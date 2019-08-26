@@ -2,25 +2,48 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import { Card, FormControl, InputGroup } from 'react-bootstrap';
+import { FaHatWizard } from 'react-icons/fa'; 
+import 'bootstrap/dist/css/bootstrap.css';
+
+class App extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      query: ''
+    }
+  }
+
+  render() {
+    return (
+      <div className="App">
+        <header className="App-header">
+          <div className="queryInput">
+            <InputGroup size="lg">
+              <InputGroup.Prepend>
+                <InputGroup.Text id="inputGroup-sizing-lg"><FaHatWizard /></InputGroup.Text>
+              </InputGroup.Prepend>
+              
+              <FormControl 
+                value={this.state.query}
+                onChange={evt => this.setState({query: evt.target.value})}
+                aria-label="Large" 
+                aria-describedby="inputGroup-sizing-sm"
+                placeholder="What do you want to know?"
+                 />
+
+            </InputGroup>
+
+            { this.state.query !== '' && 
+            <Card className="queryResults">
+              <Card.Body>Showing search results for "{this.state.query}"</Card.Body>
+            </Card>}
+          </div>
+        </header>
+      </div>
+    );
+  }
 }
 
 export default App;
