@@ -1,9 +1,12 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 
-import { Card, FormControl, InputGroup } from 'react-bootstrap';
-import { FaHatWizard } from 'react-icons/fa'; 
+import { 
+  Button, 
+  Card, 
+  Form, 
+  FormControl,
+  InputGroup } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 
 class App extends React.Component {
@@ -11,8 +14,25 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      query: ''
+      inprogressQuery: '',
+      submittedQuery: '',
+      loading: false,
     }
+
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleSubmit (event) {
+    this.setState({ 
+      loading: true,
+      submittedQuery: this.state.inprogressQuery
+    });
+
+
+    setTimeout(() => {
+      this.setState({loading: false});
+    }, 3000);
+    event.preventDefault();
   }
 
   render() {
@@ -20,27 +40,39 @@ class App extends React.Component {
       <div className="App">
         <header className="App-header">
           <div className="queryInput">
-            <InputGroup size="lg">
-              <InputGroup.Prepend>
-                <InputGroup.Text id="inputGroup-sizing-lg"><FaHatWizard /></InputGroup.Text>
-              </InputGroup.Prepend>
+            <Form onSubmit={this.handleSubmit}>
+              <InputGroup size="lg">
               
               <FormControl 
-                value={this.state.query}
-                onChange={evt => this.setState({query: evt.target.value})}
+                value={this.state.inprogressQuery}
+                onChange={evt => this.setState({inprogressQuery: evt.target.value})}
                 aria-label="Large" 
                 aria-describedby="inputGroup-sizing-sm"
                 placeholder="What do you want to know?"
                  />
-
+              
+              <InputGroup.Append>
+                <Button type="submit">Search</Button>              
+              </InputGroup.Append>
             </InputGroup>
-
-            { this.state.query !== '' && 
-            <Card className="queryResults">
-              <Card.Body>Showing search results for "{this.state.query}"</Card.Body>
-            </Card>}
+            </Form>
           </div>
         </header>
+
+
+        <div className="App-body">
+            { this.state.loading && 
+              <>
+                Creating study, please wait...
+              </>
+            }
+            
+            { this.state.submittedQuery !== '' && !this.state.loading && 
+              <Card className="queryResults">
+                <Card.Body>Showing search results for "{this.state.submittedQuery}"</Card.Body>
+              </Card>
+            }
+          </div>
       </div>
     );
   }
