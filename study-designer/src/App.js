@@ -20,8 +20,8 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      inprogressQuery: 'What time do I leave my house every day?',
-      submittedQuery: 'What time do I leave my house every day?',
+      inprogressQuery: '',
+      submittedQuery: '',// 'What time do I leave my house every day?',
       loading: false,
 
       implementations: this.generateDummyImplementations()
@@ -69,10 +69,14 @@ class App extends React.Component {
     for (let i = 0; i < nlayers; i++) {
       let next_layer_nodes = [];
 
-
+      // eventually we want multiple nodes which implement the same thing
+      // this will allow us to swap in and out implementations for same info
+      // we also want a node to require different devices
+      
       for (let j = 0; j < perlayer; j++) {
         next_layer_nodes.push({
-          supplies: `info-${i}-${j}`,
+          name: `name-${i}-${j}`,
+          supplies: `information-${i}-${j}`,
           requires: this.sampleRandomRequirements(atmax_requirements, nodes),
         })
       }
@@ -92,9 +96,23 @@ class App extends React.Component {
       4. list all leaf-node information/sensors required by implementations
       5. loop 2 - 4 until we meet requirements and some optimality condition
     */
-
-
-    // Some plans are objectively better because they require fewer information. This is kinda like a graph search.
+    
+    // Some plans are objectively better because they require 
+    // fewer information. This is kinda like a graph search.
+    
+    // You start at two nodes -- those are the only ones required.
+    // You find a subset of the remaining nodes so that it is a complete network.
+    // First pass -- 
+    //    just take the node
+    //    depth first search through the graph
+    //    if you ever encounter same node again, skip it
+    return {
+      information: {
+        required: ['leave house', 'driving'],
+        secondary: ['semantic location', 'activity recognition', 'openxc', 'user input', 'smartwatch:motion'],
+      },
+      sensors: ['gps', 'user input', 'imu']
+    }
   }
 
   handleSubmit (event) {
@@ -110,54 +128,59 @@ class App extends React.Component {
   }
 
   renderStudy () {
+    let plan = this.createStudyPlan();
     return (<Container className="study-design">
+        <Row className="justify-content-lg-center">
 
-        <Row>
-          <pre>{ JSON.stringify(this.state.implementations, null, 2) } </pre>
-        </Row>
+          <Col lg={{span:2}}>
+            <Button block>Select devices</Button>
+            <Button block>Minimize sensors</Button>
+            <Button block>Minimize effort</Button>
+          </Col>
 
-        <Row>
-          <Col><Card className="study-card">
-            <Card.Header>Required Information</Card.Header>
+          <Col lg={{span: 2, offset: 1}}><Card className="study-card">
             <Card.Body>
+              <Card.Title>Information</Card.Title>
+              <Card.Subtitle>Required</Card.Subtitle>
               <Card.Text>
-                <Button variant="outline-primary" block>Leave House</Button>
-                <Button variant="outline-primary" block>Driving</Button>
+                {plan.information.required.map(
+                  item => <Button 
+                            variant="outline-primary" 
+                            block>
+                            {item}
+                          </Button>)}
+              </Card.Text>
+
+              <Card.Subtitle>Secondary</Card.Subtitle>
+              <Card.Text>
+                {plan.information.secondary.map(
+                  item => <Button 
+                            variant="outline-primary" 
+                            block>
+                            {item}
+                          </Button>)}
               </Card.Text>
             </Card.Body>
           </Card></Col>
-
-          <Col></Col>
-
-          <Col><Card className="study-card">
-            <Card.Header>Secondary Information</Card.Header>
+          
+          <Col lg={{span: 2, offset: 0}} ><Card className="study-card">
             <Card.Body>
+              <Card.Title>Sensors</Card.Title>
               <Card.Text>
-                <Button variant="outline-primary" block>Sematic Location</Button>
-                <Button variant="outline-primary" block>Activity Recognition</Button>
-                <Button variant="outline-primary" block>OpenXC</Button>
-                <Button variant="outline-primary" block>User Input</Button>
-                <Button variant="outline-primary" block>Smartwatch:Motion</Button>
+                {plan.sensors.map(
+                  item => <Button 
+                            variant="outline-primary" 
+                            block>
+                            {item}
+                          </Button>)}
               </Card.Text>
             </Card.Body>
           </Card></Col>
-
-          <Col></Col>
-
-          <Col><Card className="study-card">
-            <Card.Header>Collected Sensors</Card.Header>
-            <Card.Body>
-              <Card.Text>
-                <Button variant="outline-primary" block>GPS</Button>
-                <Button variant="outline-primary" block>User input</Button>
-                <Button variant="outline-primary" block>IMU</Button>
-              </Card.Text>
-            </Card.Body>
-          </Card></Col>
-        </Row>
-
-        <Row>
-          <Col><Button>Launch study</Button></Col>
+          
+          <Col lg={{span:2, offset: 1}}>
+            <Button block>Print summary</Button>
+            <Button block>Launch study</Button>
+          </Col>
         </Row>
       </Container>);
   }

@@ -1,5 +1,4 @@
 .App {
-  text-align: center;
   background-color: #82CAFF;
 }
 
@@ -33,9 +32,8 @@
 
 .study-card Button {
   font-family: 'Courier New', Courier, monospace;
+  font-size: 0.75em;
 }
-
-
 
 .App-link {
   color: #61dafb;
@@ -45,3 +43,6 @@
   margin-top: 25px;
   width: 500px;
 }
+
+
+
