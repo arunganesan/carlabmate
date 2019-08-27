@@ -20,7 +20,37 @@ class App extends React.Component {
       inprogressQuery: 'What time do I leave my house every day?',
       submittedQuery: 'What time do I leave my house every day?',
       loading: false,
+
+      information: [],
+      sensors: [],
+      implementations: [
+        { name: 'pothole patrol', implements: ['pothole'], requires: ['map matched location', 'aligned imu'], sensors: [] },
+        { name: 'steering wheel estimation', implements: ['steering wheel'], requires: ['map matched location', 'aligned imu', 'speed'], sensors: [] },
+        { name: 'speed limit monitor', implements: ['exceed speed limit'], requires: ['map matched location', 'speed'], sensors: [] },
+        
+        { name: 'android:imu aligner', implements: ['aligned imu'], requires: ['imu'], sensors: [] },
+        { name: '-', implements: ['map matched location'], requires: ['location', 'imu'], sensors: [] },
+        
+        { name: 'obfuscation', implements: ['location'], requires: ['location'], sensors: [] },
+        { name: 'spoofer', implements: ['imu', 'location'], requires: [], sensors: [] },
+
+        // Low-level values
+        { name: 'raw', implements: ['imu', 'location'], requires: [], sensors: ['imu', 'location'] },
+        { name: 'web-based-input', implements: ['location'], requires: [], sensors: ['web:input'] },
+        { name: 'phone-based-input', implements: ['location'], requires: [], sensors: ['phone:input'] },
+      ],
     }
+  }
+
+
+  createStudyPlan() {
+    /*
+      1. fix some information as requirements
+      2. for each information, gather all implemnentations of that information 
+      3. fix some implementations, list all sensors those require
+      4. list all leaf-node information/sensors required by implementations
+      5. loop 2 - 4 until we meet requirements and some optimality condition
+    */
   }
 
   handleSubmit (event) {
@@ -28,7 +58,6 @@ class App extends React.Component {
       loading: true,
       submittedQuery: this.state.inprogressQuery
     });
-
 
     setTimeout(() => {
       this.setState({loading: false});
@@ -38,9 +67,6 @@ class App extends React.Component {
 
   renderStudy () {
     return (<Container className="study-design">
-        <Row>
-          <Col>...</Col>
-        </Row>
 
         <Row>
           <Col><Card className="study-card">
@@ -95,23 +121,21 @@ class App extends React.Component {
           <div className="query-input">
             <Form onSubmit={(e) => this.handleSubmit(e)}>
               <InputGroup size="lg">
-              
-              <FormControl 
-                value={this.state.inprogressQuery}
-                onChange={evt => this.setState({inprogressQuery: evt.target.value})}
-                aria-label="Large" 
-                aria-describedby="inputGroup-sizing-sm"
-                placeholder="What do you want to know?"
-                 />
-              
-              <InputGroup.Append>
-                <Button type="submit">Search</Button>              
-              </InputGroup.Append>
-            </InputGroup>
+                <FormControl 
+                  value={this.state.inprogressQuery}
+                  onChange={evt => this.setState({inprogressQuery: evt.target.value})}
+                  aria-label="Large" 
+                  aria-describedby="inputGroup-sizing-sm"
+                  placeholder="What do you want to know?"
+                  />
+                
+                <InputGroup.Append>
+                  <Button type="submit">Search</Button>      
+                </InputGroup.Append>
+              </InputGroup>
             </Form>
           </div>
         </header>
-
 
         <div className="App-body">
             { this.state.loading && 
