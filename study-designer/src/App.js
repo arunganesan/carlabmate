@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React from 'react';
 import './App.css';
 
@@ -12,6 +13,8 @@ import {
   Row } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 
+
+
 class App extends React.Component {
 
   constructor(props) {
@@ -21,25 +24,63 @@ class App extends React.Component {
       submittedQuery: 'What time do I leave my house every day?',
       loading: false,
 
-      information: [],
-      sensors: [],
-      implementations: [
-        { name: 'pothole patrol', implements: ['pothole'], requires: ['map matched location', 'aligned imu'], sensors: [] },
-        { name: 'steering wheel estimation', implements: ['steering wheel'], requires: ['map matched location', 'aligned imu', 'speed'], sensors: [] },
-        { name: 'speed limit monitor', implements: ['exceed speed limit'], requires: ['map matched location', 'speed'], sensors: [] },
+      implementations: this.generateDummyImplementations()
+      // implementations: [
+      //   { name: 'pothole patrol', implements: ['pothole'], requires: ['map matched location', 'aligned imu'], sensors: [] },
+      //   { name: 'steering wheel estimation', implements: ['steering wheel'], requires: ['map matched location', 'aligned imu', 'speed'], sensors: [] },
+      //   { name: 'speed limit monitor', implements: ['exceed speed limit'], requires: ['map matched location', 'speed'], sensors: [] },
         
-        { name: 'android:imu aligner', implements: ['aligned imu'], requires: ['imu'], sensors: [] },
-        { name: '-', implements: ['map matched location'], requires: ['location', 'imu'], sensors: [] },
+      //   { name: 'android:imu aligner', implements: ['aligned imu'], requires: ['imu'], sensors: [] },
+      //   { name: '-', implements: ['map matched location'], requires: ['location', 'imu'], sensors: [] },
         
-        { name: 'obfuscation', implements: ['location'], requires: ['location'], sensors: [] },
-        { name: 'spoofer', implements: ['imu', 'location'], requires: [], sensors: [] },
+      //   { name: 'obfuscation', implements: ['location'], requires: ['location'], sensors: [] },
+      //   { name: 'spoofer', implements: ['imu', 'location'], requires: [], sensors: [] },
 
-        // Low-level values
-        { name: 'raw', implements: ['imu', 'location'], requires: [], sensors: ['imu', 'location'] },
-        { name: 'web-based-input', implements: ['location'], requires: [], sensors: ['web:input'] },
-        { name: 'phone-based-input', implements: ['location'], requires: [], sensors: ['phone:input'] },
-      ],
+      //   // Low-level values
+      //   { name: 'raw', implements: ['imu', 'location'], requires: [], sensors: ['imu', 'location'] },
+      //   { name: 'web-based-input', implements: ['location'], requires: [], sensors: ['web:input'] },
+      //   { name: 'phone-based-input', implements: ['location'], requires: [], sensors: ['phone:input'] },
+      // ],
     }
+  }
+
+
+
+  sampleRandomRequirements(atmax_requirements, nodes) {
+    let num_requirements = _.random(1, atmax_requirements)
+    let random_requirements = _.sampleSize(nodes, num_requirements);
+    return random_requirements.map(impl => impl.supplies)
+  }
+
+
+  generateDummyImplementations () {
+    // each implementation discovers a set of information and requires a set of information
+    // if an implementation doesn't have any requirements or sensors, that is a "leaf node" - often a raw sensor
+    // only special implementations may use or require low-level data such as sensors
+
+    const nlayers = 5;
+    const perlayer = 10;
+    const atmax_requirements = 5;
+
+    // start with bottom most layer
+    // each node can depend on other nodes in previous layers
+
+    let nodes = [];
+    for (let i = 0; i < nlayers; i++) {
+      let next_layer_nodes = [];
+
+
+      for (let j = 0; j < perlayer; j++) {
+        next_layer_nodes.push({
+          supplies: `info-${i}-${j}`,
+          requires: this.sampleRandomRequirements(atmax_requirements, nodes),
+        })
+      }
+
+      nodes = nodes.concat(next_layer_nodes);
+    }
+    
+    return nodes;
   }
 
 
@@ -51,6 +92,9 @@ class App extends React.Component {
       4. list all leaf-node information/sensors required by implementations
       5. loop 2 - 4 until we meet requirements and some optimality condition
     */
+
+
+    // Some plans are objectively better because they require fewer information. This is kinda like a graph search.
   }
 
   handleSubmit (event) {
@@ -67,6 +111,10 @@ class App extends React.Component {
 
   renderStudy () {
     return (<Container className="study-design">
+
+        <Row>
+          <pre>{ JSON.stringify(this.state.implementations, null, 2) } </pre>
+        </Row>
 
         <Row>
           <Col><Card className="study-card">
