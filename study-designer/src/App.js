@@ -14,7 +14,6 @@ import {
   ToggleButtonGroup,
   Row } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
-import Lorem from 'react-lorem-component'
 
 
 class App extends React.Component {
@@ -22,15 +21,23 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      inprogressQuery: '',
-      submittedQuery: '',// 'What time do I leave my house every day?',
+      inprogressQuery: 'yolo',
+      submittedQuery: 'yolo',// 'What time do I leave my house every day?',
       loading: false,
       devices: [1, 3, 4],
       optimizeFor: 1,
+
+      plan: {
+        information: {
+          required: [],
+          secondary: [],
+        },
+        sensors: []
+      },
       
       editInfo: '',
       showEditInfoForm: false,
-      implementations: this.generateDummyImplementations()
+
 
       // implementations: [
       //   { name: 'pothole patrol', implements: ['pothole'], requires: ['map matched location', 'aligned imu'], sensors: [] },
@@ -49,6 +56,12 @@ class App extends React.Component {
       //   { name: 'phone-based-input', implements: ['location'], requires: [], sensors: ['phone:input'] },
       // ],
     }
+
+
+  }
+
+  componentDidMount() {
+    this.generateDummyImplementations();
   }
 
 
@@ -65,33 +78,48 @@ class App extends React.Component {
     // if an implementation doesn't have any requirements or sensors, that is a "leaf node" - often a raw sensor
     // only special implementations may use or require low-level data such as sensors
 
-    const nlayers = 5;
-    const perlayer = 10;
-    const atmax_requirements = 5;
+    const n_information = 15;
+    const n_implementation = 50;
+    const atmax_requirements = 10;
 
     // start with bottom most layer
     // each node can depend on other nodes in previous layers
+    let implementations = {}
+    let information = {}
 
-    let nodes = [];
-    for (let i = 0; i < nlayers; i++) {
-      let next_layer_nodes = [];
-
-      // eventually we want multiple nodes which implement the same thing
-      // this will allow us to swap in and out implementations for same info
-      // we also want a node to require different devices
-      
-      for (let j = 0; j < perlayer; j++) {
-        next_layer_nodes.push({
-          name: `name-${i}-${j}`,
-          supplies: `information-${i}-${j}`,
-          requires: this.sampleRandomRequirements(atmax_requirements, nodes),
-        })
+    for (let i = 0; i < n_information; i++)  {
+      let info = `information-${i}` 
+      let impl = `default-impl-${i}`;
+      information[info] = {
+        name: info,
+        implemented_by: [impl]
       }
 
-      nodes = nodes.concat(next_layer_nodes);
+      implementations[impl] = {
+        name: impl,
+        supplies: info,
+        requires: []
+      }
     }
     
-    return nodes;
+    let information_names = _.keys(information)
+    
+    for (let i = 0; i < n_implementation; i++) {
+      let name = `implementation-${i}`
+      let supplies = _.sample(information_names)
+      implementations[name] = {
+        name: name,
+        supplies: supplies,
+        requires: _.sampleSize(information_names, 
+                    _.random(0, atmax_requirements))
+      }
+      information[supplies].implemented_by.push(name);
+    }
+
+    this.setState({
+      information: information,
+      implementations: implementations,
+    })
   }
 
 
@@ -109,83 +137,126 @@ class App extends React.Component {
     
     // You start at two nodes -- those are the only ones required.
     // You find a subset of the remaining nodes so that it is a complete network.
-    // First pass -- 
-    //    just take the node
-    //    depth first search through the graph
-    //    if you ever encounter same node again, skip it
-    return {
-      information: {
-        required: ['leave house', 'driving'],
-        secondary: ['semantic location', 'activity recognition', 'openxc', 'user input', 'smartwatch:motion'],
-      },
-      sensors: ['gps', 'user input', 'imu']
+    // The tricky part is really which implementation+config do you choose? 
+    //    Some choices may lead to more sensors collectioned
+    
+    // 1. sample random information that we may want -- initial round are the required sensors
+    // 2. for each information, assign an implementation
+    // 3. go through all dependents, and repeat 1-3 until we reach leaf node
+    // A 'leaf node' is an implementation that has no dependents -- these are sensors
+
+    let information_names = _.keys(this.state.information);
+    let required_information = _.sampleSize(information_names, 3);
+    let secondary_information = []
+    let leaf_nodes = []
+
+    // for each information, pick an implementation, get their list of informations
+    let plan = []
+
+    let additional_dependencies = _.clone(required_information);
+
+    console.log(this.state.implementations)
+
+    let loop_count = 1000;  
+    while (additional_dependencies.length != 0) {
+      let new_additional_dependencies = [];
+      for (let info of additional_dependencies) {
+        let impl_name = _.sample(this.state.information[info].implemented_by)
+        let plan_step = {
+          'info': info,
+          'impl': impl_name
+        }
+
+
+        plan.push(plan_step)
+  
+        let dependencies = this.state.implementations[impl_name].requires;
+        if (dependencies.length === 0) leaf_nodes.push(plan_step)
+      
+        let new_deps = _.filter(dependencies, dep => !_.includes(required_information, dep) && !_.includes(secondary_information, dep))
+        new_additional_dependencies = _.concat(new_additional_dependencies, new_deps);
+        secondary_information = _.concat(secondary_information, new_deps);
+
+        console.log(loop_count, new_additional_dependencies)
+      }
+      
+      new_additional_dependencies = _.uniq(new_additional_dependencies);
+      additional_dependencies = _.clone(new_additional_dependencies);
+      if (loop_count-- < 0) {
+        alert('Looped too many times');
+        break;
+      }
     }
+
+    console.log(plan, leaf_nodes)
+    let summarized_plan = {
+      information: {
+        required: required_information,
+        secondary: secondary_information,
+      },
+      sensors: leaf_nodes.map(step => step.info)
+    }
+
+      // information: {
+      //   required: ['leave house', 'driving'],
+      //   secondary: ['semantic location', 'activity recognition', 'openxc', 'user input', 'smartwatch:motion'],
+      // },
+      // sensors: ['gps', 'user input', 'imu']
+    this.setState({
+      plan: summarized_plan,
+      loading: false});
   }
 
   handleSubmit (event) {
     this.setState({ 
       loading: true,
-      submittedQuery: this.state.inprogressQuery
+      submittedQuery: this.state.inprogressQuery,
     });
 
-    setTimeout(() => {
-      this.setState({loading: false});
-    }, 3000);
+    this.createStudyPlan();
     event.preventDefault();
   }
 
   renderStudy () {
-    let plan = this.createStudyPlan();
-    return (<Container className="study-design">
-        <Row className="justify-content-lg-center">
+    let plan = this.state.plan;
+    return (<>
+      <div className='input-section-title'>Required information</div>
+        <div className='info-entry-list'>
+        {plan.information.required.map(
+        item => <div 
+                  onClick={() => this.setState({  
+                    editInfo: item,
+                    showEditInfoForm: true})} 
+                  className='info-entry'>
+                  {item}
+                </div>)}
+          </div>
 
-         
+      <div className='input-section-title'>Secondary information</div>
+      <div className='info-entry-list'>
+      {plan.information.secondary.map(
+      item => <div 
+                onClick={() => this.setState({ 
+                  editInfo: item,
+                  showEditInfoForm: true})} 
+                className='info-entry'>
+                {item}
+              </div>)}
+        </div>
 
-          <Col lg={{span: 2, offset: 1}}><Card className="study-card">
-            <Card.Body>
-              <Card.Title>Information</Card.Title>
-              <Card.Subtitle>Required</Card.Subtitle>
-              <Card.Text>
-                {plan.information.required.map(
-                  item => <Button 
-                            variant="outline-primary" 
-                            block>
-                            {item}
-                          </Button>)}
-              </Card.Text>
 
-              <Card.Subtitle>Secondary</Card.Subtitle>
-              <Card.Text>
-                {plan.information.secondary.map(
-                  item => <Button 
-                            variant="outline-primary" 
-                            block>
-                            {item}
-                          </Button>)}
-              </Card.Text>
-            </Card.Body>
-          </Card></Col>
-          
-          <Col lg={{span: 2, offset: 0}} >
-            { this.state.showEditInfoForm && <Card className="study-card">
-            <Card.Body>
-              <Card.Title>Sensors</Card.Title>
-              <Card.Text>
-                {plan.sensors.map(
-                  item => <Button 
-                            variant="outline-primary" 
-                            block>
-                            {item}
-                          </Button>)}
-              </Card.Text>
-            </Card.Body>
-          </Card>}
-
-          </Col>
-          
-         
-        </Row>
-      </Container>);
+      <div className='input-section-title'>Sensors collected</div>
+      <div className='info-entry-list'>
+      {plan.sensors.map(
+      item => <div 
+                onClick={() => this.setState({ 
+                  editInfo: item,
+                  showEditInfoForm: true})} 
+                className='info-entry'>
+                {item}
+              </div>)}
+      </div>
+    </>);
   }
    
     /*  
@@ -196,8 +267,6 @@ class App extends React.Component {
     } */
 
   render() {
-
-    let plan = this.createStudyPlan();
 
     return (
       <div className="App">
@@ -252,7 +321,7 @@ class App extends React.Component {
                       </ToggleButtonGroup>
                     </div>
 
-                    <Button size="sm" type="submit" block>{
+                    <Button size="sm" disabled={this.state.inprogressQuery === ''} type="submit" block>{
                       this.state.submittedQuery === '' 
                       ? "Create study" 
                       : "Update study"
@@ -265,43 +334,7 @@ class App extends React.Component {
               <Row>
                 <Col lg={{span: 1}} id='design-section' className="section-title">design</Col>
                 <Col lg={{span: 6, offset: 3}} className="section-content">
-                  <div class='input-section-title'>Required information</div>
-                  <div class='info-entry-list'>
-                  {plan.information.required.map(
-                  item => <div 
-                            onClick={() => this.setState({  
-                              editInfo: item,
-                              showEditInfoForm: true})} 
-                            className='info-entry'>
-                            {item}
-                          </div>)}
-                    </div>
-
-                <div class='input-section-title'>Secondary information</div>
-                <div class='info-entry-list'>
-                {plan.information.secondary.map(
-                item => <div 
-                          onClick={() => this.setState({ 
-                            editInfo: item,
-                            showEditInfoForm: true})} 
-                          className='info-entry'>
-                          {item}
-                        </div>)}
-                  </div>
-
-
-                <div class='input-section-title'>Sensors collection</div>
-                <div class='info-entry-list'>
-                {plan.information.secondary.map(
-                item => <div 
-                          onClick={() => this.setState({ 
-                            editInfo: item,
-                            showEditInfoForm: true})} 
-                          className='info-entry'>
-                          {item}
-                        </div>)}
-                </div>
-
+                  { this.renderStudy() }
                 </Col>
               </Row>
  
