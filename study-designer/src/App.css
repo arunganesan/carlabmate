@@ -1,3 +1,8 @@
+* {
+  --inter-item-spacing: 35px;  
+  --highlight-color: #CC5654;
+}
+
 .App {
   background-color: #82CAFF;
   min-height: 100vh;
@@ -45,19 +50,55 @@
   width: 500px;
 }
 
-
 .section-title  {
   font-size: 3em;
   font-weight: bold;
 }
 
 .section-content { 
-  margin-top: 25px;
-  font-weight: 0.75em;
+  margin: 13px 0;
+  /* font-weight: 0.75em; */
   padding-left: 25px;
 }
 
 .information-edit-modal {
-  height: 75vh;;
+  height: 75vh;
   margin-top: 25px;
 }
+
+.input-options {
+  margin-top: var(--inter-item-spacing);
+}
+
+
+.input-section Button {
+  margin-top:  var(--inter-item-spacing);
+}
+
+#input-left-side {
+  height: 100vh;
+  overflow: scroll;
+}
+
+
+.input-section-title {
+  margin-top: var(--inter-item-spacing)
+}
+
+.info-entry-list {
+  margin-left: 7px;
+}
+
+.info-entry {
+  display: inline;
+  cursor: pointer;
+  font-family: 'Courier New', Courier, monospace;
+  margin: 0 5px 0 0;
+  border-bottom: solid thin black;
+}
+
+.info-entry:hover {  
+  color: var(--highlight-color);
+}
+
+

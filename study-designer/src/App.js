@@ -10,6 +10,8 @@ import {
   Form, 
   FormControl,
   InputGroup, 
+  ToggleButton,
+  ToggleButtonGroup,
   Row } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 import Lorem from 'react-lorem-component'
@@ -23,8 +25,13 @@ class App extends React.Component {
       inprogressQuery: '',
       submittedQuery: '',// 'What time do I leave my house every day?',
       loading: false,
-
+      devices: [1, 3, 4],
+      optimizeFor: 1,
+      
+      editInfo: '',
+      showEditInfoForm: false,
       implementations: this.generateDummyImplementations()
+
       // implementations: [
       //   { name: 'pothole patrol', implements: ['pothole'], requires: ['map matched location', 'aligned imu'], sensors: [] },
       //   { name: 'steering wheel estimation', implements: ['steering wheel'], requires: ['map matched location', 'aligned imu', 'speed'], sensors: [] },
@@ -132,11 +139,7 @@ class App extends React.Component {
     return (<Container className="study-design">
         <Row className="justify-content-lg-center">
 
-          <Col lg={{span:2}}>
-            <Button block>Select devices</Button>
-            <Button block>Minimize sensors</Button>
-            <Button block>Minimize effort</Button>
-          </Col>
+         
 
           <Col lg={{span: 2, offset: 1}}><Card className="study-card">
             <Card.Body>
@@ -163,7 +166,8 @@ class App extends React.Component {
             </Card.Body>
           </Card></Col>
           
-          <Col lg={{span: 2, offset: 0}} ><Card className="study-card">
+          <Col lg={{span: 2, offset: 0}} >
+            { this.state.showEditInfoForm && <Card className="study-card">
             <Card.Body>
               <Card.Title>Sensors</Card.Title>
               <Card.Text>
@@ -175,35 +179,16 @@ class App extends React.Component {
                           </Button>)}
               </Card.Text>
             </Card.Body>
-          </Card></Col>
-          
-          <Col lg={{span:2, offset: 1}}>
-            <Button block>Print summary</Button>
-            <Button block>Launch study</Button>
+          </Card>}
+
           </Col>
+          
+         
         </Row>
       </Container>);
   }
    
-  /*         
-        <div className="query-input">
-          <Form onSubmit={(e) => this.handleSubmit(e)}>
-            <InputGroup size="lg">
-              <FormControl 
-                value={this.state.inprogressQuery}
-                onChange={evt => this.setState({inprogressQuery: evt.target.value})}
-                aria-label="Large" 
-                aria-describedby="inputGroup-sizing-sm"
-                placeholder="What do you want to know?"
-                />
-              
-              <InputGroup.Append>
-                <Button type="submit">Search</Button>      
-              </InputGroup.Append>
-            </InputGroup>
-          </Form>
-        </div>
-
+    /*  
 
          
           { this.state.submittedQuery !== '' && !this.state.loading && 
@@ -211,42 +196,142 @@ class App extends React.Component {
     } */
 
   render() {
+
+    let plan = this.createStudyPlan();
+
     return (
       <div className="App">
         <Container>
           <Row>
-            <Col lg={{span: 7}}>
+            <Col id='input-left-side' lg={{span: 7}}>
               <Row>
                 <Col lg={{span: 1}} className="section-title">input</Col>
-                <Col lg={{span: 6, offset: 3}} className="section-content"><Lorem count={1} /></Col>
-              </Row>
+                <Col lg={{span: 6, offset: 3}} className="section-content input-section">
+                  <Form onSubmit={(e) => this.handleSubmit(e)}>
+                    <InputGroup size="sm">
+                      <FormControl 
+                        value={this.state.inprogressQuery}
+                        onChange={evt => this.setState({
+                          inprogressQuery: evt.target.value
+                        })}
+                        aria-label="small" 
+                        aria-describedby="inputGroup-sizing-sm"
+                        placeholder="What do you want to know?"
+                        />
+                    </InputGroup>
+                    
+                    <div className="input-options">
+                      <div><Form.Label>What devices do you own?</Form.Label></div>
+                      <ToggleButtonGroup 
+                        type="checkbox" 
+                        size="sm" 
+                        value={this.state.devices} 
+                        onChange={val => this.setState({ devices: val })}>
 
+                        <ToggleButton variant="outline-primary" value={1}>Android</ToggleButton>
+                        <ToggleButton variant="outline-primary" value={2}>iPhone</ToggleButton>
+                        <ToggleButton variant="outline-primary" value={3}>Texting</ToggleButton>
+                        <ToggleButton variant="outline-primary" value={4}>FitBit</ToggleButton>
+                        <ToggleButton variant="outline-primary" value={5}>Smartwatch</ToggleButton>
+                      </ToggleButtonGroup>
+                    </div>
+
+
+                    <div className="input-options">
+                      <div><Form.Label>What do you prioritize?</Form.Label></div>
+
+                      <ToggleButtonGroup 
+                        type="radio" 
+                        size="sm"
+                        name="options"
+                        value={this.state.optimizeFor} 
+                        onChange={val => this.setState({ optimizeFor: val })}>
+
+                        <ToggleButton variant="outline-primary" value={1}>Minimize sensors</ToggleButton>
+                        <ToggleButton variant="outline-primary" value={2}>Minimize effort</ToggleButton>
+                      </ToggleButtonGroup>
+                    </div>
+
+                    <Button size="sm" type="submit" block>{
+                      this.state.submittedQuery === '' 
+                      ? "Create study" 
+                      : "Update study"
+                    }</Button>
+                  </Form>
+                </Col>
+              </Row>
+              
+              { this.state.submittedQuery !== '' && <>
               <Row>
-                <Col lg={{span: 1}} className="section-title">design</Col>
-                <Col lg={{span: 6, offset: 3}} className="section-content"><Lorem count={2} /></Col>
+                <Col lg={{span: 1}} id='design-section' className="section-title">design</Col>
+                <Col lg={{span: 6, offset: 3}} className="section-content">
+                  <div class='input-section-title'>Required information</div>
+                  <div class='info-entry-list'>
+                  {plan.information.required.map(
+                  item => <div 
+                            onClick={() => this.setState({  
+                              editInfo: item,
+                              showEditInfoForm: true})} 
+                            className='info-entry'>
+                            {item}
+                          </div>)}
+                    </div>
+
+                <div class='input-section-title'>Secondary information</div>
+                <div class='info-entry-list'>
+                {plan.information.secondary.map(
+                item => <div 
+                          onClick={() => this.setState({ 
+                            editInfo: item,
+                            showEditInfoForm: true})} 
+                          className='info-entry'>
+                          {item}
+                        </div>)}
+                  </div>
+
+
+                <div class='input-section-title'>Sensors collection</div>
+                <div class='info-entry-list'>
+                {plan.information.secondary.map(
+                item => <div 
+                          onClick={() => this.setState({ 
+                            editInfo: item,
+                            showEditInfoForm: true})} 
+                          className='info-entry'>
+                          {item}
+                        </div>)}
+                </div>
+
+                </Col>
               </Row>
  
               <Row>                
                 <Col lg={{span: 1}} className="section-title">confirm</Col>
-                <Col lg={{span: 6, offset: 3}} className="section-content"><Lorem count={1} /></Col>
+                <Col lg={{span: 6, offset: 3}} className="section-content">
+                  <Button size="sm" block>Print summary</Button>
+                  <Button size="sm" block>Launch study</Button>
+                </Col>
               </Row>
+              </>}
             </Col>
-            <Col><Card className="information-edit-modal">
-              <Card.Header>Featured</Card.Header>
+
+
+
+            <Col>
+              { this.state.showEditInfoForm && <Card className="information-edit-modal">
+              <Card.Header>{this.state.editInfo}</Card.Header>
               <Card.Body>
                 <Card.Title>Special title treatment</Card.Title>
                 <Card.Text>
                   With supporting text below as a natural lead-in to additional content.
                 </Card.Text>
-                <Button variant="primary">Go somewhere</Button>
+                <Button variant="primary" onClick={() => this.setState({
+                  showEditInfoForm: false
+                })}>Save</Button>
               </Card.Body>
-              </Card></Col>
+              </Card>}
+            </Col>
           </Row>
-           
-
-      
-          
-         
         </Container>
       </div>
     );
