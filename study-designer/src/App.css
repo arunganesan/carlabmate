@@ -1,5 +1,6 @@
 .App {
   background-color: #82CAFF;
+  min-height: 100vh;
 }
 
 .App-header {
@@ -45,4 +46,18 @@
 }
 
 
+.section-title  {
+  font-size: 3em;
+  font-weight: bold;
+}
 
+.section-content { 
+  margin-top: 25px;
+  font-weight: 0.75em;
+  padding-left: 25px;
+}
+
+.information-edit-modal {
+  height: 75vh;;
+  margin-top: 25px;
+}

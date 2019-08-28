@@ -12,7 +12,7 @@ import {
   InputGroup, 
   Row } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
-
+import Lorem from 'react-lorem-component'
 
 
 class App extends React.Component {
@@ -184,41 +184,70 @@ class App extends React.Component {
         </Row>
       </Container>);
   }
+   
+  /*         
+        <div className="query-input">
+          <Form onSubmit={(e) => this.handleSubmit(e)}>
+            <InputGroup size="lg">
+              <FormControl 
+                value={this.state.inprogressQuery}
+                onChange={evt => this.setState({inprogressQuery: evt.target.value})}
+                aria-label="Large" 
+                aria-describedby="inputGroup-sizing-sm"
+                placeholder="What do you want to know?"
+                />
+              
+              <InputGroup.Append>
+                <Button type="submit">Search</Button>      
+              </InputGroup.Append>
+            </InputGroup>
+          </Form>
+        </div>
+
+
+         
+          { this.state.submittedQuery !== '' && !this.state.loading && 
+            this.renderStudy()
+    } */
 
   render() {
     return (
       <div className="App">
-        <header className="App-header">
-          <div className="query-input">
-            <Form onSubmit={(e) => this.handleSubmit(e)}>
-              <InputGroup size="lg">
-                <FormControl 
-                  value={this.state.inprogressQuery}
-                  onChange={evt => this.setState({inprogressQuery: evt.target.value})}
-                  aria-label="Large" 
-                  aria-describedby="inputGroup-sizing-sm"
-                  placeholder="What do you want to know?"
-                  />
-                
-                <InputGroup.Append>
-                  <Button type="submit">Search</Button>      
-                </InputGroup.Append>
-              </InputGroup>
-            </Form>
-          </div>
-        </header>
+        <Container>
+          <Row>
+            <Col lg={{span: 7}}>
+              <Row>
+                <Col lg={{span: 1}} className="section-title">input</Col>
+                <Col lg={{span: 6, offset: 3}} className="section-content"><Lorem count={1} /></Col>
+              </Row>
 
-        <div className="App-body">
-            { this.state.loading && 
-              <>
-                Creating study, please wait...
-              </>
-            }
-            
-            { this.state.submittedQuery !== '' && !this.state.loading && 
-              this.renderStudy()
-            }
-          </div>
+              <Row>
+                <Col lg={{span: 1}} className="section-title">design</Col>
+                <Col lg={{span: 6, offset: 3}} className="section-content"><Lorem count={2} /></Col>
+              </Row>
+ 
+              <Row>                
+                <Col lg={{span: 1}} className="section-title">confirm</Col>
+                <Col lg={{span: 6, offset: 3}} className="section-content"><Lorem count={1} /></Col>
+              </Row>
+            </Col>
+            <Col><Card className="information-edit-modal">
+              <Card.Header>Featured</Card.Header>
+              <Card.Body>
+                <Card.Title>Special title treatment</Card.Title>
+                <Card.Text>
+                  With supporting text below as a natural lead-in to additional content.
+                </Card.Text>
+                <Button variant="primary">Go somewhere</Button>
+              </Card.Body>
+              </Card></Col>
+          </Row>
+           
+
+      
+          
+         
+        </Container>
       </div>
     );
   }
