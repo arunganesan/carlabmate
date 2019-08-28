@@ -14,19 +14,20 @@ import {
   ToggleButtonGroup,
   Row } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
-
+import Lorem from 'react-lorem-component'
 
 class App extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      inprogressQuery: 'yolo',
-      submittedQuery: 'yolo',// 'What time do I leave my house every day?',
+      inprogressQuery: 'What time do I leave my house every day?',
+      submittedQuery: '',
       loading: false,
       devices: [1, 3, 4],
       optimizeFor: 1,
 
+      selectedPlanStep: '',
       plan: {
         information: {
           required: [],
@@ -36,25 +37,9 @@ class App extends React.Component {
       },
       
       editInfo: '',
+      implDetails: '',
       showEditInfoForm: false,
-
-
-      // implementations: [
-      //   { name: 'pothole patrol', implements: ['pothole'], requires: ['map matched location', 'aligned imu'], sensors: [] },
-      //   { name: 'steering wheel estimation', implements: ['steering wheel'], requires: ['map matched location', 'aligned imu', 'speed'], sensors: [] },
-      //   { name: 'speed limit monitor', implements: ['exceed speed limit'], requires: ['map matched location', 'speed'], sensors: [] },
-        
-      //   { name: 'android:imu aligner', implements: ['aligned imu'], requires: ['imu'], sensors: [] },
-      //   { name: '-', implements: ['map matched location'], requires: ['location', 'imu'], sensors: [] },
-        
-      //   { name: 'obfuscation', implements: ['location'], requires: ['location'], sensors: [] },
-      //   { name: 'spoofer', implements: ['imu', 'location'], requires: [], sensors: [] },
-
-      //   // Low-level values
-      //   { name: 'raw', implements: ['imu', 'location'], requires: [], sensors: ['imu', 'location'] },
-      //   { name: 'web-based-input', implements: ['location'], requires: [], sensors: ['web:input'] },
-      //   { name: 'phone-based-input', implements: ['location'], requires: [], sensors: ['phone:input'] },
-      // ],
+      useNewImplementation: '',
     }
 
 
@@ -124,34 +109,18 @@ class App extends React.Component {
 
 
   createStudyPlan() {
-    /*
-      1. fix some information as requirements
-      2. for each information, gather all implemnentations of that information 
-      3. fix some implementations, list all sensors those require
-      4. list all leaf-node information/sensors required by implementations
-      5. loop 2 - 4 until we meet requirements and some optimality condition
-    */
-    
-    // Some plans are objectively better because they require 
-    // fewer information. This is kinda like a graph search.
-    
-    // You start at two nodes -- those are the only ones required.
-    // You find a subset of the remaining nodes so that it is a complete network.
-    // The tricky part is really which implementation+config do you choose? 
-    //    Some choices may lead to more sensors collectioned
-    
-    // 1. sample random information that we may want -- initial round are the required sensors
-    // 2. for each information, assign an implementation
-    // 3. go through all dependents, and repeat 1-3 until we reach leaf node
-    // A 'leaf node' is an implementation that has no dependents -- these are sensors
-
+  
     let information_names = _.keys(this.state.information);
     let required_information = _.sampleSize(information_names, 3);
     let secondary_information = []
     let leaf_nodes = []
 
     // for each information, pick an implementation, get their list of informations
-    let plan = []
+    let plan = { 
+      required: [],
+      secondary: [],
+      leaf: []
+    } 
 
     let additional_dependencies = _.clone(required_information);
 
@@ -163,16 +132,21 @@ class App extends React.Component {
       for (let info of additional_dependencies) {
         let impl_name = _.sample(this.state.information[info].implemented_by)
         let plan_step = {
-          'info': info,
-          'impl': impl_name
+          info: info,
+          impl: impl_name
         }
 
-
-        plan.push(plan_step)
-  
         let dependencies = this.state.implementations[impl_name].requires;
-        if (dependencies.length === 0) leaf_nodes.push(plan_step)
       
+        if (_.includes(required_information, info))
+          plan.required.push(plan_step)
+        else if (dependencies.length === 0)
+          plan.leaf.push(plan_step)
+        else
+          plan.secondary.push(plan_step)
+        
+
+
         let new_deps = _.filter(dependencies, dep => !_.includes(required_information, dep) && !_.includes(secondary_information, dep))
         new_additional_dependencies = _.concat(new_additional_dependencies, new_deps);
         secondary_information = _.concat(secondary_information, new_deps);
@@ -189,21 +163,9 @@ class App extends React.Component {
     }
 
     console.log(plan, leaf_nodes)
-    let summarized_plan = {
-      information: {
-        required: required_information,
-        secondary: secondary_information,
-      },
-      sensors: leaf_nodes.map(step => step.info)
-    }
 
-      // information: {
-      //   required: ['leave house', 'driving'],
-      //   secondary: ['semantic location', 'activity recognition', 'openxc', 'user input', 'smartwatch:motion'],
-      // },
-      // sensors: ['gps', 'user input', 'imu']
     this.setState({
-      plan: summarized_plan,
+      plan: plan,
       loading: false});
   }
 
@@ -217,54 +179,54 @@ class App extends React.Component {
     event.preventDefault();
   }
 
+  openPlanStep (step) {
+    this.setState({  
+      editInfo: step,
+      implDetails: '',
+      showEditInfoForm: true})
+  }
+
   renderStudy () {
     let plan = this.state.plan;
     return (<>
       <div className='input-section-title'>Required information</div>
         <div className='info-entry-list'>
-        {plan.information.required.map(
+        {plan.required.map(
         item => <div 
-                  onClick={() => this.setState({  
-                    editInfo: item,
-                    showEditInfoForm: true})} 
+                  onClick={() => this.openPlanStep(item)} 
                   className='info-entry'>
-                  {item}
+                  {item.info}
                 </div>)}
           </div>
 
       <div className='input-section-title'>Secondary information</div>
       <div className='info-entry-list'>
-      {plan.information.secondary.map(
+      {plan.secondary.map(
       item => <div 
-                onClick={() => this.setState({ 
-                  editInfo: item,
-                  showEditInfoForm: true})} 
+                onClick={() => this.openPlanStep(item)} 
                 className='info-entry'>
-                {item}
+                {item.info}
               </div>)}
         </div>
 
 
       <div className='input-section-title'>Sensors collected</div>
       <div className='info-entry-list'>
-      {plan.sensors.map(
+      {plan.leaf.map(
       item => <div 
-                onClick={() => this.setState({ 
-                  editInfo: item,
-                  showEditInfoForm: true})} 
+                onClick={() => this.openPlanStep(item)} 
                 className='info-entry'>
-                {item}
+                {item.info}
               </div>)}
       </div>
     </>);
   }
-   
-    /*  
 
-         
-          { this.state.submittedQuery !== '' && !this.state.loading && 
-            this.renderStudy()
-    } */
+  showImplDetails (impl_name) {
+    this.setState({
+      implDetails: impl_name,
+    })
+  }
 
   render() {
 
@@ -352,16 +314,97 @@ class App extends React.Component {
 
             <Col>
               { this.state.showEditInfoForm && <Card className="information-edit-modal">
-              <Card.Header>{this.state.editInfo}</Card.Header>
               <Card.Body>
-                <Card.Title>Special title treatment</Card.Title>
+                <Card.Title>Info: <div className='tttext'>{this.state.editInfo.info}</div></Card.Title>
                 <Card.Text>
-                  With supporting text below as a natural lead-in to additional content.
+                    <Lorem className="info-entry-list" count={1} />
                 </Card.Text>
-                <Button variant="primary" onClick={() => this.setState({
-                  showEditInfoForm: false
-                })}>Save</Button>
+
+                <Card.Title>Implementations</Card.Title>
+                <Card.Text>
+                  <ul>
+                    { this.state.information[this.state.editInfo.info].implemented_by.map(impl_name => 
+                      impl_name == this.state.editInfo.impl 
+                      ? <li><div className="impl-item chosen-impl" onClick={() => this.showImplDetails(impl_name)}>{impl_name}</div></li>
+                      : <li><div className="impl-item" onClick={() => this.showImplDetails(impl_name)}>{impl_name}</div></li>
+                    )}
+                  </ul>
+                </Card.Text>
+
+
+                { this.state.implDetails !== '' && (<>
+                   <Card.Title>Impl: <div className='tttext'>{this.state.implDetails}</div>
+                   </Card.Title>
+                   <Card.Text>
+                     <Lorem className="info-entry-list" count={1} />
+                   </Card.Text>
+
+                  <Card.Subtitle className="">Devices</Card.Subtitle>
+                  
+                  <Card.Text>
+                  <ToggleButtonGroup 
+                   className="info-entry-list" 
+                        type="checkbox" 
+                        size="sm" 
+                        value={[1,2,4]}>
+
+                        <ToggleButton variant="outline-primary" value={1}>Android</ToggleButton>
+                        <ToggleButton variant="outline-primary" value={2}>iPhone</ToggleButton>
+                        <ToggleButton variant="outline-primary" value={3}>Texting</ToggleButton>
+                        <ToggleButton variant="outline-primary" value={4}>FitBit</ToggleButton>
+                        <ToggleButton variant="outline-primary" value={5}>Smartwatch</ToggleButton>
+                      </ToggleButtonGroup>
+
+                  </Card.Text>
+                  
+                  <Card.Subtitle>Required Information</Card.Subtitle>
+                  <Card.Text>
+                    <div  className="info-entry-list">
+                      { this.state.implementations[this.state.implDetails].requires.map(info => 
+                        <div class="passive-info-entry">{info}</div>)}
+                    </div>
+                    
+                    {
+                      this.state.implDetails !== this.state.editInfo.impl &&
+                      <div 
+                        className="update-new-impl"
+                        onClick={() => this.setState({
+                          useNewImplementation: this.state.implDetails
+                        })}
+                      >
+                      Use this implementation instead
+                      </div>
+                    }
+                  </Card.Text>
+
+
+                </>)}
               </Card.Body>
+              <Card.Footer className="info-edit-form-footer text-muted"> 
+
+              <Button 
+                variant="outline-primary" onClick={() => 
+                  this.setState({
+                    showEditInfoForm: false,
+                    implDetails: '',
+                })}>
+                  { this.state.useNewImplementation === '' ? 'Close' : 'Cancel' }
+                </Button>
+
+
+                { this.state.useNewImplementation !== '' && <Button 
+                variant="outline-primary" onClick={() => {
+                  this.createStudyPlan();
+
+                  this.setState({
+                    useNewImplementation: '',
+                    implDetails: '',
+                    showEditInfoForm: false,
+                  })
+                }}>
+                  Update study
+                </Button>}
+                </Card.Footer>
               </Card>}
             </Col>
           </Row>

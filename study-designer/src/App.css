@@ -33,7 +33,7 @@
 }
 
 .study-card {
-  height: 70vh;
+  /* height: 70vh; */
 }
 
 .study-card Button {
@@ -94,11 +94,48 @@
   cursor: pointer;
   font-family: 'Courier New', Courier, monospace;
   margin: 0 5px 0 0;
-  border-bottom: solid thin black;
+  text-decoration: underline;
 }
 
 .info-entry:hover {  
   color: var(--highlight-color);
 }
 
+.passive-info-entry {
+  display: inline;
+  font-family: 'Courier New', Courier, monospace;
+  margin: 0 5px 0 0;
+  text-decoration: underline;
+}
 
+
+.update-new-impl {
+  cursor:pointer;
+  font-weight: bold;
+  text-decoration: underline;
+  margin-top: 15px;
+}
+
+.impl-item {
+  cursor: pointer;
+  font-family: 'Courier New', Courier, monospace;
+  text-decoration: underline;
+}
+
+.impl-item.chosen-impl {
+  color: var(--highlight-color)
+}
+
+.tttext {
+  display: inline;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.tunderline {
+  text-decoration: underline;
+}
+
+
+.info-edit-form-footer Button {
+  margin-right: 15px;
+}
