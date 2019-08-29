@@ -1,5 +1,5 @@
 * {
-  --inter-item-spacing: 35px;  
+  --inter-item-spacing: 15px;  
   --highlight-color: #CC5654;
 }
 
@@ -32,10 +32,6 @@
   margin-top: 25px;
 }
 
-.study-card {
-  /* height: 70vh; */
-}
-
 .study-card Button {
   font-family: 'Courier New', Courier, monospace;
   font-size: 0.75em;
@@ -56,30 +52,29 @@
 }
 
 .section-content { 
-  margin: 13px 0;
+  margin: 20px 0;
   /* font-weight: 0.75em; */
   padding-left: 25px;
 }
 
 .information-edit-modal {
-  height: 75vh;
+  height: 45vh;
   margin-top: 25px;
 }
 
-.input-options {
-  margin-top: var(--inter-item-spacing);
+.information-edit-modal-body {
+  height: 100%;
+  overflow-y: auto;
 }
 
-
-.input-section Button {
-  margin-top:  var(--inter-item-spacing);
+.input-options, .input-section Button {
+  margin-top: var(--inter-item-spacing);
 }
 
 #input-left-side {
   height: 100vh;
   overflow: scroll;
 }
-
 
 .input-section-title {
   margin-top: var(--inter-item-spacing)
@@ -108,7 +103,6 @@
   text-decoration: underline;
 }
 
-
 .update-new-impl {
   cursor:pointer;
   font-weight: bold;
@@ -129,10 +123,6 @@
 .tttext {
   display: inline;
   font-family: 'Courier New', Courier, monospace;
-}
-
-.tunderline {
-  text-decoration: underline;
 }
 
 

@@ -15,6 +15,7 @@ import {
   Row } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 import Lorem from 'react-lorem-component'
+import { createStudyPlan, generateDummyImplementations } from './library'
 
 class App extends React.Component {
 
@@ -28,170 +29,48 @@ class App extends React.Component {
       optimizeFor: 1,
 
       selectedPlanStep: '',
-      plan: {
-        information: {
-          required: [],
-          secondary: [],
-        },
-        sensors: []
-      },
+      plan: [],
       
       editInfo: '',
       implDetails: '',
       showEditInfoForm: false,
       useNewImplementation: '',
     }
-
-
   }
 
   componentDidMount() {
-    this.generateDummyImplementations();
-  }
-
-
-
-  sampleRandomRequirements(atmax_requirements, nodes) {
-    let num_requirements = _.random(1, atmax_requirements)
-    let random_requirements = _.sampleSize(nodes, num_requirements);
-    return random_requirements.map(impl => impl.supplies)
-  }
-
-
-  generateDummyImplementations () {
-    // each implementation discovers a set of information and requires a set of information
-    // if an implementation doesn't have any requirements or sensors, that is a "leaf node" - often a raw sensor
-    // only special implementations may use or require low-level data such as sensors
-
-    const n_information = 15;
-    const n_implementation = 50;
-    const atmax_requirements = 10;
-
-    // start with bottom most layer
-    // each node can depend on other nodes in previous layers
-    let implementations = {}
-    let information = {}
-
-    for (let i = 0; i < n_information; i++)  {
-      let info = `information-${i}` 
-      let impl = `default-impl-${i}`;
-      information[info] = {
-        name: info,
-        implemented_by: [impl]
-      }
-
-      implementations[impl] = {
-        name: impl,
-        supplies: info,
-        requires: []
-      }
-    }
-    
-    let information_names = _.keys(information)
-    
-    for (let i = 0; i < n_implementation; i++) {
-      let name = `implementation-${i}`
-      let supplies = _.sample(information_names)
-      implementations[name] = {
-        name: name,
-        supplies: supplies,
-        requires: _.sampleSize(information_names, 
-                    _.random(0, atmax_requirements))
-      }
-      information[supplies].implemented_by.push(name);
-    }
-
     this.setState({
-      information: information,
-      implementations: implementations,
+      ...generateDummyImplementations()
     })
-  }
-
-
-  createStudyPlan() {
-  
-    let information_names = _.keys(this.state.information);
-    let required_information = _.sampleSize(information_names, 3);
-    let secondary_information = []
-    let leaf_nodes = []
-
-    // for each information, pick an implementation, get their list of informations
-    let plan = { 
-      required: [],
-      secondary: [],
-      leaf: []
-    } 
-
-    let additional_dependencies = _.clone(required_information);
-
-    console.log(this.state.implementations)
-
-    let loop_count = 1000;  
-    while (additional_dependencies.length != 0) {
-      let new_additional_dependencies = [];
-      for (let info of additional_dependencies) {
-        let impl_name = _.sample(this.state.information[info].implemented_by)
-        let plan_step = {
-          info: info,
-          impl: impl_name
-        }
-
-        let dependencies = this.state.implementations[impl_name].requires;
-      
-        if (_.includes(required_information, info))
-          plan.required.push(plan_step)
-        else if (dependencies.length === 0)
-          plan.leaf.push(plan_step)
-        else
-          plan.secondary.push(plan_step)
-        
-
-
-        let new_deps = _.filter(dependencies, dep => !_.includes(required_information, dep) && !_.includes(secondary_information, dep))
-        new_additional_dependencies = _.concat(new_additional_dependencies, new_deps);
-        secondary_information = _.concat(secondary_information, new_deps);
-
-        console.log(loop_count, new_additional_dependencies)
-      }
-      
-      new_additional_dependencies = _.uniq(new_additional_dependencies);
-      additional_dependencies = _.clone(new_additional_dependencies);
-      if (loop_count-- < 0) {
-        alert('Looped too many times');
-        break;
-      }
-    }
-
-    console.log(plan, leaf_nodes)
-
-    this.setState({
-      plan: plan,
-      loading: false});
   }
 
   handleSubmit (event) {
     this.setState({ 
       loading: true,
       submittedQuery: this.state.inprogressQuery,
+    }, () => {
+      this.setState({
+        plan: createStudyPlan(this.state),
+        loading: false
+      })
     });
 
-    this.createStudyPlan();
     event.preventDefault();
   }
 
   openPlanStep (step) {
     this.setState({  
       editInfo: step,
-      implDetails: '',
+      implDetails: step.impl,
       showEditInfoForm: true})
   }
 
   renderStudy () {
     let plan = this.state.plan;
     return (<>
-      <div className='input-section-title'>Required information</div>
+      <div className='input-section-title'>Information</div>
         <div className='info-entry-list'>
-        {plan.required.map(
+        {plan.map(
         item => <div 
                   onClick={() => this.openPlanStep(item)} 
                   className='info-entry'>
@@ -199,26 +78,15 @@ class App extends React.Component {
                 </div>)}
           </div>
 
-      <div className='input-section-title'>Secondary information</div>
+      <div className='input-section-title'>Implementation</div>
       <div className='info-entry-list'>
-      {plan.secondary.map(
+      {plan.map(
       item => <div 
                 onClick={() => this.openPlanStep(item)} 
                 className='info-entry'>
-                {item.info}
+                {item.impl}
               </div>)}
         </div>
-
-
-      <div className='input-section-title'>Sensors collected</div>
-      <div className='info-entry-list'>
-      {plan.leaf.map(
-      item => <div 
-                onClick={() => this.openPlanStep(item)} 
-                className='info-entry'>
-                {item.info}
-              </div>)}
-      </div>
     </>);
   }
 
@@ -310,17 +178,15 @@ class App extends React.Component {
               </>}
             </Col>
 
-
-
             <Col>
               { this.state.showEditInfoForm && <Card className="information-edit-modal">
-              <Card.Body>
+              <Card.Body className="information-edit-modal-body">
                 <Card.Title>Info: <div className='tttext'>{this.state.editInfo.info}</div></Card.Title>
                 <Card.Text>
                     <Lorem className="info-entry-list" count={1} />
                 </Card.Text>
 
-                <Card.Title>Implementations</Card.Title>
+                <Card.Title>Available Implementations</Card.Title>
                 <Card.Text>
                   <ul>
                     { this.state.information[this.state.editInfo.info].implemented_by.map(impl_name => 
@@ -330,9 +196,36 @@ class App extends React.Component {
                     )}
                   </ul>
                 </Card.Text>
+              </Card.Body>
+
+              <Card.Footer className="info-edit-form-footer text-muted"> 
+
+              <Button 
+                variant="outline-primary" onClick={() => 
+                  this.setState({
+                    showEditInfoForm: false,
+                    implDetails: '',
+                })}>
+                  { this.state.useNewImplementation === '' ? 'Close' : 'Cancel' }
+                </Button>
 
 
-                { this.state.implDetails !== '' && (<>
+                { this.state.useNewImplementation !== '' && <Button 
+                variant="outline-primary" onClick={() => {
+                  this.setState({
+                    plan: createStudyPlan(this.state),
+                    useNewImplementation: '',
+                    implDetails: '',
+                    showEditInfoForm: false,
+                  })
+                }}>
+                  Update study
+                </Button>}
+                </Card.Footer>
+              </Card>}
+
+                { this.state.implDetails !== '' && (<Card className="information-edit-modal">
+                  <Card.Body className="information-edit-modal-body">
                    <Card.Title>Impl: <div className='tttext'>{this.state.implDetails}</div>
                    </Card.Title>
                    <Card.Text>
@@ -376,36 +269,9 @@ class App extends React.Component {
                       </div>
                     }
                   </Card.Text>
-
-
-                </>)}
-              </Card.Body>
-              <Card.Footer className="info-edit-form-footer text-muted"> 
-
-              <Button 
-                variant="outline-primary" onClick={() => 
-                  this.setState({
-                    showEditInfoForm: false,
-                    implDetails: '',
-                })}>
-                  { this.state.useNewImplementation === '' ? 'Close' : 'Cancel' }
-                </Button>
-
-
-                { this.state.useNewImplementation !== '' && <Button 
-                variant="outline-primary" onClick={() => {
-                  this.createStudyPlan();
-
-                  this.setState({
-                    useNewImplementation: '',
-                    implDetails: '',
-                    showEditInfoForm: false,
-                  })
-                }}>
-                  Update study
-                </Button>}
-                </Card.Footer>
-              </Card>}
+                </Card.Body>     
+                </Card>)}
+              
             </Col>
           </Row>
         </Container>
