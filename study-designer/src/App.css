@@ -1,6 +1,7 @@
 * {
   --inter-item-spacing: 15px;  
   --highlight-color: #CC5654;
+  --light-highlight-color: #CFEBFF;
 }
 
 .App {
@@ -85,16 +86,19 @@
 }
 
 .info-entry {
-  display: inline;
+  display: inline-block;
   cursor: pointer;
   font-family: 'Courier New', Courier, monospace;
   margin: 0 5px 0 0;
   text-decoration: underline;
 }
 
-.info-entry:hover {  
-  color: var(--highlight-color);
+.opened-info-entry {
+  border: solid 0.45pt black;
+  background-color: var(--light-highlight-color);
+  border-radius: 2px;
 }
+
 
 .passive-info-entry {
   display: inline;
@@ -114,17 +118,19 @@
   cursor: pointer;
   font-family: 'Courier New', Courier, monospace;
   text-decoration: underline;
+  display: inline;
+  margin-right: 10px;
 }
 
-.impl-item.chosen-impl {
-  color: var(--highlight-color)
+.impl-badge {
+  cursor: pointer;
 }
+
 
 .tttext {
   display: inline;
   font-family: 'Courier New', Courier, monospace;
 }
-
 
 .info-edit-form-footer Button {
   margin-right: 15px;

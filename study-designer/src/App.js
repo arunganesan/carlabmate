@@ -3,6 +3,7 @@ import React from 'react';
 import './App.css';
 
 import { 
+  Badge, 
   Button, 
   Col,
   Container,
@@ -31,7 +32,10 @@ class App extends React.Component {
       selectedPlanStep: '',
       plan: [],
       
-      editInfo: '',
+      openedPlanStep: {
+        info: '', impl: ''
+      },
+
       implDetails: '',
       showEditInfoForm: false,
       useNewImplementation: '',
@@ -59,21 +63,24 @@ class App extends React.Component {
   }
 
   openPlanStep (step) {
+    console.log('Clicked on plan step: ', step)
+
     this.setState({  
-      editInfo: step,
+      openedPlanStep: step,
       implDetails: step.impl,
       showEditInfoForm: true})
   }
 
   renderStudy () {
     let plan = this.state.plan;
+
     return (<>
       <div className='input-section-title'>Information</div>
         <div className='info-entry-list'>
         {plan.map(
         item => <div 
                   onClick={() => this.openPlanStep(item)} 
-                  className='info-entry'>
+                  className={'info-entry ' + (this.state.openedPlanStep.info == item.info ? 'opened-info-entry' : '')}>
                   {item.info}
                 </div>)}
           </div>
@@ -83,11 +90,124 @@ class App extends React.Component {
       {plan.map(
       item => <div 
                 onClick={() => this.openPlanStep(item)} 
-                className='info-entry'>
+                className={'info-entry ' + (this.state.openedPlanStep.impl == item.impl ? 'opened-info-entry' : '')}>
                 {item.impl}
               </div>)}
         </div>
     </>);
+  }
+
+
+  renderInfoCard () {
+    if (!this.state.showEditInfoForm) 
+      return null;
+    
+    return <Card className="information-edit-modal">
+    <Card.Body className="information-edit-modal-body">
+      <Card.Title>Info: <div className='tttext'>{this.state.openedPlanStep.info}</div></Card.Title>
+      <Card.Text>
+        <Lorem className="info-entry-list" count={1} />
+      </Card.Text>
+
+      <Card.Title>Available Implementations</Card.Title>
+      <Card.Text>
+        <ul>
+          { 
+            // console.log(this.state.openedPlanStep)
+            this.state.information[this.state.openedPlanStep.info].implemented_by.map(impl_name => {
+              return <li>
+                  <div className='impl-item' onClick={() => this.showImplDetails(impl_name)}>{impl_name}</div>
+                  { (impl_name == this.state.openedPlanStep.impl)
+                    ? <Badge pill variant="primary">
+                      Currently chosen
+                    </Badge>
+
+                    : (impl_name == this.state.useNewImplementation) 
+                    ? <Badge onClick={() => this.setState({
+                      useNewImplementation: '',
+                    })} className='impl-badge' pill variant="warning">
+                      New implementation chosen
+                    </Badge>
+
+                    : <Badge onClick={() => this.setState({
+                      useNewImplementation: impl_name,
+                    })} className='impl-badge' pill variant="secondary">
+                    Select this instead
+                  </Badge>
+                  }
+                </li>
+            }
+          )}
+        </ul>
+      </Card.Text>
+    </Card.Body>
+
+    <Card.Footer className="info-edit-form-footer text-muted"> 
+
+    <Button 
+      variant="outline-primary" onClick={() => 
+        this.setState({
+          showEditInfoForm: false,
+          implDetails: '',
+      })}>
+        { this.state.useNewImplementation === '' ? 'Close' : 'Cancel' }
+      </Button>
+
+
+      { this.state.useNewImplementation !== '' && <Button 
+      variant="outline-primary" onClick={() => {
+        this.setState({
+          plan: createStudyPlan(this.state),
+          useNewImplementation: '',
+          implDetails: '',
+          showEditInfoForm: false,
+        })
+      }}>
+        Update study
+      </Button>}
+      </Card.Footer>
+    </Card>;
+  }
+
+  renderImplementationCard () {
+    if (this.state.implDetails === '')
+      return null;
+    
+    return <Card className="information-edit-modal">
+        <Card.Body className="information-edit-modal-body">
+        <Card.Title>Impl: <div className='tttext'>{this.state.implDetails}</div>
+        </Card.Title>
+        <Card.Text>
+          <Lorem className="info-entry-list" count={1} />
+        </Card.Text>
+
+        <Card.Subtitle className="">Devices</Card.Subtitle>
+        
+        <Card.Text>
+        <ToggleButtonGroup 
+        className="info-entry-list" 
+              type="checkbox" 
+              size="sm" 
+              value={[1,2,4]}>
+
+              <ToggleButton variant="outline-primary" value={1}>Android</ToggleButton>
+              <ToggleButton variant="outline-primary" value={2}>iPhone</ToggleButton>
+              <ToggleButton variant="outline-primary" value={3}>Texting</ToggleButton>
+              <ToggleButton variant="outline-primary" value={4}>FitBit</ToggleButton>
+              <ToggleButton variant="outline-primary" value={5}>Smartwatch</ToggleButton>
+            </ToggleButtonGroup>
+
+        </Card.Text>
+        
+        <Card.Subtitle>Required Information</Card.Subtitle>
+        <Card.Text>
+          <div  className="info-entry-list">
+            { this.state.implementations[this.state.implDetails].requires.map(info => 
+              <div className="passive-info-entry">{info}</div>)}
+          </div>
+        </Card.Text>
+      </Card.Body>     
+    </Card>;
   }
 
   showImplDetails (impl_name) {
@@ -135,17 +255,14 @@ class App extends React.Component {
                       </ToggleButtonGroup>
                     </div>
 
-
                     <div className="input-options">
                       <div><Form.Label>What do you prioritize?</Form.Label></div>
 
                       <ToggleButtonGroup 
-                        type="radio" 
-                        size="sm"
-                        name="options"
                         value={this.state.optimizeFor} 
+                        type="radio" size="sm" name="options"
                         onChange={val => this.setState({ optimizeFor: val })}>
-
+                      
                         <ToggleButton variant="outline-primary" value={1}>Minimize sensors</ToggleButton>
                         <ToggleButton variant="outline-primary" value={2}>Minimize effort</ToggleButton>
                       </ToggleButtonGroup>
@@ -178,100 +295,9 @@ class App extends React.Component {
               </>}
             </Col>
 
-            <Col>
-              { this.state.showEditInfoForm && <Card className="information-edit-modal">
-              <Card.Body className="information-edit-modal-body">
-                <Card.Title>Info: <div className='tttext'>{this.state.editInfo.info}</div></Card.Title>
-                <Card.Text>
-                    <Lorem className="info-entry-list" count={1} />
-                </Card.Text>
-
-                <Card.Title>Available Implementations</Card.Title>
-                <Card.Text>
-                  <ul>
-                    { this.state.information[this.state.editInfo.info].implemented_by.map(impl_name => 
-                      impl_name == this.state.editInfo.impl 
-                      ? <li><div className="impl-item chosen-impl" onClick={() => this.showImplDetails(impl_name)}>{impl_name}</div></li>
-                      : <li><div className="impl-item" onClick={() => this.showImplDetails(impl_name)}>{impl_name}</div></li>
-                    )}
-                  </ul>
-                </Card.Text>
-              </Card.Body>
-
-              <Card.Footer className="info-edit-form-footer text-muted"> 
-
-              <Button 
-                variant="outline-primary" onClick={() => 
-                  this.setState({
-                    showEditInfoForm: false,
-                    implDetails: '',
-                })}>
-                  { this.state.useNewImplementation === '' ? 'Close' : 'Cancel' }
-                </Button>
-
-
-                { this.state.useNewImplementation !== '' && <Button 
-                variant="outline-primary" onClick={() => {
-                  this.setState({
-                    plan: createStudyPlan(this.state),
-                    useNewImplementation: '',
-                    implDetails: '',
-                    showEditInfoForm: false,
-                  })
-                }}>
-                  Update study
-                </Button>}
-                </Card.Footer>
-              </Card>}
-
-                { this.state.implDetails !== '' && (<Card className="information-edit-modal">
-                  <Card.Body className="information-edit-modal-body">
-                   <Card.Title>Impl: <div className='tttext'>{this.state.implDetails}</div>
-                   </Card.Title>
-                   <Card.Text>
-                     <Lorem className="info-entry-list" count={1} />
-                   </Card.Text>
-
-                  <Card.Subtitle className="">Devices</Card.Subtitle>
-                  
-                  <Card.Text>
-                  <ToggleButtonGroup 
-                   className="info-entry-list" 
-                        type="checkbox" 
-                        size="sm" 
-                        value={[1,2,4]}>
-
-                        <ToggleButton variant="outline-primary" value={1}>Android</ToggleButton>
-                        <ToggleButton variant="outline-primary" value={2}>iPhone</ToggleButton>
-                        <ToggleButton variant="outline-primary" value={3}>Texting</ToggleButton>
-                        <ToggleButton variant="outline-primary" value={4}>FitBit</ToggleButton>
-                        <ToggleButton variant="outline-primary" value={5}>Smartwatch</ToggleButton>
-                      </ToggleButtonGroup>
-
-                  </Card.Text>
-                  
-                  <Card.Subtitle>Required Information</Card.Subtitle>
-                  <Card.Text>
-                    <div  className="info-entry-list">
-                      { this.state.implementations[this.state.implDetails].requires.map(info => 
-                        <div class="passive-info-entry">{info}</div>)}
-                    </div>
-                    
-                    {
-                      this.state.implDetails !== this.state.editInfo.impl &&
-                      <div 
-                        className="update-new-impl"
-                        onClick={() => this.setState({
-                          useNewImplementation: this.state.implDetails
-                        })}
-                      >
-                      Use this implementation instead
-                      </div>
-                    }
-                  </Card.Text>
-                </Card.Body>     
-                </Card>)}
-              
+            <Col lg={{span: 5}}>
+              { this.renderInfoCard() }
+              { this.renderImplementationCard() }
             </Col>
           </Row>
         </Container>

@@ -22,8 +22,8 @@ export function generateDummyImplementations () {
     let information = {}
 
     for (let i = 0; i < n_information; i++)  {
-      let info = `info-${i}` 
-      let impl = `default-impl-${i}`;
+      let info = `info${i}` 
+      let impl = `default_impl${i}`;
       information[info] = {
         name: info,
         implemented_by: [impl]
@@ -39,7 +39,7 @@ export function generateDummyImplementations () {
     let information_names = _.keys(information)
     
     for (let i = 0; i < n_implementation; i++) {
-      let name = `impl-${i}`
+      let name = `impl${i}`
       let supplies = _.sample(information_names)
       implementations[name] = {
         name: name,
