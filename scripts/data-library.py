@@ -1,5 +1,7 @@
 #! /usr/bin/env python3
 
+import networkx as nx
+
 class Info ():
     def __init__ (self, name):
         self.name = name
@@ -19,58 +21,55 @@ implementations = []
 stubs = [
     # these are stubs -- low-level information
     # these are implemented by core libraries
-    # still -- there needs to be an implementation which uses this information...
-    # for stubs, the implementation has the same name as information
-    'phone[imu]',
-    'phone[gps]',
-    'openxc[speed]',
-    'openxc[steering]',
-    'openxc[fuel]',
-    'openxc[odometer]',
-    'openxc[gear]',
-    'openxc[rpm]',
+    'phone/magnetometer',
+    'phone/imu',
+    'phone/gps',
+    'openxc/speed',
+    'openxc/steering',
+    'openxc/fuel',
+    'openxc/odometer',
+    'openxc/gear',
+    'openxc/rpm',
 ]
 
 information += [
-    'car[speed]',
-    'car[odometer]',
-    'car[fuel]',
-    'car[rpm]',
-    'car[steering]',
-    'car[gear]',
+    'car/speed',
+    'car/odometer',
+    'car/fuel',
+    'car/rpm',
+    'car/steering',
+    'car/gear',
     'location',
-    'phone[aligned imu]', 
+    'phone/aligned imu', 
 ] + stubs
 
 
 implementations += [
     # watchfone
-    Impl('watchfone[speed]', 'car[speed]', ['phone[imu]', 'location']),
-    Impl('watchfone[odometer]', 'car[odometer]', 'location'),
-    Impl('watchfone[fuel]', 'car[fuel]', 'car[odometer]'),
-    Impl('watchfone[gear]', 'car[gear]', 'car[speed]'),
-    Impl('watchfone[steering]', 'car[steering]', ['car[speed]', 'phone[aligned imu]']),
-    Impl('watchfone[rpm]', 'car[rpm]', ['car[gear]', 'car[speed]']),
+    Impl('watchfone/speed', 'car/speed', ['phone/imu', 'location']),
+    Impl('watchfone/odometer', 'car/odometer', 'location'),
+    Impl('watchfone/fuel', 'car/fuel', 'car/odometer'),
+    Impl('watchfone/gear', 'car/gear', 'car/speed'),
+    Impl('watchfone/steering', 'car/steering', ['car/speed', 'phone/aligned imu']),
+    Impl('watchfone/rpm', 'car/rpm', ['car/gear', 'car/speed']),
 
     # aligned IMU
-    Impl('android[aligned imu]', 'phone[aligned imu]', ['phone[magnetometer]', 'phone[imu]']),
-    Impl('vsense[aligned imu]', 'phone[aligned imu]', ['phone[magnetometer]', 'phone[imu]']),
-    Impl('complimentary filter[aligned imu]', 'phone[aligned imu]', ['phone[magnetometer]', 'phone[imu]']),
+    Impl('android/aligned imu', 'phone/aligned imu', ['phone/magnetometer', 'phone/imu']),
+    Impl('vsense/aligned imu', 'phone/aligned imu', ['phone/magnetometer', 'phone/imu']),
+    Impl('comp filter aligned imu', 'phone/aligned imu', ['phone/magnetometer', 'phone/imu']),
     
     # location providers
-    Impl('phone[gps]', 'location', 'phone[gps]'),
-    Impl('react-native[gps]', 'location', 'phone[gps]'),
-    Impl('react-native[dummy]', 'location', ''),
+    Impl('phone/gps', 'location', 'phone/gps'),
+    Impl('react-native/gps', 'location', 'phone/gps'),
+    Impl('react-native/dummy', 'location', ''),
 
     # openxc implementations
-    Impl('openxc[speed]', 'car[speed]', 'openxc[speed]'),
-    Impl('openxc[steering]', 'car[steering]', 'openxc[steering]'),
-    Impl('openxc[odometer]', 'car[odometer]', 'openxc[odometer]'),
-    Impl('openxc[fuel]', 'car[fuel]', 'openxc[fuel]'),
-    Impl('openxc[rpm]', 'car[rpm]', 'openxc[rpm]'),
-    Impl('openxc[gear]', 'car[gear]', 'openxc[gear]'),
-
-    
+    Impl('openxc/speed', 'car/speed', 'openxc/speed'),
+    Impl('openxc/steering', 'car/steering', 'openxc/steering'),
+    Impl('openxc/odometer', 'car/odometer', 'openxc/odometer'),
+    Impl('openxc/fuel', 'car/fuel', 'openxc/fuel'),
+    Impl('openxc/rpm', 'car/rpm', 'openxc/rpm'),
+    Impl('openxc/gear', 'car/gear', 'openxc/gear'),
 ]
 
 # // implementations: [
@@ -87,3 +86,9 @@ implementations += [
 # // { name: 'web-based-input', implements: ['location'], requires: [], sensors: ['web:input'] },
 # // { name: 'phone-based-input', implements: ['location'], requires: [], sensors: ['phone:input'] },
 # // ],
+
+
+    
+
+if __name__ == '__main__':
+    main()
