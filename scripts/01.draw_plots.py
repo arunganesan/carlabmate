@@ -8,13 +8,12 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
-
-def main():
+def draw_network(filename):
     # create bipartite graph
     dg = nx.DiGraph()
     for info in information:
         dg.add_node(('info', info), type='information')
-    
+   
     for impl in implementations:
         dg.add_node(('impl', impl.name), type='implementation')
         dg.add_edge(('impl', impl.name), ('info', impl.implements))
@@ -28,8 +27,7 @@ def main():
     min_y, max_y = 0, 5
     info_x, impl_x = 0, 2
 
-    info_y = 0
-    impl_y = 0
+    info_y = 0; impl_y = 0
     info_ystep = (max_y - min_y) / len(information)
     impl_ystep = (max_y - min_y) / len(implementations)
 
@@ -44,14 +42,13 @@ def main():
             positioning[n] = np.array([impl_x, impl_y])
             impl_y += impl_ystep
     
-    # shells = []
-    # shells.append([n for n in dg.nodes() if attributes[n] == 'information']) 
-    # shells.append([n for n in dg.nodes() if attributes[n] == 'implementation']) 
-    # positioning = nx.shell_layout(dg, shells)
-    pprint(positioning)
-    
     colors = [0 if attributes[n] == 'information' else 1 for n in nodes]
-    nx.draw_networkx(dg, pos=positioning, node_color=colors, with_labels=False, node_size=75)
+    nx.draw_networkx(
+        dg, 
+        pos=positioning, 
+        node_color=colors, 
+        with_labels=False,
+        node_size=75)
     
     labels = {}
     label_positioning = {}
@@ -74,8 +71,19 @@ def main():
     ax.set_aspect('equal')
     print(ax.set_xlim(info_x - 2, impl_x + 2))
     plt.draw()
-    plt.savefig('network.png')
-    
+    plt.savefig(filename)
+
+def solve_graph (required=[], blacklisted=[], exclusive={}):
+    # exclusive[info] = implementation. 
+    #   this means IF we need that requirement to solve this graph
+    #   then we force use that implementation over others 
+    """
+    Our goal is to find the smallest sub-graph subject to:
+        * Required: Must contain required information nodes
+        * Blacklisted: We may have restrictions on which nodes are available (blacklist some information, blacklist some devices) but none of those are required
+        * Conditional exclusion: If a certain information is required, we may have a specific implementation that we require
+    """
+    return 1
 
 if __name__ == '__main__':
-    main()
+    draw_network('network.png')
