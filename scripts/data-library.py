@@ -1,6 +1,11 @@
 #! /usr/bin/env python3
 
+from networkx.algorithms import bipartite
+from pprint import pprint
+
+import matplotlib.pyplot as plt
 import networkx as nx
+import numpy as np
 
 class Info ():
     def __init__ (self, name):
@@ -10,7 +15,11 @@ class Impl ():
     def __init__ (self, name, implements, requires):
         self.name = name
         self.implements = implements
-        self.requires = requires
+        
+        if type(requires) == list:
+            self.requires = requires
+        else:
+            self.requires = [requires]
 
 
 information = []
@@ -21,7 +30,7 @@ implementations = []
 stubs = [
     # these are stubs -- low-level information
     # these are implemented by core libraries
-    'phone/magnetometer',
+    'phone/magnet',
     'phone/imu',
     'phone/gps',
     'openxc/speed',
@@ -54,14 +63,14 @@ implementations += [
     Impl('watchfone/rpm', 'car/rpm', ['car/gear', 'car/speed']),
 
     # aligned IMU
-    Impl('android/aligned imu', 'phone/aligned imu', ['phone/magnetometer', 'phone/imu']),
-    Impl('vsense/aligned imu', 'phone/aligned imu', ['phone/magnetometer', 'phone/imu']),
-    Impl('comp filter aligned imu', 'phone/aligned imu', ['phone/magnetometer', 'phone/imu']),
+    Impl('android/aligned imu', 'phone/aligned imu', ['phone/magnet', 'phone/imu']),
+    Impl('vsense/aligned imu', 'phone/aligned imu', ['phone/magnet', 'phone/imu']),
+    Impl('comp filter aligned imu', 'phone/aligned imu', ['phone/magnet', 'phone/imu']),
     
     # location providers
     Impl('phone/gps', 'location', 'phone/gps'),
     Impl('react-native/gps', 'location', 'phone/gps'),
-    Impl('react-native/dummy', 'location', ''),
+    Impl('react-native/dummy', 'location', []),
 
     # openxc implementations
     Impl('openxc/speed', 'car/speed', 'openxc/speed'),
@@ -81,13 +90,68 @@ implementations += [
 # // { name: 'obfuscation', implements: ['location'], requires: ['location'], sensors: [] },
 # // { name: 'spoofer', implements: ['imu', 'location'], requires: [], sensors: [] },
 
-# // // Low-level values
-# // { name: 'raw', implements: ['imu', 'location'], requires: [], sensors: ['imu', 'location'] },
-# // { name: 'web-based-input', implements: ['location'], requires: [], sensors: ['web:input'] },
-# // { name: 'phone-based-input', implements: ['location'], requires: [], sensors: ['phone:input'] },
-# // ],
 
+def main():
+    # create bipartite graph
+    dg = nx.DiGraph()
+    for info in information:
+        dg.add_node(('info', info), type='information')
+    
+    for impl in implementations:
+        dg.add_node(('impl', impl.name), type='implementation')
+        dg.add_edge(('impl', impl.name), ('info', impl.implements))
+        for info in impl.requires:
+            dg.add_edge(('info', info), ('impl', impl.name))
 
+    print(dg.nodes())
+    print('----------------')
+    print(dg.edges())
+    print('----------------')
+    print(bipartite.is_bipartite(dg))
+    
+    attributes = nx.get_node_attributes(dg, 'type')
+    nodes = dg.nodes()
+
+    info_y = 0
+    impl_y = 0
+    info_x = 0
+    impl_x = 1
+    _ystep = 0.15
+
+    positioning = {}
+    for n in nodes:
+        if attributes[n] == 'information':
+            positioning[n] = np.array([info_x, info_y])
+            info_y += _ystep
+        else:
+            positioning[n] = np.array([impl_x, impl_y])
+            impl_y += _ystep
+    
+    colors = [0 if attributes[n] == 'information' else 1 for n in nodes]
+    nx.draw_networkx(dg, pos=positioning, node_color=colors, with_labels=False, node_size=75)
+    
+    labels = {}
+    label_positioning = positioning
+    for n in nodes:
+        p = label_positioning[n]
+        if attributes[n] == 'information':
+            label_positioning[n] = [p[0]-0.5, p[1]]
+            labels[n] = n[1]
+        else:
+            label_positioning[n] = [p[0]+0.5, p[1]]
+            labels[n] = n[1]
+
+    nx.draw_networkx_labels(
+        dg, 
+        pos=label_positioning, 
+        font_size=8, 
+        labels=labels)
+    
+    ax = plt.gca()
+    ax.set_aspect('equal')
+    print(ax.set_xlim(-1, 2))
+    plt.draw()
+    plt.savefig('network.png')
     
 
 if __name__ == '__main__':
