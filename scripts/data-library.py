@@ -12,7 +12,7 @@ class Info ():
         self.name = name
 
 class Impl ():
-    def __init__ (self, name, implements, requires):
+    def __init__ (self, name, implements, requires=[]):
         self.name = name
         self.implements = implements
         
@@ -27,19 +27,6 @@ implementations = []
 
 
 # watchfone related
-stubs = [
-    # these are stubs -- low-level information
-    # these are implemented by core libraries
-    'phone/magnet',
-    'phone/imu',
-    'phone/gps',
-    'openxc/speed',
-    'openxc/steering',
-    'openxc/fuel',
-    'openxc/odometer',
-    'openxc/gear',
-    'openxc/rpm',
-]
 
 information += [
     'car/speed',
@@ -48,37 +35,45 @@ information += [
     'car/rpm',
     'car/steering',
     'car/gear',
+
+
     'location',
-    'phone/aligned imu', 
-] + stubs
+    'aligned imu',
+    'magnet',
+    'imu',
+]
 
 
 implementations += [
     # watchfone
-    Impl('watchfone/speed', 'car/speed', ['phone/imu', 'location']),
+    Impl('watchfone/speed', 'car/speed', ['imu', 'location']),
     Impl('watchfone/odometer', 'car/odometer', 'location'),
     Impl('watchfone/fuel', 'car/fuel', 'car/odometer'),
     Impl('watchfone/gear', 'car/gear', 'car/speed'),
-    Impl('watchfone/steering', 'car/steering', ['car/speed', 'phone/aligned imu']),
+    Impl('watchfone/steering', 'car/steering', ['car/speed', 'aligned imu']),
     Impl('watchfone/rpm', 'car/rpm', ['car/gear', 'car/speed']),
 
     # aligned IMU
-    Impl('android/aligned imu', 'phone/aligned imu', ['phone/magnet', 'phone/imu']),
-    Impl('vsense/aligned imu', 'phone/aligned imu', ['phone/magnet', 'phone/imu']),
-    Impl('comp filter aligned imu', 'phone/aligned imu', ['phone/magnet', 'phone/imu']),
+    Impl('android/aligned imu', 'aligned imu', ['magnet', 'imu']),
+    Impl('vsense/aligned imu', 'aligned imu', ['magnet', 'imu']),
+    Impl('watchfone/imu', 'aligned imu', ['magnet', 'imu']),
     
     # location providers
-    Impl('phone/gps', 'location', 'phone/gps'),
-    Impl('react-native/gps', 'location', 'phone/gps'),
-    Impl('react-native/dummy', 'location', []),
+    Impl('phone/gps', 'location'),
+    Impl('react-native/gps', 'location'),
+    Impl('react-native/dummy', 'location'),
+
+    # core implementations
+    Impl('core/magnet', 'magnet'),
+    Impl('core/imu', 'imu'),
 
     # openxc implementations
-    Impl('openxc/speed', 'car/speed', 'openxc/speed'),
-    Impl('openxc/steering', 'car/steering', 'openxc/steering'),
-    Impl('openxc/odometer', 'car/odometer', 'openxc/odometer'),
-    Impl('openxc/fuel', 'car/fuel', 'openxc/fuel'),
-    Impl('openxc/rpm', 'car/rpm', 'openxc/rpm'),
-    Impl('openxc/gear', 'car/gear', 'openxc/gear'),
+    Impl('openxc/speed', 'car/speed'),
+    Impl('openxc/steering', 'car/steering'),
+    Impl('openxc/odometer', 'car/odometer'),
+    Impl('openxc/fuel', 'car/fuel'),
+    Impl('openxc/rpm', 'car/rpm'),
+    Impl('openxc/gear', 'car/gear'),
 ]
 
 # // implementations: [
@@ -103,29 +98,27 @@ def main():
         for info in impl.requires:
             dg.add_edge(('info', info), ('impl', impl.name))
 
-    print(dg.nodes())
-    print('----------------')
-    print(dg.edges())
-    print('----------------')
-    print(bipartite.is_bipartite(dg))
-    
+    assert bipartite.is_bipartite(dg), 'Not a bipartite graph'
     attributes = nx.get_node_attributes(dg, 'type')
     nodes = dg.nodes()
 
+
+    min_y, max_y = 0, 5
+    info_x, impl_x = 0, 2
+
     info_y = 0
     impl_y = 0
-    info_x = 0
-    impl_x = 1
-    _ystep = 0.15
+    info_ystep = (max_y - min_y) / len(information)
+    impl_ystep = (max_y - min_y) / len(implementations)
 
     positioning = {}
     for n in nodes:
         if attributes[n] == 'information':
             positioning[n] = np.array([info_x, info_y])
-            info_y += _ystep
+            info_y += info_ystep
         else:
             positioning[n] = np.array([impl_x, impl_y])
-            impl_y += _ystep
+            impl_y += impl_ystep
     
     colors = [0 if attributes[n] == 'information' else 1 for n in nodes]
     nx.draw_networkx(dg, pos=positioning, node_color=colors, with_labels=False, node_size=75)
@@ -135,10 +128,10 @@ def main():
     for n in nodes:
         p = label_positioning[n]
         if attributes[n] == 'information':
-            label_positioning[n] = [p[0]-0.5, p[1]]
+            label_positioning[n] = [p[0]-0.65, p[1]]
             labels[n] = n[1]
         else:
-            label_positioning[n] = [p[0]+0.5, p[1]]
+            label_positioning[n] = [p[0]+0.95, p[1]]
             labels[n] = n[1]
 
     nx.draw_networkx_labels(
@@ -149,7 +142,7 @@ def main():
     
     ax = plt.gca()
     ax.set_aspect('equal')
-    print(ax.set_xlim(-1, 2))
+    print(ax.set_xlim(info_x - 2, impl_x + 2))
     plt.draw()
     plt.savefig('network.png')
     
