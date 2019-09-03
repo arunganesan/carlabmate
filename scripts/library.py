@@ -99,3 +99,45 @@ indexed_implementation = {
 # // { name: 'obfuscation', implements: ['location'], requires: ['location'], sensors: [] },
 # // { name: 'spoofer', implements: ['imu', 'location'], requires: [], sensors: [] },
 
+
+if __name__ == '__main__':
+    import json
+    
+    json_data = {}
+    json_data['information'] = {
+        info.name: { 
+            'name': info.name,
+            'implemented_by': [i.name for i in info.implemented_by]
+        }
+        for info in information
+    }
+
+
+    json_data['implementations'] = {
+        impl.name: {
+            'name': impl.name,
+            'supplies': impl.implements.name,
+            'requires': [i.name for i in impl.requires],
+            'devices': impl.devices
+        }
+        for impl in implementations
+    }
+
+    print(json.dumps(json_data))
+    """
+    { 
+        information: {
+            name: {
+                name: string,
+                implemented_by: []
+            }
+        },
+        implementations: {
+            name: { 
+                name: string, 
+                supplies: string,
+                requires: [string]
+            }
+        }
+    }
+    """

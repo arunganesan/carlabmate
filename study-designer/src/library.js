@@ -1,10 +1,12 @@
 import _ from 'lodash'
 
 function sampleRandomRequirements(atmax_requirements, nodes) {
-    let num_requirements = _.random(1, atmax_requirements)
-    let random_requirements = _.sampleSize(nodes, num_requirements);
-    return random_requirements.map(impl => impl.supplies)
-  }
+  let num_requirements = _.random(1, atmax_requirements)
+  let random_requirements = _.sampleSize(nodes, num_requirements);
+  return random_requirements.map(impl => impl.supplies)
+}
+
+export const Library = {"information": {"car/speed": {"name": "car/speed", "implemented_by": ["watchfone/speed", "openxc/speed", "obd/speed"]}, "car/odometer": {"name": "car/odometer", "implemented_by": ["watchfone/odometer", "openxc/odometer", "obd/odometer"]}, "car/fuel": {"name": "car/fuel", "implemented_by": ["watchfone/fuel", "openxc/fuel", "obd/fuel"]}, "car/rpm": {"name": "car/rpm", "implemented_by": ["watchfone/rpm", "openxc/rpm", "obd/rpm"]}, "car/steering": {"name": "car/steering", "implemented_by": ["watchfone/steering", "openxc/steering"]}, "car/gear": {"name": "car/gear", "implemented_by": ["watchfone/gear", "openxc/gear"]}, "location": {"name": "location", "implemented_by": ["phone/gps", "react-native/gps", "react-native/dummy"]}, "magnet": {"name": "magnet", "implemented_by": ["core/magnet"]}, "imu": {"name": "imu", "implemented_by": ["core/imu"]}, "aligned imu": {"name": "aligned imu", "implemented_by": ["android/aligned imu", "vsense/aligned imu", "watchfone/imu"]}}, "implementations": {"watchfone/speed": {"name": "watchfone/speed", "supplies": "car/speed", "requires": ["imu", "location"], "devices": ["android"]}, "watchfone/odometer": {"name": "watchfone/odometer", "supplies": "car/odometer", "requires": ["location"], "devices": ["android"]}, "watchfone/fuel": {"name": "watchfone/fuel", "supplies": "car/fuel", "requires": ["car/odometer"], "devices": ["android"]}, "watchfone/gear": {"name": "watchfone/gear", "supplies": "car/gear", "requires": ["car/speed"], "devices": ["android"]}, "watchfone/steering": {"name": "watchfone/steering", "supplies": "car/steering", "requires": ["car/speed", "aligned imu"], "devices": ["android"]}, "watchfone/rpm": {"name": "watchfone/rpm", "supplies": "car/rpm", "requires": ["car/gear", "car/speed"], "devices": ["android"]}, "android/aligned imu": {"name": "android/aligned imu", "supplies": "aligned imu", "requires": ["magnet", "imu"], "devices": ["android"]}, "vsense/aligned imu": {"name": "vsense/aligned imu", "supplies": "aligned imu", "requires": ["magnet", "imu"], "devices": ["android"]}, "watchfone/imu": {"name": "watchfone/imu", "supplies": "aligned imu", "requires": ["magnet", "imu"], "devices": ["android"]}, "phone/gps": {"name": "phone/gps", "supplies": "location", "requires": [], "devices": ["android", "iphone"]}, "react-native/gps": {"name": "react-native/gps", "supplies": "location", "requires": [], "devices": ["android", "iphone"]}, "react-native/dummy": {"name": "react-native/dummy", "supplies": "location", "requires": [], "devices": ["android", "iphone"]}, "core/magnet": {"name": "core/magnet", "supplies": "magnet", "requires": [], "devices": ["android", "iphone"]}, "core/imu": {"name": "core/imu", "supplies": "imu", "requires": [], "devices": ["android", "iphone"]}, "openxc/speed": {"name": "openxc/speed", "supplies": "car/speed", "requires": [], "devices": ["openxc"]}, "openxc/steering": {"name": "openxc/steering", "supplies": "car/steering", "requires": [], "devices": ["openxc"]}, "openxc/odometer": {"name": "openxc/odometer", "supplies": "car/odometer", "requires": [], "devices": ["openxc"]}, "openxc/fuel": {"name": "openxc/fuel", "supplies": "car/fuel", "requires": [], "devices": ["openxc"]}, "openxc/rpm": {"name": "openxc/rpm", "supplies": "car/rpm", "requires": [], "devices": ["openxc"]}, "openxc/gear": {"name": "openxc/gear", "supplies": "car/gear", "requires": [], "devices": ["openxc"]}, "obd/speed": {"name": "obd/speed", "supplies": "car/speed", "requires": [], "devices": ["obd"]}, "obd/odometer": {"name": "obd/odometer", "supplies": "car/odometer", "requires": [], "devices": ["obd"]}, "obd/fuel": {"name": "obd/fuel", "supplies": "car/fuel", "requires": [], "devices": ["obd"]}, "obd/rpm": {"name": "obd/rpm", "supplies": "car/rpm", "requires": [], "devices": ["obd"]}}}
 
 
 export function generateDummyImplementations () {
@@ -32,7 +34,8 @@ export function generateDummyImplementations () {
       implementations[impl] = {
         name: impl,
         supplies: info,
-        requires: []
+        requires: [],
+        devices: []
       }
     }
     

@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import React from 'react';
 import './App.css';
-
 import { 
   Badge, 
   Button, 
@@ -16,7 +15,7 @@ import {
   Row } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 import Lorem from 'react-lorem-component'
-import { createStudyPlan, generateDummyImplementations } from './library'
+import { createStudyPlan, Library } from './library'
 
 class App extends React.Component {
 
@@ -44,7 +43,8 @@ class App extends React.Component {
 
   componentDidMount() {
     this.setState({
-      ...generateDummyImplementations()
+      // ...generateDummyImplementations()
+      ...Library
     })
   }
 
