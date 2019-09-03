@@ -4,11 +4,14 @@
 class Info ():
     def __init__ (self, name):
         self.name = name
+    
+    def node (self):
+        return ('info', self.name)
 
 class Impl ():
     def __init__ (self, name, implements, devices, requires=[]):
         self.name = name
-        self.implements = implements
+        self.implements = indexed_information[implements]
 
         if type(devices) == list:
             self.devices = devices
@@ -16,29 +19,33 @@ class Impl ():
             self.devices = [devices]
         
         if type(requires) == list:
-            self.requires = requires
+            self.requires = [indexed_information[r] for r in requires]
         else:
-            self.requires = [requires]
+            self.requires = [indexed_information[requires]]
+        
+    def node (self):
+        return ('impl', self.name)
 
 
-information = []
 implementations = []
+indexed_information = {
+    'car/speed': Info('car/speed'),
+    'car/odometer': Info('car/odometer'),
+    'car/fuel': Info('car/fuel'),
+    'car/rpm': Info('car/rpm'),
+    'car/steering': Info('car/steering'),
+    'car/gear': Info('car/gear'),
+    'location': Info('location'),
+    'anonymized loc': Info('anonymized loc'),
+    'magnet': Info('magnet'),
+    'imu': Info('imu'),
+    'aligned imu': Info('aligned imu'),
+}
+information = list(indexed_information.values())
 
-information += [
-    'car/speed',
-    'car/odometer',
-    'car/fuel',
-    'car/rpm',
-    'car/steering',
-    'car/gear',
-    'location',
-    'anonymized loc',
-    'aligned imu',
-    'magnet',
-    'imu',
-]
 
 
+        
 implementations += [
     # watchfone
     Impl('watchfone/speed', 'car/speed', 'android', ['imu', 'location']),
