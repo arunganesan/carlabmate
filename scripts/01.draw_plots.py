@@ -3,10 +3,14 @@
 from library import *
 from networkx.algorithms import bipartite
 from pprint import pprint
+from tqdm import tqdm
 
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
+
+
+odir = 'images'
 
 min_y, max_y = 0, 5
 info_x, impl_x = 0, 2
@@ -120,6 +124,7 @@ def _draw_helper (dg, positioning, label_positioning, subset, alpha):
         dg, 
         pos=label_positioning, 
         font_size=8, 
+        font_family='serif',
         labels=labels)
 
 def draw_network(selected_nodes, filename):
@@ -143,15 +148,25 @@ def draw_network(selected_nodes, filename):
         remaining, 0.1)
 
     ax = plt.gca()
+    plt.text(
+        info_x, max_y, 'Information', 
+        fontsize='large', family='serif', fontweight='bold', 
+        ha='center')
+    plt.text(
+        impl_x, max_y, 'Implementation', 
+        fontsize='large', family='serif', fontweight='bold', 
+        ha='center')
+
     ax.set_aspect('equal')
     print(ax.set_xlim(info_x - 2, impl_x + 2))
     plt.draw()
     plt.savefig(filename)
 
-def solve_graph (required=[], blacklisted=[], exclusive={}):
+def solve_graph (required=[], devices=[], blacklist_info=[], exclusive={}, limit_rounds=np.inf):
     # exclusive[info] = implementation. 
     #   this means IF we need that requirement to solve this graph
     #   then we force use that implementation over others 
+    
     """
     Our goal is to find the smallest sub-graph subject to:
         * Required: Must contain required information nodes
@@ -159,13 +174,138 @@ def solve_graph (required=[], blacklisted=[], exclusive={}):
         * Conditional exclusion: If a certain information is required, we may have a specific implementation that we require
     """
 
+    # still it's a bit tricky how we pick an implementation given 
+    # for now, I think we can just pick all possible implementations
+
     # information
     # implementations
     # return a set of nodes/edges
+    all_nodes = []
 
-    return [n.node() for n in information[:5] + implementations[:5]]
+    required_info = []
+    required_impl = []
+
+    new_required_info = [i for i in required if i not in blacklist_info]
+    new_required_impl = []
+
+    round = 1
+
+    while (len(new_required_info) > 0 or len(new_required_impl) > 0):
+        _next_required_impl = new_required_impl[:]
+        _next_required_info = new_required_info[:]
+        required_info += new_required_info[:]
+        required_impl += new_required_impl[:]
+        new_required_impl = []
+        new_required_info = []
+
+        for info in _next_required_info:
+            if info in exclusive:
+                impl = exclusive[info]
+                if any([d in devices for d in impl.devices]):
+                    new_required_impl.append(impl)
+            else:
+                for impl in info.implemented_by:
+                    if impl not in required_impl and impl not in new_required_impl:
+                        if any([d in devices for d in impl.devices]):
+                            new_required_impl.append(impl)
+                        else:
+                            # none of the devices are available
+                            continue
+
+            
+        for impl in _next_required_impl:
+            for info in impl.requires:
+                if info not in required_info and info not in new_required_info:
+                    if info not in blacklist_info:
+                        new_required_info.append(info)
+
+        round += 1
+        if round > limit_rounds:
+            break
+    
+    print(required_info, required_impl)
+    
+    # initialize set of information
+    # get all implementations for information set
+    # get their required information
+    # loop until we don't add any more to info or impl sets
+
+    return [n.node() for n in required_info + required_impl]
 
 if __name__ == '__main__':
-    # solve graph --> get a list of nodes, some of which are highlighted and some which are not
-    selected_nodes = solve_graph()
-    draw_network(selected_nodes, 'network.png')
+    
+    # list of information we need
+    #   car related sensors
+    #   location.
+    required_information = [
+        indexed_information['car/speed'],
+        indexed_information['car/odometer'],
+        indexed_information['car/fuel'],
+        indexed_information['car/rpm'],
+        indexed_information['car/steering'],
+        indexed_information['car/gear'],
+        indexed_information['location'],
+    ]
+
+
+    android = 'android'
+    openxc = 'openxc'
+    obd = 'obd'
+    
+
+    
+    # selected_nodes = solve_graph(required=[indexed_information['car/fuel'], 'car/...'])
+    # question: Am I dangerous driver?
+    for round in tqdm(list(range(1, 10)), 'Num rounds'):
+        selected_nodes = solve_graph(
+            required=required_information, 
+            devices=[android, openxc, obd], 
+            limit_rounds=round)
+        #draw_network(selected_nodes, '{}/network-{:02d}.png'.format(odir, round))
+        
+    
+    # i have all devices (openxc, obd, phone, etc) -- highlight that implementation
+    """
+    draw_network(solve_graph(
+                    required=required_information, 
+                    devices=[android, openxc, obd]),
+                '{}/devices-all-devices.png'.format(odir))
+
+    draw_network(solve_graph(
+                    required=required_information, 
+                    devices=[android]),
+                '{}/devices-only-phone.png'.format(odir))
+    
+    draw_network(solve_graph(
+                    required=required_information, 
+                    devices=[android, obd]),
+                '{}/devices-phone-and-obd.png'.format(odir))
+    
+    draw_network(solve_graph(
+                    required=required_information, 
+                    devices=[obd]),
+                '{}/devices-only-obd.png'.format(odir))
+    """ 
+
+
+    draw_network(solve_graph(
+                    required=required_information, 
+                    blacklist_info=[indexed_information['location']],
+                    devices=[android]),
+                '{}/blacklist-location.png'.format(odir))
+
+    draw_network(solve_graph(
+                    required=required_information, 
+                    blacklist_info=[],
+                    exclusive={
+                        indexed_information['location']: indexed_implementation['react-native/dummy']
+                    },
+                    devices=[android]),
+                '{}/blacklist-dummy-location.png'.format(odir))
+    
+    #   - I only have phone -- blacklist non-phone implementation
+    #   - I only have OBD and phone
+    
+    # suppose i don't want to share location
+    #   show what happens if you DO share location + dummy location
+    

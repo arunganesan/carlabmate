@@ -4,7 +4,8 @@
 class Info ():
     def __init__ (self, name):
         self.name = name
-    
+        self.implemented_by = []
+
     def node (self):
         return ('info', self.name)
 
@@ -12,6 +13,7 @@ class Impl ():
     def __init__ (self, name, implements, devices, requires=[]):
         self.name = name
         self.implements = indexed_information[implements]
+        indexed_information[implements].implemented_by.append(self)
 
         if type(devices) == list:
             self.devices = devices
@@ -27,26 +29,24 @@ class Impl ():
         return ('impl', self.name)
 
 
-implementations = []
+information = [
+    Info('car/speed'),
+    Info('car/odometer'),
+    Info('car/fuel'),
+    Info('car/rpm'),
+    Info('car/steering'),
+    Info('car/gear'),
+    Info('location'),
+    Info('magnet'),
+    Info('imu'),
+    Info('aligned imu'),
+]
 indexed_information = {
-    'car/speed': Info('car/speed'),
-    'car/odometer': Info('car/odometer'),
-    'car/fuel': Info('car/fuel'),
-    'car/rpm': Info('car/rpm'),
-    'car/steering': Info('car/steering'),
-    'car/gear': Info('car/gear'),
-    'location': Info('location'),
-    'anonymized loc': Info('anonymized loc'),
-    'magnet': Info('magnet'),
-    'imu': Info('imu'),
-    'aligned imu': Info('aligned imu'),
+    info.name: info
+    for info in information
 }
-information = list(indexed_information.values())
 
-
-
-        
-implementations += [
+implementations = [
     # watchfone
     Impl('watchfone/speed', 'car/speed', 'android', ['imu', 'location']),
     Impl('watchfone/odometer', 'car/odometer', 'android', 'location'),
@@ -65,7 +65,6 @@ implementations += [
     Impl('react-native/gps', 'location', ['android', 'iphone']),
     Impl('react-native/dummy', 'location', ['android', 'iphone']),
     
-
     # core implementations
     Impl('core/magnet', 'magnet', ['android', 'iphone']),
     Impl('core/imu', 'imu', ['android', 'iphone']),
@@ -85,6 +84,10 @@ implementations += [
     Impl('obd/rpm', 'car/rpm', 'obd'),
 ]
 
+indexed_implementation = {
+    impl.name: impl
+    for impl in implementations
+}
 
 
 # // implementations: [
