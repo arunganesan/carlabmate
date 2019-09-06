@@ -69,6 +69,6 @@ class PacketController < ApplicationController
                 person_id: params[:person],
                 information_id: params[:information],
             })
-        
+            
     end
 end

@@ -1,0 +1,16 @@
+[
+    { "name": "car/speed", "description": "Car speed in kmph"},
+    { "name": "car/odometer", "description": "Car odometer in km"},
+    { "name": "car/fuel", "description": "Car fuel in liters"},
+    { "name": "car/rpm", "description": "Car engine RPM"},
+    { "name": "car/steering", "description": "Car steering wheel angle in degrees"},
+    { "name": "car/gear", "description": "Car gear position"},
+    
+    { "name": "aligned imu", "description": "Phone accelerometer in world frame of reference"},
+    { "name": "imu", "description": "Phone accelerometer"},
+    { "name": "magnet", "description": "Phone magnetometer"},
+
+    { "name": "location", "description": "User location"},
+    { "name": "mood", "description": "User's mood"},
+    { "name": "home-work", "description": "User's home/work locations"}
+]
