@@ -1,5 +1,19 @@
 class DevController < ApplicationController
     def dummy_database 
-        render :json => ['ok']
+        Person.delete_all
+        Information.delete_all
+
+        for i in 1..10 do
+            Person.create(:name => "Person #{i}")
+            Information.create(:name => "Info #{i}")
+        end
+
+        # todo populate a bunch of data
+
+        render :json => {
+            'information': Information.all,
+            'people': Person.all,
+            'packets': Packet.all            
+        }
     end
 end

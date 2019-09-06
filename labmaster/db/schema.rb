@@ -17,7 +17,6 @@ ActiveRecord::Schema.define(version: 2019_09_06_114809) do
   end
 
   create_table "packets", force: :cascade do |t|
-    t.string "name"
     t.string "url"
     t.datetime "received"
     t.integer "person_id"
