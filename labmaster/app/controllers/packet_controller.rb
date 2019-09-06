@@ -20,8 +20,8 @@ class PacketController < ApplicationController
             return
         end
 
-        person = Person.find_by(:id: params[:person])
-        information = Information.find_by(:id: params[:information])
+        person = Person.find_by(id: params[:person])
+        information = Information.find_by(id: params[:information])
         if person.blank? or information.blank?
             head :invalid
             return
@@ -42,7 +42,7 @@ class PacketController < ApplicationController
             FileUtils.mkdir_p dest_dir
             save_filename = "#{dest_dir}/#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}"
             file = FileUtils.copy_entry params[:file].tempfile.path, save_filename
-            puts (save_filename)
+            puts 'saved file to ', save_filename
             packet.file = save_filename
         end
         
@@ -64,12 +64,11 @@ class PacketController < ApplicationController
             return
         end
 
-        render :json => {
-            Packet.where('received > :sincetime AND person_id = :person_id AND information_id = :information_id', {
+        render :json => Packet.where('received > :sincetime AND person_id = :person_id AND information_id = :information_id', {
                 sincetime: DateTime.parse(params[:sincetime]),
                 person_id: params[:person],
                 information_id: params[:information],
             })
-        }
+        
     end
 end
