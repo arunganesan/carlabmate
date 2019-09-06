@@ -3,7 +3,7 @@ import './App.css';
 import { Main } from './Main'
 
 function uploadData (name, info) {
-  console.log(`Uploadnig ${name} - ${info}`)
+  console.log(`Uploading ${name} - ${info}`)
 }
 
 function checkNewData () {

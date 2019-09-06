@@ -38,14 +38,14 @@ export class Main extends React.Component {
     }
     
     submitData() {
-        this.props.onNewData('location', this.state.message);
+        this.props.onNewData('home-work', this.state.message);
     }
 
     render () {
         // Render a map picker where the user can pick their location
         // This gets uploaded to the server as "new information"
         return <Container>
-            <Form.Label style={style.input}>Enter your location</Form.Label>
+            <Form.Label style={style.input}>Where do you live?</Form.Label>
             <Form.Control 
                 style={style.input}
                 aria-label="large" 
