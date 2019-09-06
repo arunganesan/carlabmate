@@ -9,7 +9,8 @@ class CreateInfoTable < ActiveRecord::Migration[6.0]
     end
 
     create_table :packets do |t|
-      t.string :url
+      t.string :file
+      t.string :message
       t.datetime :received
       t.references :person
       t.references :information

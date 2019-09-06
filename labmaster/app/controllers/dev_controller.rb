@@ -8,7 +8,7 @@ class DevController < ApplicationController
             Information.create(:name => "Info #{i}")
         end
 
-        # todo populate a bunch of data
+        # populate a bunch of data
 
         render :json => {
             'information': Information.all,

@@ -9,7 +9,13 @@ class PacketController < ApplicationController
         # Must be post
         # Must contain params about information + person
         # Must contain data
-        if !request.post? or !request.has_key? :information or !params.has_key? :person or !request.has_key? :file
+        if !request.post? or !params.has_key? :information or !params.has_key? :person
+            head :invalid
+            return
+        end
+
+        # must have message or file
+        if !params.has_key? :file and !params.has_key? :message
             head :invalid
             return
         end
@@ -21,20 +27,27 @@ class PacketController < ApplicationController
             return
         end
 
+        packet = Packet.new
+        packet.received = Time.now
+        packet.person = person
+        packet.information = information
+        
+        if params.kas_key? :message
+            packet.message = message
+        end
+
         # move file to location
-        dest_dir = "#{PUBLIC.to_s}/#{params[:person]}/#{params[:information]}"
-        FileUtils.mkdir_p dest_dir
-        save_filename = "#{dest_dir}/#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}"
-        file = FileUtils.copy_entry params[:file].tempfile.path, save_filename
-        puts (save_filename)
+        if params.has_key? :file
+            dest_dir = "#{PUBLIC.to_s}/#{params[:person]}/#{params[:information]}"
+            FileUtils.mkdir_p dest_dir
+            save_filename = "#{dest_dir}/#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}"
+            file = FileUtils.copy_entry params[:file].tempfile.path, save_filename
+            puts (save_filename)
+            packet.file = save_filename
+        end
         
-        Packet.create(
-            :url => save_filename,
-            :received => Time.now,
-            :person => person,
-            :information => information
-        )
-        
+        packet.save!
+
         render :json => {
             'information': Information.all,
             'people': Person.all,
@@ -46,14 +59,14 @@ class PacketController < ApplicationController
     def list 
         # Must be get
         # Must contain params about info and person and last date
-        if !request.get? or !request.has_key? :information or !params.has_key? :person or !params.has_key? :sincetime
+        if !request.get? or !params.has_key? :information or !params.has_key? :person or !params.has_key? :sincetime
             head :invalid
             return
         end
 
         render :json => {
             Packet.where('received > :sincetime AND person_id = :person_id AND information_id = :information_id', {
-                sincetime: params[:sincetime],
+                sincetime: DateTime.parse(params[:sincetime]),
                 person_id: params[:person],
                 information_id: params[:information],
             })
