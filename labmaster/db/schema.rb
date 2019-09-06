@@ -10,6 +10,24 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 0) do
+ActiveRecord::Schema.define(version: 2019_09_06_114809) do
+
+  create_table "information", force: :cascade do |t|
+    t.string "name"
+  end
+
+  create_table "packets", force: :cascade do |t|
+    t.string "name"
+    t.string "url"
+    t.datetime "received"
+    t.integer "person_id"
+    t.integer "information_id"
+    t.index ["information_id"], name: "index_packets_on_information_id"
+    t.index ["person_id"], name: "index_packets_on_person_id"
+  end
+
+  create_table "people", force: :cascade do |t|
+    t.string "name"
+  end
 
 end
