@@ -66,3 +66,29 @@ def main():
 if __name__ == '__main__':
     # test it with dummy data
     main()
+
+    from twilio.rest import Client
+    import os
+
+    # Your Account Sid and Auth Token from twilio.com/console
+    # DANGER! This is insecure. See http://twil.io/secure
+    account_sid = os.environ['TWILIO_ACCOUNT_SID']
+    auth_token = os.environ['TWILIO_AUTH_TOKEN']
+
+    client = Client(account_sid, auth_token)
+
+    message = client.messages \
+                    .create(
+                        body="How was your day? Enter 1 - 7 (1 being the worst)",
+                        from_='+17344363993',
+                        to='+17343584745'
+                    )
+
+    # message = client.messages.create(
+    #                           body='Hello there!',
+    #                           from_='+17344363993',
+    #                           media_url=['https://demo.twilio.com/owl.png'],
+    #                           to='+17343584745'
+    #                       )
+    
+    print(message.sid)
