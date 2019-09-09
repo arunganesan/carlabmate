@@ -1,13 +1,14 @@
+import calendar
 import requests
 import time
 
 class libcarlab ():
     def __init__ (self, userid, required_info, test=False):
-        self.last_check_time = 0
+        self.last_check_time = calendar.timegm(time.gmtime())
         self.userid = userid
         self.test = test
         self.required_info = required_info
-        self.baseurl = 'http://localhost:1234'
+        self.baseurl = 'http://localhost:1234/packet/list'
         self.fetch_url = '{base}?information={info}&person={person}&sincetime={time}'
         self.push_url = '{base}?information={info}&person={person}'
     
@@ -19,15 +20,19 @@ class libcarlab ():
         new_data = []
 
         for info in self.required_info:
-            results = requests.get(self.fetch_url.format(
+            url = self.fetch_url.format(
                 base=self.baseurl,
                 info=info,
                 person=self.userid,
                 time=self.last_check_time,
-            ))
+            )
+            
+            results = requests.get(url)
+
+            print(url)
             new_data += results.json()
 
-        self.last_check_time = time.time()
+        self.last_check_time = calendar.timegm(time.gmtime())
         return new_data
     
     def output_new_info (self, info, value):

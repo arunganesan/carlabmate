@@ -1,11 +1,11 @@
 export class Libcarlab {
   constructor (userid, required_info, test) {
-    this.last_check_time = 0
+    this.last_check_time = Math.round(new Date().getTime() / 1000)
     this.userid = userid
     this.test = test
     this.required_info = required_info
 
-    this.baseurl = 'http://localhost:1234'
+    this.baseurl = 'http://localhost:1234/packet/list'
     this.fetch_url = (info) => `${this.baseurl}?information=${info}&person=${this.userid}&sincetime=${this.last_check_time}`
     this.push_url = (info, message) => `${this.baseurl}?information=${info}&person=${this.userid}&message=${message}`
   }
@@ -17,6 +17,9 @@ export class Libcarlab {
         fetch(this.fetch_url(info))
             .then(res => res.json())
             .then(data => callback(info, data));
+        
+      
+    this.last_check_time = Math.round(new Date().getTime() / 1000)
   }
 
   outputNewInfo (info, message, callback) {

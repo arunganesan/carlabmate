@@ -65,7 +65,7 @@ class PacketController < ApplicationController
         end
 
         render :json => Packet.where('received > :sincetime AND person_id = :person_id AND information_id = :information_id', {
-                sincetime: DateTime.parse(params[:sincetime]),
+                sincetime: DateTime.strptime(params[:sincetime], '%s'),
                 person_id: params[:person],
                 information_id: params[:information],
             })
