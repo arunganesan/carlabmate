@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">carlabui</string>
+
+    <string name="carlab_stopped_button">CarLab is currently not running</string>
+    <string name="carlab_running_button">Pause</string>
+    <string name="carlab_paused_button">Resume</string>
+
+    <string name="survey_details_trip">Trip #: %1$d</string>
+    <string name="survey_details_start">Start: %1$s</string>
+    <string name="survey_details_stop">End: %1$s</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

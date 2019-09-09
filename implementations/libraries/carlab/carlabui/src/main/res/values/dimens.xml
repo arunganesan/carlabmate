@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="controlButtonWidth">135dp</dimen>
+    <dimen name="controlButtonHeight">100dp</dimen>
+    <dimen name="controlButtonTextSize">10sp</dimen>
+</resources>

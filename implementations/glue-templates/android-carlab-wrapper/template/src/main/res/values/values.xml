@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="uid">111088096967389001979</string>
+    <integer name="version">1</integer>
+    <integer name="experimentID">666</integer>
+    <string name="shortname">template</string>
+</resources>

@@ -1,0 +1,69 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="edu.umich.carlab">
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+
+    <application android:allowBackup="true"
+                 android:label="@string/app_name"
+                 android:icon="@mipmap/ic_launcher"
+                 android:roundIcon="@mipmap/ic_launcher_round"
+                 android:supportsRtl="true"
+                 android:theme="@style/AppTheme">
+
+        <service
+                android:name="edu.umich.carlab.CLService"
+                android:enabled="true"
+                android:exported="false" />
+
+
+        <receiver
+                android:name="edu.umich.carlab.recurring.SetupOnBoot"
+                android:enabled="true"
+                android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <service
+                android:name="edu.umich.carlab.net.BluetoothConnService"
+                android:enabled="true"
+                android:exported="true" />
+
+        <receiver android:name="edu.umich.carlab.recurring.UploadFiles" />
+        <receiver android:name="edu.umich.carlab.clog.UploadLog" />
+        <receiver android:name="edu.umich.carlab.net.GetLatestTrip" />
+        <receiver android:name="edu.umich.carlab.net.CheckUpdate" />
+        <receiver android:name="edu.umich.carlab.ManualTrigger" />
+
+
+        <!-- META DATA FOR LIBRARIES AND KEYS -->
+        <meta-data
+                android:name="com.google.android.gms.version"
+                android:value="@integer/google_play_services_version" />
+        <meta-data
+                android:name="preloaded_fonts"
+                android:resource="@array/preloaded_fonts" />
+        <meta-data
+                android:name="io.fabric.ApiKey"
+                android:value="8b84a926706e1c33268937fed2d0fa1d7ee05732" />
+
+
+    </application>
+</manifest>
