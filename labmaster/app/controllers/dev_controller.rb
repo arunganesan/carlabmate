@@ -29,4 +29,12 @@ class DevController < ApplicationController
             'packets': Packet.all            
         }
     end
+
+    def all
+        render :json => {
+            'information': Information.all,
+            'people': Person.all,
+            'packets': Packet.all            
+        }
+    end
 end

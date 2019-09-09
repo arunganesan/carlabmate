@@ -2,6 +2,7 @@ class PacketController < ApplicationController
     require 'time'
     require 'digest'
     require 'fileutils'
+    skip_before_action :verify_authenticity_token
 
     PUBLIC = Rails.root.join('public')
 
@@ -9,6 +10,7 @@ class PacketController < ApplicationController
         # Must be post
         # Must contain params about information + person
         # Must contain data
+        puts "Got upload. Params are: ", params[:message]
         if !request.post? or !params.has_key? :information or !params.has_key? :person
             head :invalid
             return
@@ -19,21 +21,27 @@ class PacketController < ApplicationController
             head :invalid
             return
         end
-
+        
         person = Person.find_by(id: params[:person])
-        information = Information.find_by(id: params[:information])
-        if person.blank? or information.blank?
+        
+        if person.blank?
             head :invalid
             return
         end
+
+        information = Information.find_by(name: params[:information])
+        if information.blank?
+            information = Information.create(name: params[:information])
+        end
+
 
         packet = Packet.new
         packet.received = Time.now
         packet.person = person
         packet.information = information
         
-        if params.kas_key? :message
-            packet.message = message
+        if params.has_key? :message
+            packet.message = params[:message]
         end
 
         # move file to location
@@ -64,10 +72,15 @@ class PacketController < ApplicationController
             return
         end
 
+        information = Information.find_by(name: params[:information])
+        if information.blank?
+            render :json => []
+        end
+
         render :json => Packet.where('received > :sincetime AND person_id = :person_id AND information_id = :information_id', {
                 sincetime: DateTime.strptime(params[:sincetime], '%s'),
                 person_id: params[:person],
-                information_id: params[:information],
+                information_id: information.id,
             })
             
     end

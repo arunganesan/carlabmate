@@ -2,6 +2,8 @@ import React from 'react';
 import { LinkContainer } from 'react-router-bootstrap'
 import { Nav, NavItem, Navbar, Button } from 'react-bootstrap'
 import { BrowserRouter as Router, Route } from 'react-router-dom'
+import 'bootstrap/dist/css/bootstrap.css'
+import './App.css';
 
 /*
 import { Main as Alias } from './name-of-file.js'
@@ -9,9 +11,12 @@ import { Main as Alias } from './name-of-file.js'
 import { Main as WhereAreYou } from './WhereAreYou'
 import { Main as WhereDoYouLive } from './WhereDoYouLive'
 
-import 'bootstrap/dist/css/bootstrap.css'
 
-import './App.css';
+/*
+User-specific
+*/
+const USERID = 2;
+
 
 function MyLink (props) {
   return <NavItem>
@@ -53,8 +58,13 @@ function App() {
               <Route path={full url} exact component={Component} />
             */}
 
-            <Route path='/where-are-you' exact component={WhereAreYou} />
-            <Route path='/where-do-you-live' exact component={WhereDoYouLive} />
+            <Route path='/where-are-you' exact
+              render={props => <WhereAreYou userid={USERID} />} />
+
+            <Route 
+              path='/where-do-you-live' 
+              exact
+              render={props => <WhereDoYouLive userid={USERID} />} />
         </div>
       </div>
     </Router>

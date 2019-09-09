@@ -52,7 +52,9 @@ export class Main extends React.Component {
                         'lng': pos.coords.longitude,
                     })
                 })
-            })
+            }, (err) => {
+                console.log('error', err);
+            }, {timeout:10000})
         }
     }
     
@@ -68,17 +70,15 @@ export class Main extends React.Component {
         return <Container>
             <Form.Label style={style.input}>Enter your location</Form.Label>
 
-            <InputGroup>
+            <InputGroup className="mb-3">
                 <InputGroup.Prepend>
                     <Button 
                         onClick={() => this.locateMe()}
-                        variant="secondary">Locate Me</Button>
+                        variant="outline-secondary">Locate Me</Button>
                 </InputGroup.Prepend>
                 
-            <Form.Control 
-                style={style.input}
-                // aria-label="large" 
-                // aria-describedby="inputGroup-sizing-lg"
+                <Form.Control 
+                    aria-describedby="basic-addon1" 
                 value={this.state.message} 
                 onChange={(evt) => this.setState({ 
                     message: evt.target.value })} />

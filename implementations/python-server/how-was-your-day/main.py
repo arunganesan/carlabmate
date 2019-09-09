@@ -27,7 +27,9 @@ def main(userid, test=False):
     cl = libcarlab(userid, required_info, test)
     
     # check if there is any new info
-    for name, info in cl.check_new_info():
+    for name, info in cl.check_new_info().items():
+        print('Got new data: ', name, info)
+        
         if name == 'home-work':
             storage[HOME_WORK] = json.loads(info)
         

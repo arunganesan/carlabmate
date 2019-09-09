@@ -4,20 +4,20 @@ import time
 
 class libcarlab ():
     def __init__ (self, userid, required_info, test=False):
-        self.last_check_time = calendar.timegm(time.gmtime())
+        self.last_check_time = calendar.timegm(time.gmtime()) - 10000
         self.userid = userid
         self.test = test
         self.required_info = required_info
-        self.baseurl = 'http://localhost:1234/packet/list'
-        self.fetch_url = '{base}?information={info}&person={person}&sincetime={time}'
-        self.push_url = '{base}?information={info}&person={person}'
+        self.baseurl = 'http://localhost:1234/packet/'
+        self.fetch_url = '{base}list?information={info}&person={person}&sincetime={time}'
+        self.push_url = '{base}upload?information={info}&person={person}'
     
     def check_new_info (self):
         # Make server call to /packet/list
         # if there are files, copy them over 
         # (stick to HTTP routing so we can put server scripts on a separate machine)
         # XXX do differently if testing
-        new_data = []
+        new_data = {}
 
         for info in self.required_info:
             url = self.fetch_url.format(
@@ -30,7 +30,7 @@ class libcarlab ():
             results = requests.get(url)
 
             print(url)
-            new_data += results.json()
+            new_data[info] = results.json()
 
         self.last_check_time = calendar.timegm(time.gmtime())
         return new_data

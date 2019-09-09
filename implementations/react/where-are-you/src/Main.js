@@ -52,7 +52,9 @@ export class Main extends React.Component {
                         'lng': pos.coords.longitude,
                     })
                 })
-            })
+            }, (err) => {
+                console.log('error', err);
+            }, {timeout:10000})
         }
     }
     
@@ -76,11 +78,9 @@ export class Main extends React.Component {
                 </InputGroup.Prepend>
                 
                 <Form.Control 
-                style={style.input}
-                aria-label="large" 
-                aria-describedby="inputGroup-sizing-lg"
-                value={this.state.message} 
-                onChange={(evt) => this.setState({ 
+                    aria-describedby="basic-addon1" 
+                    value={this.state.message} 
+                    onChange={(evt) => this.setState({ 
                     message: evt.target.value })} />
 
             </InputGroup>

@@ -5,9 +5,9 @@ export class Libcarlab {
     this.test = test
     this.required_info = required_info
 
-    this.baseurl = 'http://localhost:1234/packet/list'
-    this.fetch_url = (info) => `${this.baseurl}?information=${info}&person=${this.userid}&sincetime=${this.last_check_time}`
-    this.push_url = (info, message) => `${this.baseurl}?information=${info}&person=${this.userid}&message=${message}`
+    this.baseurl = 'http://localhost:1234/packet/'
+    this.fetch_url = (info) => `${this.baseurl}list?information=${info}&person=${this.userid}&sincetime=${this.last_check_time}`
+    this.push_url = (info) => `${this.baseurl}upload?information=${info}&person=${this.userid}`
   }
   
   checkNewInfo (callback) {
@@ -23,10 +23,11 @@ export class Libcarlab {
   }
 
   outputNewInfo (info, message, callback) {
-    fetch(this.push_url(info, message), {
+    console.log('Sending to ', this.push_url(info), 'value', info, message);
+    fetch(this.push_url(info), {
         method: 'post', mode: 'cors', cache: 'no-cache',
         headers: { 'Content-type': 'application/json' },
-        body: { 'message': message }})
+        body: JSON.stringify({'message': message })})
         .then(res => callback(res))
   }
 }
