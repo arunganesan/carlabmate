@@ -71,18 +71,17 @@ if __name__ == '__main__':
     import os
 
     # Your Account Sid and Auth Token from twilio.com/console
-    # DANGER! This is insecure. See http://twil.io/secure
     account_sid = os.environ['TWILIO_ACCOUNT_SID']
     auth_token = os.environ['TWILIO_AUTH_TOKEN']
 
     client = Client(account_sid, auth_token)
 
-    message = client.messages \
-                    .create(
-                        body="How was your day? Enter 1 - 7 (1 being the worst)",
-                        from_='+17344363993',
-                        to='+17343584745'
-                    )
+    # message = client.messages \
+    #                 .create(
+    #                     body="How was your day? Enter 1 - 7 (1 being the worst)",
+    #                     from_='+17344363993',
+    #                     to='+17343584745'
+    #                 )
 
     # message = client.messages.create(
     #                           body='Hello there!',

@@ -40,7 +40,7 @@ class PacketController < ApplicationController
         if params.has_key? :file
             dest_dir = "#{PUBLIC.to_s}/#{params[:person]}/#{params[:information]}"
             FileUtils.mkdir_p dest_dir
-            save_filename = "#{dest_dir}/#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}"
+            save_filename = "#{dest_dir}/#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}.json"
             file = FileUtils.copy_entry params[:file].tempfile.path, save_filename
             puts 'saved file to ', save_filename
             packet.file = save_filename
