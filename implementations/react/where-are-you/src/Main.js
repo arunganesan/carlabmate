@@ -5,6 +5,7 @@ import {
     Form,
 } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
+import { Libcarlab } from './Libcarlab'
 
 const style = {
     input: {
@@ -18,10 +19,19 @@ const style = {
 export class Main extends React.Component { 
     constructor (props) {
         super(props);
-
+        
         this.state = {
-           message: ''
+            message: '',
+            userid: (props.userid === undefined) ? 0 : props.userid,
+            test: (props.test === undefined) ? false : props.test,
+            required_info: [],
         }
+
+        this.libcarlab = Libcarlab(
+            this.state.userid,
+            this.state.required_info,
+            this.state.test,
+        )
     }
 
     componentDidMount () {
@@ -38,7 +48,7 @@ export class Main extends React.Component {
     }
     
     submitData() {
-        this.props.onNewData('location', this.state.message);
+        this.props.onNewInfo('location', this.state.message);
     }
 
     render () {
@@ -54,7 +64,10 @@ export class Main extends React.Component {
                 onChange={(evt) => this.setState({ 
                     message: evt.target.value })} />
         
-            <Button onClick={() => this.submitData()} style={style.button} size="lg">Submit</Button>    
+            <Button 
+                onClick={() => this.submitData()} 
+                style={style.button} 
+                size="lg">Submit</Button>    
         </Container>
     }
 }

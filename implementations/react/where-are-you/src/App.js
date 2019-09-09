@@ -2,23 +2,13 @@ import React from 'react';
 import './App.css';
 import { Main } from './Main'
 
-function uploadData (name, info) {
-  console.log(`Uploading ${name} - ${info}`)
-}
 
-function checkNewData () {
-  // Get new data
-  // check with local storage first to only get relevant data
-}
+class App extends React.Component {
 
-
-function App() {
+  render () {
   return (
-    <Main
-      checkNewData={() => checkNewData()}
-      onNewData={(n,d) => uploadData(n, d)}  
-    />
-  );
+    <Main />
+  );}
 }
 
 export default App;
