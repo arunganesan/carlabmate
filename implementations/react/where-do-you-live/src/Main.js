@@ -5,6 +5,8 @@ import {
     Form,
 } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
+import { Libcarlab } from './Libcarlab'
+
 
 const style = {
     input: {
@@ -18,10 +20,19 @@ const style = {
 export class Main extends React.Component { 
     constructor (props) {
         super(props);
-
+        
         this.state = {
-           message: ''
+            message: '',
+            userid: (props.userid === undefined) ? 0 : props.userid,
+            test: (props.test === undefined) ? false : props.test,
+            required_info: [],
         }
+
+        this.libcarlab = Libcarlab(
+            this.state.userid,
+            this.state.required_info,
+            this.state.test,
+        )
     }
 
     componentDidMount () {
@@ -35,10 +46,15 @@ export class Main extends React.Component {
                 })
             })
         }
+
+
+        this.libcarlab.checkNewInfo((info, data) => {
+            console.log('Got info ', info, 'with data', data);
+        });
     }
     
     submitData() {
-        this.props.onNewData('home-work', this.state.message);
+        this.props.onNewInfo('home-work', this.state.message);
     }
 
     render () {
