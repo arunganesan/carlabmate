@@ -5,7 +5,7 @@ import {
     Form,
 } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
-import { Libcarlab } from './Libcarlab'
+import { Libcarlab } from '../../../libraries/Libcarlab'
 
 const style = {
     input: {
@@ -45,10 +45,17 @@ export class Main extends React.Component {
                 })
             })
         }
+
+        
+        this.libcarlab.checkNewInfo((info, data) => {
+            console.log('Got info ', info, 'with data', data);
+        });
     }
     
     submitData() {
-        this.props.onNewInfo('location', this.state.message);
+        this.props.onNewInfo('location', this.state.message, (res) => {
+            console.log('Response:', res);
+        });
     }
 
     render () {
