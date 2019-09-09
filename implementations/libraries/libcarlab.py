@@ -23,7 +23,7 @@ class libcarlab ():
                 base=self.baseurl,
                 info=info,
                 person=self.userid,
-                sincetime=self.last_check_time,
+                time=self.last_check_time,
             ))
             new_data += results.json()
 

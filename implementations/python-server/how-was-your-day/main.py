@@ -5,6 +5,7 @@ import json
 import os
 import pickle
 from libcarlab import libcarlab
+import time
 
 LOCALFILE = 'local.db'
 LAST_TEXTED_TIME = 'LAST TEXTED TIME'
@@ -23,7 +24,7 @@ def main(userid, test=False):
     storage.setdefault(HOME_WORK, None)
     storage.setdefault(CURRENT_LOC, None)
     
-    cl = libcarlab(userid, test, required_info)
+    cl = libcarlab(userid, required_info, test)
     
     # check if there is any new info
     for name, info in cl.check_new_info():

@@ -6,10 +6,11 @@ import time
 SLEEP_TIME = 60 # wake up every 1 minute
 
 # USER-SPECIFIC CONFIG
-# USERID = ...
+USERID = '2'
 
 SCRIPTS = [
     # list each implementation script
+    'how-was-your-day.py'
 ]
 
 def main():
