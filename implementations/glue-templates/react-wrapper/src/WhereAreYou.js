@@ -2,6 +2,7 @@ import React from 'react';
 import { 
     Button, 
     Container,
+    InputGroup,
     Form,
 } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
@@ -35,8 +36,16 @@ export class Main extends React.Component {
     }
 
     componentDidMount () {
+        this.libcarlab.checkNewInfo((info, data) => {
+            console.log('Got info ', info, 'with data', data);
+        });
+    }
+
+    locateMe() {
+        console.log('Locating!')
         if (navigator && navigator.geolocation) {
             navigator.geolocation.getCurrentPosition((pos) => {
+                console.log('Received response?', pos);
                 this.setState({
                     message: JSON.stringify({
                         'lat': pos.coords.latitude,
@@ -45,10 +54,6 @@ export class Main extends React.Component {
                 })
             })
         }
-        
-        this.libcarlab.checkNewInfo((info, data) => {
-            console.log('Got info ', info, 'with data', data);
-        });
     }
     
     submitData() {
@@ -62,14 +67,23 @@ export class Main extends React.Component {
         // This gets uploaded to the server as "new information"
         return <Container>
             <Form.Label style={style.input}>Enter your location</Form.Label>
+
+            <InputGroup>
+                <InputGroup.Prepend>
+                    <Button 
+                        onClick={() => this.locateMe()}
+                        variant="secondary">Locate Me</Button>
+                </InputGroup.Prepend>
+                
             <Form.Control 
                 style={style.input}
-                aria-label="large" 
-                aria-describedby="inputGroup-sizing-lg"
+                // aria-label="large" 
+                // aria-describedby="inputGroup-sizing-lg"
                 value={this.state.message} 
                 onChange={(evt) => this.setState({ 
                     message: evt.target.value })} />
-        
+
+            </InputGroup>
             <Button 
                 onClick={() => this.submitData()} 
                 style={style.button} 
