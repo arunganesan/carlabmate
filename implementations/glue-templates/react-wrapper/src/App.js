@@ -3,9 +3,25 @@ import { LinkContainer } from 'react-router-bootstrap'
 import { Nav, NavItem, Navbar, Button } from 'react-bootstrap'
 import { BrowserRouter as Router, Route } from 'react-router-dom'
 
+/*
+import { Main as Alias } from './name-of-file.js'
+*/
+import { Main as WhereAreYou } from './WhereAreYou'
+import { Main as WhereDoYouLive } from './WhereDoYouLive'
+
 import 'bootstrap/dist/css/bootstrap.css'
 
 import './App.css';
+
+function MyLink (props) {
+  return <NavItem>
+    <LinkContainer to={'/' + props.to}>
+      <Nav.Link eventKey={props.to}>
+        { props.label ? props.label : props.to }
+      </Nav.Link>
+    </LinkContainer>
+  </NavItem>;
+}
 
 function App() {
   return (
@@ -24,6 +40,9 @@ function App() {
                 </LinkContainer>
               </NavItem>
             */}
+
+            <MyLink to='where-are-you' />
+            <MyLink to='where-do-you-live' />
           </Nav>
         </Navbar>
 
@@ -33,8 +52,10 @@ function App() {
             for each implementation:
               <Route path={full url} exact component={Component} />
             */}
-        </div>
 
+            <Route path='/where-are-you' exact component={WhereAreYou} />
+            <Route path='/where-do-you-live' exact component={WhereDoYouLive} />
+        </div>
       </div>
     </Router>
   );
