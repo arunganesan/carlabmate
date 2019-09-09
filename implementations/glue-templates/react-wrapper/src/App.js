@@ -1,7 +1,7 @@
 import React from 'react';
 import { LinkContainer } from 'react-router-bootstrap'
 import { Nav, NavItem, Navbar, Button } from 'react-bootstrap'
-import { BrowserRouter as Router, Route } from 'react-router-dom
+import { BrowserRouter as Router, Route } from 'react-router-dom'
 
 import 'bootstrap/dist/css/bootstrap.css'
 
