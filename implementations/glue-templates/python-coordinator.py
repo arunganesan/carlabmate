@@ -1,23 +1,28 @@
 #! /usr/bin/env python3
 
-import subprocess
 import time
 
-SLEEP_TIME = 60 # wake up every 1 minute
+SLEEP_TIME = 60
 
 # USER-SPECIFIC CONFIG
 USERID = '2'
 
-SCRIPTS = [
+MODULES = [
     # list each implementation script
-    'how-was-your-day.py'
+    # e.g. 'how_was_your_day'
 ]
+
+imported = {}
+for module in MODULES:
+    mod = __import__(module)
+    imported[module] = mod
+
 
 def main():
     # Periodically cycle through and run each script
     while (True):
-        for script in SCRIPTS:
-            subprocess.call(['python3', script, '--userid', USERID])
+        for name, module in imported.items():
+            module.main.main(USERID, test=False)
         time.sleep(SLEEP_TIME)
 
 if __name__ == '__main__':

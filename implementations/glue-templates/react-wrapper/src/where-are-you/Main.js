@@ -6,7 +6,7 @@ import {
     Form,
 } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
-import { Libcarlab } from './Libcarlab'
+import { Libcarlab } from '../Libcarlab'
 
 const style = {
     input: {
@@ -79,8 +79,8 @@ export class Main extends React.Component {
                 
                 <Form.Control 
                     aria-describedby="basic-addon1" 
-                value={this.state.message} 
-                onChange={(evt) => this.setState({ 
+                    value={this.state.message} 
+                    onChange={(evt) => this.setState({ 
                     message: evt.target.value })} />
 
             </InputGroup>

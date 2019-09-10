@@ -8,8 +8,8 @@ import './App.css';
 /*
 import { Main as Alias } from './name-of-file.js'
 */
-import { Main as WhereAreYou } from './WhereAreYou'
-import { Main as WhereDoYouLive } from './WhereDoYouLive'
+import { Main as WhereAreYou } from './where-are-you/Main'
+import { Main as WhereDoYouLive } from './where-do-you-live/Main'
 
 
 /*
@@ -58,12 +58,14 @@ function App() {
               <Route path={full url} exact component={Component} />
             */}
 
-            <Route path='/where-are-you' exact
+            <Route 
+              exact
+              path='/where-are-you' 
               render={props => <WhereAreYou userid={USERID} />} />
 
             <Route 
-              path='/where-do-you-live' 
               exact
+              path='/where-do-you-live' 
               render={props => <WhereDoYouLive userid={USERID} />} />
         </div>
       </div>

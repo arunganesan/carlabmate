@@ -5,7 +5,7 @@ import {
     Form,
 } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
-import { Libcarlab } from './Libcarlab'
+import { Libcarlab } from '../Libcarlab'
 
 
 const style = {
