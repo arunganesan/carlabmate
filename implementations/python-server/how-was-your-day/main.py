@@ -11,11 +11,15 @@ LOCALFILE = 'local.db'
 LAST_TEXTED_TIME = 'LAST TEXTED TIME'
 HOME_WORK = 'home work location'
 CURRENT_LOC = 'current location'
-INFO = "mood"
+output_info = ["mood"]
 required_info = ['location', 'home-work']
+carlab = None
 
 def main(userid, test=False):
+    global carlab
     storage = {}
+    if carlab is None:
+        carlab = libcarlab(userid, required_info, output_info. LOCALFILE, test)
 
     if os.path.exists(LOCALFILE):
         storage = pickle.load(open(LOCALFILE, 'rb'))
@@ -24,10 +28,9 @@ def main(userid, test=False):
     storage.setdefault(HOME_WORK, None)
     storage.setdefault(CURRENT_LOC, None)
     
-    cl = libcarlab(userid, required_info, test)
     
     # check if there is any new info
-    for name, info in cl.check_new_info().items():
+    for name, info in carlab.check_new_info().items():
         print('Got new data: ', name, info)
         
         if name == 'home-work':
@@ -50,7 +53,7 @@ def main(userid, test=False):
                 if time.time() > ltt:
                     # output info if needed
                     " send text! "
-                    cl.output_new_info(INFO, 'happy')
+                    carlab.output_new_info(output_info[0], 'happy')
                     storage[LAST_TEXTED_TIME] = time.time()
 
     # go back to sleep
