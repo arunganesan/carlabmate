@@ -1,6 +1,7 @@
 import React  from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Libcarlab } from '../Libcarlab'
+import { StorageHandler } from '../StorageHandlerRN'
 import { Accelerometer } from 'expo-sensors';
 
 export class Main extends React.Component {
@@ -12,15 +13,15 @@ export class Main extends React.Component {
             userid: (props.userid === undefined) ? 0 : props.userid,
             test: (props.test === undefined) ? false : props.test,
             required_info: [],
-
+            outputSensors: ['imu'],
             accelerometerData: {},
 
         }
         this.libcarlab = new Libcarlab(
             this.state.userid,
             this.state.required_info,
-            this.state.test)
-
+            this.state.test,
+            new StorageHandler(this.state.outputSensors))
     }
     
     componentDidMount() {

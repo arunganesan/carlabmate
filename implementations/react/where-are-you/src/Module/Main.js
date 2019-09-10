@@ -7,6 +7,7 @@ import {
 } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 import { Libcarlab } from '../Libcarlab'
+import { StorageHandler } from '../StorageHandlerReact'
 
 const style = {
     input: {
@@ -26,12 +27,14 @@ export class Main extends React.Component {
             userid: (props.userid === undefined) ? 0 : props.userid,
             test: (props.test === undefined) ? false : props.test,
             required_info: [],
+            outputSensors: ['location'],
         }
 
         this.libcarlab = new Libcarlab(
             this.state.userid,
             this.state.required_info,
             this.state.test,
+            new StorageHandler(this.state.outputSensors)
         )
     }
 
@@ -39,6 +42,12 @@ export class Main extends React.Component {
         this.libcarlab.checkNewInfo((info, data) => {
             console.log('Got info ', info, 'with data', data);
         });
+
+        this.libcarlab.scheduleUploads()
+    }
+
+    componentWillUnmount() {
+        this.libcarlab.unscheduleUploads()
     }
 
     locateMe() {
