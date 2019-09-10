@@ -5,6 +5,7 @@ class PacketController < ApplicationController
     skip_before_action :verify_authenticity_token
 
     PUBLIC = Rails.root.join('public')
+    MAX_DB_MESSAGE_SIZE = 50
 
     def upload
         # Must be post
@@ -40,15 +41,26 @@ class PacketController < ApplicationController
         packet.person = person
         packet.information = information
         
+        dest_dir = "#{PUBLIC.to_s}/#{params[:person]}/#{params[:information]}"
+        FileUtils.mkdir_p dest_dir
+        save_filename = "#{dest_dir}/#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}.json"
+        
         if params.has_key? :message
-            packet.message = params[:message]
+            if params[:message].length > MAX_DB_MESSAGE_SIZE
+                file = File.open(save_filename, 'w')
+                file.puts(params[:message])
+                file.close
+                
+                puts 'Message too long. Saved to file ', save_filename
+                packet.file = save_filename
+
+            else
+                packet.message = params[:message]
+            end
         end
 
         # move file to location
         if params.has_key? :file
-            dest_dir = "#{PUBLIC.to_s}/#{params[:person]}/#{params[:information]}"
-            FileUtils.mkdir_p dest_dir
-            save_filename = "#{dest_dir}/#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}.json"
             file = FileUtils.copy_entry params[:file].tempfile.path, save_filename
             puts 'saved file to ', save_filename
             packet.file = save_filename

@@ -18,12 +18,15 @@ export class Libcarlab {
             .then(res => res.json())
             .then(data => callback(info, data));
         
-      
+    
+    // XXX This should only be updated IF we successfully made a call. Otherwise info will be lost
+    // This could also be the time of the last data we received -- that might be better to avoid time-off-sync-related errors
     this.last_check_time = Math.round(new Date().getTime() / 1000)
   }
 
   outputNewInfo (info, message, callback) {
     console.log('Sending to ', this.push_url(info), 'value', info, message);
+
     fetch(this.push_url(info), {
         method: 'post', mode: 'cors', cache: 'no-cache',
         headers: { 'Content-type': 'application/json' },
