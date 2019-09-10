@@ -1,27 +1,14 @@
-include ':watchfon',
-        ':libcarlab', ':carlabui',
-        ':world_aligned_imu', ':watchfon_speed', ':watchfon_steering',
-        ':watchfon_rpm', ':watchfon_odometer', ':watchfon_fuel',
-        ':watchfon_gear', ':watchfon_spoofed_sensors', ':watchfon_intrusion_detection',
-        ':watchfon_estimates', ':librecan', ':librecan_middleware', ':watchfon_test_suite',
-        ':wf_sensors', ':wf_speed', ':wf_steer', ':wf_odometer', ':wf_fuel', ':wf_rpm', 
-        ':wf_gear', ':wf_all_estimators'
+include ':libcarlab', ':carlabui', 'carlab_wrapper' //,
+// include all sub-modules included in this wrapper
+// e.g. ':world_aligned_imu', ':watchfon_speed', ':watchfon_steering',
 
-// ':debug' --> this one has problems we we'll remove it for now
-
+// These need to be copied over from the correct source
+// If they are in the same directory, no need to re-link them
 project(':libcarlab').projectDir = new File(settingsDir, '../carlab/libcarlab')
 project(':carlabui').projectDir = new File(settingsDir, '../carlab/carlabui')
 
-project(':world_aligned_imu').projectDir = new File(settingsDir, '../middleware/world_aligned_imu')
+// For each middleware, copy it over into this directory
+/*
+If not in the same directory, we need to specify projectDir. If in same directory, no need to do this.
 project(':watchfon_speed').projectDir = new File(settingsDir, '../middleware/watchfon_speed')
-project(':watchfon_steering').projectDir = new File(settingsDir, '../middleware/watchfon_steering')
-project(':watchfon_rpm').projectDir = new File(settingsDir, '../middleware/watchfon_rpm')
-project(':watchfon_odometer').projectDir = new File(settingsDir, '../middleware/watchfon_odometer')
-project(':watchfon_fuel').projectDir = new File(settingsDir, '../middleware/watchfon_fuel')
-project(':watchfon_gear').projectDir = new File(settingsDir, '../middleware/watchfon_gear')
-project(':watchfon_spoofed_sensors').projectDir = new File(settingsDir, '../middleware/watchfon_spoofed_sensors')
-project(':watchfon_intrusion_detection').projectDir = new File(settingsDir, '../middleware/watchfon_intrusion_detection')
-project(':watchfon_estimates').projectDir = new File(settingsDir, '../middleware/watchfon_estimates')
-project(':librecan_middleware').projectDir = new File(settingsDir, '../middleware/librecan_middleware')
-project(':watchfon_test_suite').projectDir = new File(settingsDir, '../middleware/watchfon_test_suite')
-
+*/
