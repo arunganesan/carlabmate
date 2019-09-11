@@ -2,8 +2,11 @@ package edu.umich.carlab.net;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -15,17 +18,30 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.MessageDigest;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -33,9 +49,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.GZIPOutputStream;
 
 import edu.umich.carlab.Constants;
 import edu.umich.carlab.DataMarshal;
+import edu.umich.carlab.hal.HardwareAbstractionLayer;
+import edu.umich.carlab.io.CLTripWriter;
+import edu.umich.carlab.io.MultipartUtility;
 import edu.umich.carlab.utils.Utilities;
 
 
@@ -51,6 +71,12 @@ public class PacketHandleService extends Service {
     ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     Map<String, List<DataMarshal.DataObject>> allData = new HashMap<>();
+    SharedPreferences prefs;
+    final String FILE_INFO_MAPPING = "saved file info mapping";
+
+
+    final int USERID = 21;
+    final String UPLOAD_URL = "http://localhost:3000/packet/upload?information=%s&person=" + USERID;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -61,6 +87,7 @@ public class PacketHandleService extends Service {
 
     @Override
     public void onCreate() {
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
     }
 
     @Override
@@ -92,113 +119,153 @@ public class PacketHandleService extends Service {
          * Add the data to the internal database
          * Will be uploaded asynchronously
          */
-
         // Save it locally
         synchronized (allData) {
             if (!allData.containsKey(info))
-                allData.put(info, new ArrayList<DataMarshal.DataObject>());
+                allData.put(
+                        info,
+                        new ArrayList<DataMarshal.DataObject>());
 
             allData.get(info).add(data);
         }
     }
 
     public Map<String, Object> checkNewInfo () {
-        /**
-         * If there data in the local database, then return those pairs
-         * This is a non-blocking call
-         */
+        // When and how do we get data?
+        // Need to make a call to the server... how would this even be a non-blocking call?
+        // 
         return null;
     }
 
 
+    File getNewFile (String infoname) {
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.US);
+        String filename = infoname + "-" + dateFormatter.format(Calendar.getInstance().getTime())+ ".json";
+        return new File(CLTripWriter.GetTripsDir(this), filename);
+    }
+
     Runnable  uploadRunnable = new Runnable() {
         public void run() {
             // Save all data to disk
+            Map<String, List<DataMarshal.DataObject>> dataHolder;
             synchronized (allData) {
-                for (String info : allData.keySet())
-                    saveOrUpdateData(info, allData.get(info));
-                allData.clear();
+                dataHolder = allData;
+                allData = new HashMap<>();
+            }
+
+            String fileInfoMappingJson = prefs.getString(FILE_INFO_MAPPING, "{}");
+            JSONObject fileInfoMapping;
+
+            try {
+                fileInfoMapping = new JSONObject(fileInfoMappingJson);
+
+                for (String info : dataHolder.keySet()) {
+                    File saveFile = getNewFile(info);
+
+
+                    FileOutputStream fos = new FileOutputStream(saveFile);
+                    GZIPOutputStream gos = new GZIPOutputStream(fos);
+                    OutputStreamWriter osw = new OutputStreamWriter(gos);
+                    BufferedWriter buf = new BufferedWriter(osw);
+
+
+                    for (DataMarshal.DataObject dataObject : dataHolder.get(info)) {
+                        if (dataObject.value.length > 1)
+                            for (DataMarshal.DataObject dObject : HardwareAbstractionLayer.splitDataObjects(dataObject)) {
+                                String line = dObject.toJson();
+
+                                if (line != null) {
+                                    buf.write(line, 0, line.length());
+                                    buf.newLine();
+                                }
+                            }
+                        else {
+                            String line = dataObject.toJson();
+                            if (line != null) {
+                                buf.write(line, 0, line.length());
+                                buf.newLine();
+                            }
+                        }
+                    }
+
+                    buf.flush();
+                    buf.close();
+
+                    if (!fileInfoMapping.has(info))
+                        fileInfoMapping.put(info, new JSONArray());
+
+                    JSONArray existingFiles = fileInfoMapping.getJSONArray(info);
+                    existingFiles.put(saveFile.getAbsoluteFile());
+                    fileInfoMapping.put(info, existingFiles);
+                    prefs.edit().putString(FILE_INFO_MAPPING, fileInfoMapping.toString()).commit();
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Couldn't write Packet info to file");
+            } catch (JSONException je) {
+                Log.e(TAG, "Couldn't load file info mapping JSON file");
             }
 
 
             // Load all data stored in the local file
-            Map<String, List<DataMarshal.DataObject>> storedData = loadAllData();
+            // Get the info/file mapping
+            // For each file, try uploading using "file" post.
+            // If succeeds, delete that from file system and from shared prefs.
+            if (!Utilities.isConnectedAndWifi(PacketHandleService.this)) return;
 
-            // Then for each info, make a call to upload
-            for (String info : storedData.keySet()) {
-                // If upload successful, delete file locally
-                RequestQueue queue = Volley.newRequestQueue(context);
+            try {
+                fileInfoMappingJson = prefs.getString(FILE_INFO_MAPPING, "{}");
+                fileInfoMapping = new JSONObject(fileInfoMappingJson);
+                JSONObject remainingFileInfoMapping = new JSONObject();
 
-                // Get the list of currently uploaded receipts. Only upload ones that weren't succesfully
-                // uploaded and processed
+                String info, filename;
+                JSONArray filenames;
+                File file;
+                Iterator<String> keysIterator = fileInfoMapping.keys();
+                int returnCode;
+                List<String> failedUploads = new ArrayList<>();
 
-                JSONObject jsonObject = new JSONObject();
-                try {
-                    jsonObject.put("message", "json-ify the storedData.get(info)");
-                } catch (Exception e) {
-                    Log.e(TAG, "JSON error...");
+                while (keysIterator.hasNext()) {
+                    info = keysIterator.next();
+
+                    filenames = fileInfoMapping.getJSONArray(info);
+                    for (int i = 0; i < filenames.length(); i++) {
+                        filename = filenames.getString(i);
+                        file = new File(filename);
+                        if (!file.exists())
+                            continue;
+
+
+                        URL url = new URL(String.format(UPLOAD_URL, info));
+                        MultipartUtility mpu = new MultipartUtility(url);
+                        mpu.addFilePart("file", new File(filename));
+                        returnCode = mpu.finishCode();
+                        if (returnCode == HttpURLConnection.HTTP_OK)
+                            // Delete file if upload succeeds
+                            file.delete();
+                        else
+                            // These will be uploaded again in the future
+                            failedUploads.add(filename);
+                    }
+
+                    remainingFileInfoMapping.put(info, new JSONArray(failedUploads));
                 }
 
-                JsonObjectRequest myReq = new JsonObjectRequest(Request.Method.POST,
-                        "http:...1234/upload?uid=...",
-                        jsonObject,
-                        gotListSuccess,
-                        volleyError) {
-                };
-            }
+                // Delete successful files from shared prefs and file system
+                prefs.edit()
+                        .putString(FILE_INFO_MAPPING, remainingFileInfoMapping.toString())
+                        .commit();
 
-        }
-    };
 
-    Response.Listener<JSONObject> gotListSuccess = new Response.Listener<String>() {
-        @Override
-        public void onResponse(String responseJSON) {
-            try {
-               // get the info name that was uploaded
-               // and the last timestamp for that was uploaded
-               // and delete that from local file
-            } catch (Exception e) {
-                Log.e(TAG, "Error parsing JSON of list of uploaded receipts");
+            } catch (MalformedURLException mue) {
+                Log.e(TAG, "Malformed URL: " + mue.getLocalizedMessage());
+            } catch (IOException e) {
+                Log.e(TAG, "Couldn't write Packet info to file");
+            } catch (JSONException je) {
+                Log.e(TAG, "Couldn't load file info mapping JSON file");
             }
         }
     };
 
-    Response.ErrorListener volleyError = new Response.ErrorListener() {
-        @Override
-        public void onErrorResponse(VolleyError error) {
-        }
-    };
-
-    public void dumpData(List<DataMarshal.DataObject> dataObjects) {
-        try {
-            FileOutputStream fos = new FileOutputStream(saveFile);
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(dataObjects);
-            oos.close();
-            fos.close();
-            Log.v(TAG, "Saved data dump");
-            Toast.makeText(context, "Saved file to " + saveFile.getAbsolutePath(), Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to write file");
-        }
-    }
-
-    public List<DataMarshal.DataObject> readData(File ifile) {
-        List<DataMarshal.DataObject> returnData = null;
-
-        try {
-            FileInputStream fis = new FileInputStream(ifile);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            returnData = (List<DataMarshal.DataObject>)ois.readObject();
-            ois.close();
-            fis.close();
-            Log.v(TAG, "Loaded data");
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to write file");
-        }
-
-        return returnData;
-    }
 
     public void scheduleUploads () {
         if (scheduled == null) {

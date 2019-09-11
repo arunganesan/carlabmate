@@ -106,4 +106,17 @@ public class MultipartUtility {
         }
         return response;
     }
+
+
+    public int finishCode() throws IOException {
+        String response = "";
+        request.writeBytes(this.crlf);
+        request.writeBytes(this.twoHyphens + this.boundary +
+                this.twoHyphens + this.crlf);
+        request.flush();
+        request.close();
+        // checks server's status code first
+        int status = httpConn.getResponseCode();
+        return status;
+    }
 }
