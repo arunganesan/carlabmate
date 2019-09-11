@@ -31,6 +31,10 @@
                 android:enabled="true"
                 android:exported="false" />
 
+        <service
+                android:name="edu.umich.carlab.net.PacketHandleService"
+                android:enabled="true"
+                android:exported="true" />
 
         <receiver
                 android:name="edu.umich.carlab.recurring.SetupOnBoot"

@@ -131,9 +131,9 @@ public class PacketHandleService extends Service {
     }
 
     public Map<String, Object> checkNewInfo () {
-        // When and how do we get data?
-        // Need to make a call to the server... how would this even be a non-blocking call?
-        // 
+        // Check server if there is data.
+        // If so, return it.
+        //
         return null;
     }
 

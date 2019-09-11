@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import edu.umich.carlab.clog.UploadLog;
+import edu.umich.carlab.net.PacketHandleService;
 import edu.umich.carlab.utils.Utilities;
 
 import static edu.umich.carlab.Constants.Trip_Id_Offset;
