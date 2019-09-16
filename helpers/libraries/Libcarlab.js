@@ -24,8 +24,6 @@ export class Libcarlab {
             .then(res => res.json())
             .then(data => callback(info, data));
     
-    // XXX This should only be updated IF we successfully made a call. Otherwise info will be lost
-    // This could also be the time of the last data we received -- that might be better to avoid time-off-sync-related errors
     this.lastCheckTime = Math.round(new Date().getTime() / 1000)
   }
 

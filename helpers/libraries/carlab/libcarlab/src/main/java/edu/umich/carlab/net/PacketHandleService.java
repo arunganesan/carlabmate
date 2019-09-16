@@ -114,6 +114,10 @@ public class PacketHandleService extends Service {
     /****************************************************************
      * Public functions
      ***************************************************************/
+    public Map<String, Object> checkNewInfo () {
+        return null;
+    }
+    
     public void outputNewInfo (String info, DataMarshal.DataObject data) {
         /**
          * Add the data to the internal database
@@ -130,12 +134,7 @@ public class PacketHandleService extends Service {
         }
     }
 
-    public Map<String, Object> checkNewInfo () {
-        // Check server if there is data.
-        // If so, return it.
-        //
-        return null;
-    }
+    
 
 
     File getNewFile (String infoname) {

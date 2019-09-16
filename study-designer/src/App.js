@@ -84,7 +84,7 @@ class App extends React.Component {
                 </div>)}
           </div>
 
-      <div className='input-section-title'>Implementation</div>
+      <div className='input-section-title'>Algorithm</div>
       <div className='info-entry-list'>
       {plan.map(
       item => <div 
@@ -108,7 +108,7 @@ class App extends React.Component {
         <Lorem className="info-entry-list" count={1} />
       </Card.Text>
 
-      <Card.Title>Available Implementations</Card.Title>
+      <Card.Title>Available Algorithms</Card.Title>
       <Card.Text>
         <ul>
           { 

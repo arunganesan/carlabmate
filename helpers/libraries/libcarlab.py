@@ -22,10 +22,6 @@ class libcarlab ():
 
     
     def check_new_info (self):
-        # Make server call to /packet/list
-        # if there are files, copy them over 
-        # (stick to HTTP routing so we can put server scripts on a separate machine)
-        # XXX do differently if testing
         new_data = {}
 
         for info in self.required_info:
@@ -45,12 +41,9 @@ class libcarlab ():
         return new_data
     
     def output_new_info (self, info, value):
-        # XXX do differently for test
-
-        # save to file basically. Then we'll try uploading separately
         existingData = pickle.load(open(self.save_filename, 'rb'))
         existingData.setdefault(info, [])
-        existingData[info]append(value)
+        existingData[info].append(value)
         ofile = open(self.save_filename, 'wb')
         pickle.dump(existingData, ofile)
         ofile.close()
