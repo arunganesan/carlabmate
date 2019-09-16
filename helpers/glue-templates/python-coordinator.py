@@ -13,6 +13,7 @@ USERID = '2'
 MODULES = [
     # list each implementation script
     # e.g. 'how_was_your_day'
+    'how_was_your_day'
 ]
 
 imported = {}
