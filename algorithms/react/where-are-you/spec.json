@@ -1,6 +1,9 @@
 {
-    "name": "Where are you?",
-    "description": "The user manually picks their location on a map.",
-    "requires": [],
-    "implements": ["location"]
+  "name": "Where are you?",
+  
+  "description": "The user manually picks their location on a map.",
+
+  "requires": [],
+
+  "implements": ["location"]
 }
