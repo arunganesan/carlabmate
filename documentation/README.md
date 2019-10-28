@@ -1,5 +1,16 @@
 CarLab is a vehicular data collection builder. It has a library of algorithms maintained in the repository, which is contributed by multiple developers. Each algorithm defines the set of information it requires, and outputs a set of information. Using these algorithms, CarLab has a bi-partite graph of information and algorithms which are used to create the information. For each data collection requirement, CarLab spins up a new data collection platform copying the necessary algorithms to satisfy the data collection requirements.
 
+
+* Overview
+* Using CarLab 
+  * Data collection requirements specification
+  * Installing different data collection platforms
+  * Viewing collected data
+* Developing algorithms
+  * Different languages
+  * Local testing for each library
+
+
 # Algorithms
 
 Algorithms can be implemented in one of four development environments -- Android, Python, React and React-Native. Each modality is summarized in the following table.
