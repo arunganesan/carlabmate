@@ -1,0 +1,10 @@
+[{
+    "module": "android-dummy-sensors",
+    "functions": [
+        { "output": "accel" },
+        { "output": "magnetometer" },
+        { "output": "gyro" },
+        { "output": "gravity" },
+        { "output": "location" }
+    ]
+}]
