@@ -1,7 +1,5 @@
 package edu.umich.aligned_imu;
 
-import android.hardware.SensorManager;
-
 public class AlignedIMU {
     float[][] rm = new float[3][3];
     public float[][] produceRotation (float [] m, float [] g) {
