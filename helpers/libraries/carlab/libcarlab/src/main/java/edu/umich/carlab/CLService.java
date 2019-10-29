@@ -71,6 +71,8 @@ public class CLService extends Service implements CLDataProvider {
     HardwareAbstractionLayer hal;
     CLTripWriter clTripWriter;
     Map<String, App> runningApps;
+
+    Multiplexer multiplexer;
     Map<String, Set<String>> dataMultiplexing;
 
     Boolean liveMode;

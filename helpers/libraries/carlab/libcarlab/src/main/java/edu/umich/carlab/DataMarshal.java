@@ -18,73 +18,38 @@ public class DataMarshal {
         this.cl = cl;
     }
 
-    /**
-     * @param device Device name. E.g. phone, watch, obd, can, web
-     * @param sensor Sensor name. E.g. accel, heart rate, engine rpm, steering, weather
-     * @param value  A string that was already computed
-     */
-    public void broadcastData(long timestamp, String device, String sensor, Float[] value, MessageType dataType) {
+    public void broadcastData(long timestamp, String information, Serializable value) {
         DataObject d = new DataObject();
         d.time = timestamp;
-        d.device = device;
-        d.sensor = sensor;
+        d.information = information;
         d.value = value;
-        d.dataType = dataType;
         cl.newData(d);
     }
 
     // Overloaded helper function
-    public void broadcastData(String device, String sensor, Float value, MessageType dataType) {
-        //Double seconds = (new Double(System.currentTimeMillis())) / 1e+3;
+    public void broadcastData(String information, Serializable value) {
         long seconds = System.currentTimeMillis();
-        broadcastData(seconds, device, sensor, new Float[]{value}, dataType);
+        broadcastData(seconds, information, value);
     }
 
-    public enum MessageType {
-        ERROR, STATUS, DATA;
-    }
-
-    public static class DataObject implements Serializable {
+    public static class DataObject {
         public long time;
-        public String device;
-        public String sensor;
-        public MessageType dataType;
-        public Float[] value;
-        public String uid;
-        public String tripid;
-        public String URL;
-        public String appClassName;
+        public String information;
+        public Serializable value;
 
         public DataObject clone() {
             DataObject dobj = new DataObject();
             dobj.time = time;
-            dobj.device = device;
-            dobj.sensor = sensor;
-            dobj.dataType = dataType;
             dobj.value = value;
-            dobj.uid = uid;
-            dobj.tripid = tripid;
-            dobj.URL = URL;
-            dobj.appClassName = appClassName;
             return dobj;
         }
 
         public String toJson() {
             JSONObject jsonObject = new JSONObject();
-            if (value.length != 1) {
-                Log.e(TAG, "Error. This needs to be split before writing.");
-                return null;
-            }
             try {
                 jsonObject.put("time", time);
-                jsonObject.put("device", device);
-                jsonObject.put("sensor", sensor);
-                jsonObject.put("type", dataType);
-                jsonObject.put("value", value[0]);
-                jsonObject.put("uid", uid);
-                jsonObject.put("tripid", tripid);
-                jsonObject.put("url", URL);
-                jsonObject.put("app", appClassName);
+                jsonObject.put("information", information);
+                jsonObject.put("value", value.toString());
             } catch (JSONException jse) {
                 return null;
             }
