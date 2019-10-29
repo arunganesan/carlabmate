@@ -1,9 +1,8 @@
-{
-    "description": "World aligned IMU",
+[{
+    "module": "aligned-imu",
     "functions": [
         { "output": "rotation", "input": ["gravity", "magnetometer"] },
-        { "output": "aligned-gyro", "input": ["gyro", "rotation"] },
-        { "output": "aligned-accel", "input": ["accel", "rotation"]}
-    ],
-    "sensors": ["imu", "magnetometer", "gravity"]
-}
+        { "output": "world-aligned-gyro", "input": ["gyro", "rotation"] },
+        { "output": "world-aligned-accel", "input": ["accel", "rotation"] }
+    ]
+}]
