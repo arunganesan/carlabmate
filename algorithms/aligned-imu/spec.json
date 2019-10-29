@@ -1,0 +1,9 @@
+{
+    "description": "World aligned IMU",
+    "functions": [
+        { "output": "rotation", "input": ["gravity", "magnetometer"] },
+        { "output": "aligned-gyro", "input": ["gyro", "rotation"] },
+        { "output": "aligned-accel", "input": ["accel", "rotation"]}
+    ],
+    "sensors": ["imu", "magnetometer", "gravity"]
+}
