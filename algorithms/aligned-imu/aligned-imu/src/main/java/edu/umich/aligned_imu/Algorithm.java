@@ -7,7 +7,7 @@ import edu.umich.carlab.DataMarshal;
 import edu.umich.carlab.loadable.App;
 import edu.umich.carlab.sensors.PhoneSensors;
 
-public class AlignedIMU extends Algorithm {
+public class Algorithm extends App {
     private DataMarshal.DataObject lastMagnet,
             lastGravity,
             lastGyro,
@@ -15,7 +15,7 @@ public class AlignedIMU extends Algorithm {
 
     private boolean calculatedRotation = false;
 
-    public AlignedIMU(CLDataProvider cl, Context context) {
+    public Algorithm(CLDataProvider cl, Context context) {
         super(cl, context);
 
         name = "world_aligned_imu";
