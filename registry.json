@@ -1,21 +1,25 @@
 [
-    { "name": "car/speed", "description": "Car speed in kmph"},
-    { "name": "car/odometer", "description": "Car odometer in km"},
-    { "name": "car/fuel", "description": "Car fuel in liters"},
-    { "name": "car/rpm", "description": "Car engine RPM"},
-    { "name": "car/steering", "description": "Car steering wheel angle in degrees"},
-    { "name": "car/gear", "description": "Car gear position"},
-    
     { "name": "mood", "description": "User's mood"},
     { "name": "home-work", "description": "User's home/work locations"},
 
     { "name": "rotation", "type": "float[3][3]"},
     { "output": "world-aligned-gyro", "type": "float[3]" },
     { "output": "world-aligned-accel", "type": "float[3]" },
-    
+
     { "name": "accel", "type": "float[3]"},
     { "name": "magnetometer", "type": "float[3]"},
     { "name": "gyro", "type": "float[3]"},
     { "name": "gravity", "type": "float[3]"},
-    { "name": "location", "type": "float[3]"}
+    { "name": "location", "type": "float[3]", "description": "latitude, longitude, estimated speed"},
+
+    { "name": "map-matched-location", "type": "text,text,float", "description": "Road name, road type, distance into road"},
+
+    { "name": "car-speed", "type": "float"},
+    { "name": "car-odometer", "type": "float"},
+    { "name": "car-fuel", "type": "float"},
+    { "name": "car-rpm", "type": "float"},
+    { "name": "car-steering", "type": "float"},
+    { "name": "car-gear", "type": "int"},
+
+    { "name": "car-model", "type": "text"}
 ]

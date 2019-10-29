@@ -1,5 +1,6 @@
 package edu.umich.carlab;
 
+import android.os.Message;
 import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,29 +19,38 @@ public class DataMarshal {
         this.cl = cl;
     }
 
-    public void broadcastData(long timestamp, String information, Serializable value) {
+
+    public void broadcastData(long timestamp, String information, Serializable value, MessageType dataType) {
         DataObject d = new DataObject();
         d.time = timestamp;
         d.information = information;
         d.value = value;
+        d.dataType = dataType;
         cl.newData(d);
     }
 
     // Overloaded helper function
-    public void broadcastData(String information, Serializable value) {
+    public void broadcastData(String information, Serializable value, MessageType dataType) {
+        //Double seconds = (new Double(System.currentTimeMillis())) / 1e+3;
         long seconds = System.currentTimeMillis();
-        broadcastData(seconds, information, value);
+        broadcastData(seconds, information, value, dataType);
+    }
+
+    public enum MessageType {
+        ERROR, STATUS, DATA;
     }
 
     public static class DataObject {
         public long time;
         public String information;
         public Serializable value;
+        public MessageType dataType;
 
         public DataObject clone() {
             DataObject dobj = new DataObject();
             dobj.time = time;
             dobj.value = value;
+            dobj.dataType = dataType;
             return dobj;
         }
 
@@ -50,6 +60,7 @@ public class DataMarshal {
                 jsonObject.put("time", time);
                 jsonObject.put("information", information);
                 jsonObject.put("value", value.toString());
+                jsonObject.put("dataType", dataType.toString());
             } catch (JSONException jse) {
                 return null;
             }

@@ -16,14 +16,11 @@ import edu.umich.carlab.io.AppLoader;
 import edu.umich.carlab.io.CLTripWriter;
 import edu.umich.carlab.io.DataDumpWriter;
 import edu.umich.carlab.loadable.App;
-import edu.umich.carlab.loadable.IApp;
-import edu.umich.carlab.loadable.Middleware;
 import edu.umich.carlab.sensors.OpenXcSensors;
 import edu.umich.carlab.sensors.PhoneSensors;
 import edu.umich.carlab.trips.TripLog;
 import edu.umich.carlab.trips.TripRecord;
 import edu.umich.carlab.utils.NotificationsHelper;
-import edu.umich.carlab.utils.Utilities;
 
 import java.util.*;
 
@@ -459,13 +456,11 @@ return currentlyStarting;
         ) == TriggerSession.SessionState.PAUSED.getValue())
             return;
 
-        String multiplexKey = dataObject.device + ":" + dataObject.sensor;
+        // String multiplexKey = dataObject.device + ":" + dataObject.sensor;
+        String multiplexKey = dataObject.information;
         Intent statusIntent;
 
         if (dataMultiplexing != null && dataMultiplexing.containsKey(multiplexKey)) {
-            dataObject.uid = uid;
-            dataObject.tripid = tripid;
-
             Set<String> classNames = dataMultiplexing.get(multiplexKey);
             for (String appClassName : classNames) {
                 App app = runningApps.get(appClassName);
@@ -474,7 +469,7 @@ return currentlyStarting;
                 // Throttle the data rate for each sensor
                 if (currTime > lastDataUpdate.get(appClassName).get(multiplexKey) + DATA_UPDATE_INTERVAL_IN_MS) {
                     // The app gets new data
-                    dataObject.appClassName = appClassName;
+                    // dataObject.appClassName = appClassName;
                     app.newData(dataObject);
 
                     if (!liveMode)
@@ -504,7 +499,6 @@ return currentlyStarting;
             // This happens often when the dependency sends out lots of data which no one cares about.
             // No need to flood LogCat with this.
         }
-
     }
 
     @Override
