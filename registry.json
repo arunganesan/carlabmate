@@ -12,7 +12,7 @@
     { "name": "rotation", "type": "float[3][3]"},
     { "output": "world-aligned-gyro", "type": "float[3]" },
     { "output": "world-aligned-accel", "type": "float[3]" },
-
+    
     { "name": "accel", "type": "float[3]"},
     { "name": "magnetometer", "type": "float[3]"},
     { "name": "gyro", "type": "float[3]"},

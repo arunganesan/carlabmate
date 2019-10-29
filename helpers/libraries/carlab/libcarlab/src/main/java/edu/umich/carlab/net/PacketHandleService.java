@@ -115,7 +115,9 @@ public class PacketHandleService extends Service {
      * Public functions
      ***************************************************************/
     public Map<String, Object> checkNewInfo () {
+        // TODO When new info comes in, we need to call the multiplexer's "add new data"
         return null;
+
     }
     
     public void outputNewInfo (String info, DataMarshal.DataObject data) {
