@@ -19,7 +19,7 @@ public class AlignedIMU extends Algorithm {
         super(cl, context);
 
         name = "world_aligned_imu";
-//        middlewareName = MiddlewareImpl.APP;
+        // middlewareName = MiddlewareImpl.APP;
         subscribe(PhoneSensors.DEVICE, PhoneSensors.GRAVITY);
         subscribe(PhoneSensors.DEVICE, PhoneSensors.MAGNET);
         subscribe(PhoneSensors.DEVICE, PhoneSensors.GYRO);

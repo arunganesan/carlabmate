@@ -26,6 +26,7 @@ public class Algorithm extends App {
         subscribe(PhoneSensors.DEVICE, PhoneSensors.ACCEL);
     }
 
+//    protected void registerCallback();
 
     @Override
     public void newData(DataMarshal.DataObject dObject) {
