@@ -3,11 +3,17 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
-        <compositeConfiguration>
-          <compositeBuild compositeDefinitionSource="SCRIPT" />
-        </compositeConfiguration>
         <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/aligned-imu" />
+            <option value="$PROJECT_DIR$/sandbox" />
+            <option value="$PROJECT_DIR$/../../helpers/libraries/carlab/carlabui" />
+            <option value="$PROJECT_DIR$/../../helpers/libraries/carlab/libcarlab" />
+          </set>
+        </option>
         <option name="resolveModulePerSourceSet" value="false" />
         <option name="testRunner" value="PLATFORM" />
       </GradleProjectSettings>
