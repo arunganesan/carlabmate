@@ -169,23 +169,11 @@ public class PacketHandleService extends Service {
                     OutputStreamWriter osw = new OutputStreamWriter(gos);
                     BufferedWriter buf = new BufferedWriter(osw);
 
-
                     for (DataMarshal.DataObject dataObject : dataHolder.get(info)) {
-                        if (dataObject.value.length > 1)
-                            for (DataMarshal.DataObject dObject : HardwareAbstractionLayer.splitDataObjects(dataObject)) {
-                                String line = dObject.toJson();
-
-                                if (line != null) {
-                                    buf.write(line, 0, line.length());
-                                    buf.newLine();
-                                }
-                            }
-                        else {
-                            String line = dataObject.toJson();
-                            if (line != null) {
-                                buf.write(line, 0, line.length());
-                                buf.newLine();
-                            }
+                        String line = dataObject.toJson();
+                        if (line != null) {
+                            buf.write(line, 0, line.length());
+                            buf.newLine();
                         }
                     }
 

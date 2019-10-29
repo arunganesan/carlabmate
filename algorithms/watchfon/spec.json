@@ -1,0 +1,12 @@
+[{
+    "module": "watchfon",
+    "classname": "WatchFon",
+    "functions": [
+        { "output": "car-speed", "input": ["location", "world-aligned-accel"] },
+        { "output": "car-steering", "input": ["car-speed", "world-aligned-gyro", "car-model"] },
+        { "output": "car-gear", "input": ["car-speed", "car-model"] },
+        { "output": "car-odometer", "input": ["location"] },
+        { "output": "car-fuel", "input": ["car-odometer", "car-model", "map-matched-location"] },
+        { "output": "car-rpm", "input": ["car-speed", "car-gear", "car-model"] }
+    ]
+}]
