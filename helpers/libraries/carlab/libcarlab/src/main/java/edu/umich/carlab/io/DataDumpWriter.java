@@ -6,8 +6,6 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 import edu.umich.carlab.DataMarshal;
-import edu.umich.carlab.clog.CLog;
-import edu.umich.carlab.trips.TripRecord;
 
 import java.io.*;
 import java.text.SimpleDateFormat;

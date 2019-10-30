@@ -27,8 +27,6 @@
                 android:id="@+id/cl_buttons_wrapper"
                 android:layout_height="@dimen/controlButtonHeight"
         >
-
-
             <Button
                     android:text="Load Trace"
                     style="@style/ActionButton"
@@ -47,12 +45,12 @@
                     android:id="@+id/toggleCarlab"
             />
 
-
             <Button
                     android:text="Upload Trips"
                     style="@style/ActionButton"
                     android:id="@+id/uploadTrips"
             />
+
             <Button
                     android:text="Pause"
                     style="@style/ActionButton"
@@ -70,21 +68,6 @@
                     style="@style/ActionButton"
                     android:id="@+id/saveCurrentSessionButton"
             />
-
-
-            <Button
-                    android:text="Download Update"
-                    style="@style/ActionButton"
-                    android:id="@+id/downloadUpdate"
-            />
-
-
-            <Button
-                    android:text="Dep. Map"
-                    style="@style/ActionButton"
-                    android:id="@+id/showDependencyMap"
-            />
-
 
         </LinearLayout>
     </HorizontalScrollView>

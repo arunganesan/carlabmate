@@ -10,7 +10,7 @@ public class AlignedIMU extends Algorithm {
     }
 
     @Override
-    public float[][] produceRotation (Float [] m, Float [] g) {
+    public float[][] produceRotation (float [] m, float [] g) {
         // Cross product of magnet and gravity
         float[][] rm = new float[3][3];
 
@@ -42,17 +42,17 @@ public class AlignedIMU extends Algorithm {
     }
 
     @Override
-    public Float[] produceAlignedGyro (Float [] gyro, float [][] rm) {
+    public float[] produceAlignedGyro (float [] gyro, float [][] rm) {
         return MatrixMul(gyro, rm);
     }
 
     @Override
-    public Float[] produceAlignedAccel (Float [] accel, float [] [] rm) {
+    public float[] produceAlignedAccel (float [] accel, float [] [] rm) {
         return MatrixMul(accel, rm);
     }
 
-    public Float[] MatrixMul(Float[] T, float[][] RotMat) {
-        Float[] temp = T.clone();
+    public float[] MatrixMul(float[] T, float[][] RotMat) {
+        float[] temp = T.clone();
         for (int i = 0; i < RotMat.length; i++)
             for (int j = 0; j < T.length; j++) {
                 temp[i] = temp[i] + T[j] * RotMat[j][i];

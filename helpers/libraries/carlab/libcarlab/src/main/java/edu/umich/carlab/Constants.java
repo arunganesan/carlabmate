@@ -24,10 +24,7 @@ public class Constants {
     public static final String LIST_UPLOADED_URL = BASE_URL + "/uploaded";
     public static final String LATEST_TRIP_URL = BASE_URL + "/latestTrip";
 
-    public static final String GET_LATEST_LOG_URL = BASE_URL + "/clog/latest";
-    public static final String UPLOAD_LOG_URL = BASE_URL + "/clog/upload";
 
-    public static final String VERSION_URL = BASE_URL + "/experiment/version";
     public static final int CARLAB_NOTIFICATION_ID = 0x818;
     public static long RemainingDataCount = 0L;
 

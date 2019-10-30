@@ -10,9 +10,9 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.util.Log;
+
 import edu.umich.carlab.Constants;
-import edu.umich.carlab.clog.CLog;
-import edu.umich.carlab.io.CLTripWriter;
 import edu.umich.carlab.io.UploadValuesTask;
 import edu.umich.carlab.net.GetLatestTrip;
 
@@ -57,13 +57,13 @@ public class Utilities {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String mainActivityClassName = prefs.getString(Main_Activity, null);
         if (mainActivityClassName == null) {
-            CLog.e(TAG, "Main Activity string was null");
+            Log.e(TAG, "Main Activity string was null");
         } else {
             try {
                 Class<?> mainActivityClass = Class.forName(mainActivityClassName);
                 return mainActivityClass;
             } catch (Exception e) {
-                CLog.e(TAG, "Couldn't load main activity class");
+                Log.e(TAG, "Couldn't load main activity class");
             }
         }
 
@@ -74,7 +74,7 @@ public class Utilities {
         final String TAG = "Wake Up Utilities";
         Class<?> mainActivityClass = getMainActivity(context);
         if (mainActivityClass == null) {
-            CLog.e(TAG, "Couldn't load main activity class");
+            Log.e(TAG, "Couldn't load main activity class");
         } else {
             Intent intent = new Intent(context, mainActivityClass);
             intent.setFlags(FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -146,29 +146,6 @@ public class Utilities {
     }
 
 
-    /**
-     * List all trips in order.
-     *
-     * @param context
-     * @return
-     */
-    public static File[] listAllTripsInOrder(Context context) {
-        File homedir = CLTripWriter.GetTripsDir(context);
-        File[] files = homedir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File file, String s) {
-                return s.contains(".json");
-            }
-        });
-        Arrays.sort(files, new Comparator<File>() {
-            @Override
-            public int compare(File f1, File f2) {
-                //return Long.valueOf(f2.lastModified()).compareTo(f1.lastModified());
-                return f2.getName().compareTo(f1.getName());
-            }
-        });
-        return files;
-    }
 
 
     /**

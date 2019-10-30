@@ -17,7 +17,7 @@ import edu.umich.carlab.utils.Utilities;
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
 /**
- * Created by arunganesan on 3/20/18.
+ * TODO Repurpose this to get the latest data?
  */
 
 public class GetLatestTrip extends BroadcastReceiver {

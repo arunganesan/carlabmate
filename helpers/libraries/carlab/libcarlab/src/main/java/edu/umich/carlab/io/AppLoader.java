@@ -1,23 +1,20 @@
 package edu.umich.carlab.io;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.util.Log;
-import edu.umich.carlab.CLDataProvider;
-import edu.umich.carlab.Constants;
-import edu.umich.carlab.loadable.App;
-import edu.umich.carlab.loadable.IApp;
-import edu.umich.carlab.loadable.Middleware;
-import edu.umich.carlab.clog.CLog;
-
 
 import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-/**
- * Created by arunganesan on 3/20/18.
- */
+import edu.umich.carlab.CLDataProvider;
+import edu.umich.carlab.loadable.App;
+import edu.umich.carlab.loadable.Middleware;
+
 
 public class AppLoader {
     final static String TAG = "AppLoader";
@@ -26,7 +23,8 @@ public class AppLoader {
     private Set<Class<?>> loadedApps = new HashSet<>();
     private Map<String, Middleware> loadedMiddleware = new HashMap<>();
 
-    private AppLoader() {}
+    private AppLoader() {
+    }
 
     public static AppLoader getInstance() {
         if (instance == null) {
@@ -50,21 +48,6 @@ public class AppLoader {
             loadedApps.add(cls);
         }
         return this;
-    }
-
-    public AppLoader loadMiddlewares(Middleware[] middlewares) {
-        for (Middleware middleware : middlewares)
-            loadedMiddleware.put(middleware.getName(), middleware);
-        return this;
-    }
-
-    public AppLoader loadMiddleware(Middleware middleware) {
-        loadedMiddleware.put(middleware.getName(), middleware);
-        return this;
-    }
-
-    public Map<String, Middleware> getMiddleware() {
-        return loadedMiddleware;
     }
 
     public List<App> instantiateApps(CLDataProvider clDataProvider, Context context) {

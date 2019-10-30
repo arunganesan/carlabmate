@@ -1,8 +1,10 @@
 package edu.umich.carlab;
 
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.Build;
@@ -13,13 +15,11 @@ import android.widget.Toast;
 import edu.umich.carlab.hal.HardwareAbstractionLayer;
 import edu.umich.carlab.hal.TraceReplayer;
 import edu.umich.carlab.io.AppLoader;
-import edu.umich.carlab.io.CLTripWriter;
 import edu.umich.carlab.io.DataDumpWriter;
 import edu.umich.carlab.loadable.App;
+import edu.umich.carlab.net.LinkServerGateway;
 import edu.umich.carlab.sensors.OpenXcSensors;
 import edu.umich.carlab.sensors.PhoneSensors;
-import edu.umich.carlab.trips.TripLog;
-import edu.umich.carlab.trips.TripRecord;
 import edu.umich.carlab.utils.NotificationsHelper;
 
 import java.util.*;
@@ -62,19 +62,18 @@ public class CLService extends Service implements CLDataProvider {
     Map<String, Map<String, Long>> lastDataUpdate = new HashMap<>();
     long lastNotificationUpdate = 0;
     Map<String, DataMarshal.MessageType> lastStateUpdate = new HashMap<>();
-    TripLog tripLog;
-    TripRecord currentTrip;
     SharedPreferences prefs;
     HardwareAbstractionLayer hal;
-    CLTripWriter clTripWriter;
     Map<String, App> runningApps;
 
-    Multiplexer multiplexer;
     Map<String, Set<String>> dataMultiplexing;
     Set<String> toServerMultiplexing;
 
     Boolean liveMode;
     String uid, tripid;
+
+    LinkServerGateway linkServerGateway;
+    boolean linkServerGatewayBound = false;
 
 
     final long dataDumpBroadcastEvery = 500L;
@@ -113,10 +112,25 @@ public class CLService extends Service implements CLDataProvider {
         startTimestamp = System.currentTimeMillis();
         prefs = getDefaultSharedPreferences(this);
         liveMode = prefs.getBoolean(LIVE_MODE, false);
-        if (!liveMode)
-            tripLog = TripLog.getInstance(this);
         Log.e(TAG, "Service On create: " + startTimestamp);
     }
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            LinkServerGateway.LocalBinder binder = (LinkServerGateway.LocalBinder) service;
+            linkServerGateway = binder.getService();
+
+            linkServerGatewayBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            linkServerGateway = null;
+            linkServerGatewayBound = false;
+        }
+    };
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -144,13 +158,6 @@ public class CLService extends Service implements CLDataProvider {
             Log.e(TAG, "Service on start cmd: " + startTimestamp);
             NotificationsHelper.setNotificationForeground(this, NotificationsHelper.Notifications.COLLECTING_DATA);
 
-            if (!dumpMode && !liveMode) {
-                currentTrip = tripLog.startTrip(tripOffset);
-                clTripWriter = new CLTripWriter(this, currentTrip);
-                tripid = currentTrip.getID().toString();
-            } else {
-                tripid = "DUMP MODE OR LIVE MODE";
-            }
             startupSequence();
             Toast.makeText(this, "CarLab starting data collection. T=" + tripid, Toast.LENGTH_SHORT).show();
             return Service.START_NOT_STICKY;
@@ -254,11 +261,6 @@ return currentlyStarting;
         toServerMultiplexing = null;
         runningApps = null;
 
-
-        if (clTripWriter != null && !dumpMode && !liveMode) {
-            clTripWriter.stopTrip();
-        }
-
         if (dumpMode) {
             DataDumpWriter dumpWriter = new DataDumpWriter(this);
             dumpWriter.dumpData(dataDumpStorage);
@@ -269,6 +271,13 @@ return currentlyStarting;
         Intent stoppedIntent = new Intent();
         stoppedIntent.setAction(CLSERVICE_STOPPED);
         sendBroadcast(stoppedIntent);
+
+
+        if (linkServerGatewayBound) {
+            unbindService(mConnection);
+            linkServerGatewayBound = false;
+        }
+
     }
 
     /**
@@ -285,6 +294,13 @@ return currentlyStarting;
         if (uid == null && !liveMode) {
             Log.e(TAG, "Problem setting the UID in carlab start");
         }
+
+        bindService(
+                new Intent(
+                        this,
+                        LinkServerGateway.class),
+                mConnection,
+                Context.BIND_AUTO_CREATE);
 
         final Boolean dumpMode = prefs.getBoolean(Dump_Data_Mode_Key, false);
         if (dumpMode) dataDumpStorage = new ArrayList<>();
@@ -305,11 +321,7 @@ return currentlyStarting;
                 } else {
                     runningApps = new HashMap<>();
                     dataMultiplexing = new HashMap<>();
-                    toServerMultiplexing = new Set<>();
-
-                    if (!liveMode) {
-                        clTripWriter.startNewTrip();
-                    }
+                    toServerMultiplexing = new HashSet<>();
 
                     bringAppsToLife();
 
@@ -321,7 +333,7 @@ return currentlyStarting;
                     }
                     Log.v(TAG, "Just returned from bringing apps to life");
 
-                    registerAllSensors();
+                    // TODO Make sure things are properly wired
 
                     Log.v(TAG, "Finished startup sequence. We are multiplexing these keys: ");
                     for (Map.Entry<String, Set<String>> appEntry : dataMultiplexing.entrySet()) {
@@ -444,7 +456,7 @@ return currentlyStarting;
                     // if (!liveMode)
                     //    clTripWriter.addNewData(appClassName, dataObject);
                     if (toServerMultiplexing.contains(dataObject.information))
-                        clTripWriter.addNewData(dataObject);
+                        linkServerGateway.addNewData(dataObject);
 
                     lastDataUpdate.get(appClassName).put(multiplexKey, currTime);
                 }

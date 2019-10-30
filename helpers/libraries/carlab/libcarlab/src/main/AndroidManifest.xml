@@ -32,7 +32,7 @@
                 android:exported="false" />
 
         <service
-                android:name="edu.umich.carlab.net.PacketHandleService"
+                android:name="edu.umich.carlab.net.LinkServerGateway"
                 android:enabled="true"
                 android:exported="true" />
 
