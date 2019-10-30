@@ -8,7 +8,7 @@ import edu.umich.carlab.loadable.App;
 import edu.umich.carlab.sensors.PhoneSensors;
 
 public abstract class Algorithm extends App {
-    private DataMarshal.DataObject lastMagnet,
+    private float[] lastMagnet,
             lastGravity,
             lastGyro,
             lastAccel;
@@ -17,6 +17,9 @@ public abstract class Algorithm extends App {
 
 
     final String ROTATION = "rotation";
+    final String ALIGNED_GYRO = "world-aligned-gyro";
+    final String ALIGNED_ACCEL = "world-aligned-accel";
+
     private boolean calculatedRotation = false;
 
     public Algorithm(CLDataProvider cl, Context context) {
@@ -32,22 +35,25 @@ public abstract class Algorithm extends App {
     @Override
     public void newData(DataMarshal.DataObject dObject) {
         super.newData(dObject);
-        String sensor = dObject.sensor;
+        String sensor = dObject.information;
         if (dObject.dataType != DataMarshal.MessageType.DATA) return;
         if (dObject.value == null) return;
 
         switch (sensor) {
             case PhoneSensors.GRAVITY:
-                lastGravity = dObject;
+                lastGravity = (float[])dObject.value;
                 break;
             case PhoneSensors.MAGNET:
-                lastMagnet = dObject;
+                lastMagnet = (float[])dObject.value;
                 break;
             case PhoneSensors.GYRO:
-                lastGyro = dObject;
+                lastGyro = (float[])dObject.value;
                 break;
             case PhoneSensors.ACCEL:
-                lastAccel = dObject;
+                lastAccel = (float[])dObject.value;
+                break;
+            case ROTATION:
+                lastRotation = (float[][])dObject.value;
                 break;
         }
 
@@ -58,20 +64,21 @@ public abstract class Algorithm extends App {
 
         if (sensor.equals(PhoneSensors.MAGNET) || sensor.equals(PhoneSensors.GRAVITY)) {
             if (lastGravity != null && lastMagnet != null)
-                produceRotation(lastMagnet.value, lastGravity.value);
-        } else if (sensor.equals(PhoneSensors.GYRO) || sensor.equals(ROTATION))
+                outputData(ROTATION, produceRotation(lastMagnet, lastGravity));
+        } else if (sensor.equals(PhoneSensors.GYRO) || sensor.equals(ROTATION)) {
             if (lastRotation != null && lastGyro != null)
-                produceAlignedGyro(lastGyro.value, null);
-            else if (sensor.equals(PhoneSensors.ACCEL) || sensor.equals(ROTATION))
-                if (lastAccel != null && lastRotation != null)
-                    produceAlignedAccel(lastAccel.value, null);
+                outputData(ALIGNED_GYRO, produceAlignedGyro(lastGyro, lastRotation));
+        } else if (sensor.equals(PhoneSensors.ACCEL) || sensor.equals(ROTATION)) {
+            if (lastAccel != null && lastRotation != null)
+                outputData(ALIGNED_ACCEL, produceAlignedAccel(lastAccel, lastRotation));
+        }
     }
 
 
 
-    public abstract float[][] produceRotation (Float [] m, Float [] g);
+    public abstract float[][] produceRotation (float [] m, float [] g);
 
-    public abstract Float[] produceAlignedGyro (Float [] gyro, float [][] rm);
+    public abstract float[] produceAlignedGyro (float [] gyro, float [][] rm);
 
-    public abstract Float[] produceAlignedAccel (Float [] accel, float [] [] rm);
+    public abstract float[] produceAlignedAccel (float [] accel, float [] [] rm);
 }

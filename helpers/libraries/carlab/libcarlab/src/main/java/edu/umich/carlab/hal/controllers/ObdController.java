@@ -69,7 +69,7 @@ public class ObdController implements JobMaker {
      */
     public void startupSync () {
         // This happens syncrhonously
-        dm.broadcastData(ObdSensors.DEVICE, "*", Constants.STARTING_STATUS, DataMarshal.MessageType.STATUS);
+        dm.broadcastData("obd", Constants.STARTING_STATUS, DataMarshal.MessageType.STATUS);
         Log.v(TAG, "Starting OBD in thread: " + Thread.currentThread().getId());
 
         // Bind to Bluetooth Conn Service

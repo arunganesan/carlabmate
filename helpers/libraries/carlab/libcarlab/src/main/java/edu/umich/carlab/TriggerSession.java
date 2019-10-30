@@ -5,8 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.Toast;
-import edu.umich.carlab.clog.CLog;
 import edu.umich.carlab.utils.Utilities;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
@@ -51,9 +51,9 @@ public abstract class TriggerSession extends BroadcastReceiver {
             prefs = getDefaultSharedPreferences(context);
             sessionState = SessionState.values()[prefs.getInt(Constants.Session_State_Key, 1)];
 
-            CLog.v(TAG, "Checking state");
+            Log.v(TAG, "Checking state");
             if ((sessionState == ON || sessionState == PAUSED) && checkSleepCondition()) {
-                CLog.v(TAG, "Going to sleep");
+                Log.v(TAG, "Going to sleep");
                 sessionState = OFF;
                 prefs
                         .edit()
@@ -64,7 +64,7 @@ public abstract class TriggerSession extends BroadcastReceiver {
                 CLService.turnOffCarLab(context);
                 Toast.makeText(context, "Turning off CarLab", Toast.LENGTH_LONG).show();
             } else if (sessionState == OFF && checkWakeupCondition()) {
-                CLog.v(TAG, "Waking up");
+                Log.v(TAG, "Waking up");
                 sessionState = ON;
                 prefs
                         .edit()
@@ -75,8 +75,6 @@ public abstract class TriggerSession extends BroadcastReceiver {
                 Toast.makeText(context, "Turning on CarLab", Toast.LENGTH_LONG).show();
                 broadcastStatusChange();
             }
-
-
 
             if (sessionState == OFF) {
                 reschedule(Constants.wakeupCheckPeriod);

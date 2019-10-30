@@ -21,8 +21,6 @@ import edu.umich.carlab.CLService;
 import edu.umich.carlab.ManualTrigger;
 import edu.umich.carlab.TriggerSession;
 import edu.umich.carlab.io.DataDumpWriter;
-import edu.umich.carlab.net.CheckUpdate;
-import edu.umich.carlab.recurring.UploadFiles;
 import edu.umich.carlab.utils.Utilities;
 
 import java.io.File;
@@ -30,21 +28,17 @@ import java.util.*;
 
 import static edu.umich.carlab.Constants.*;
 
-public class ExperimentBaseActivity extends AppCompatActivity
+public class SandboxActivity extends AppCompatActivity
         implements InfoViewFragment.OnFragmentInteractionListener,
         MiddlewareGridFragment.OnFragmentInteractionListener,
-        AppViewFragment.OnFragmentInteractionListener,
-        DepMapFragment.OnFragmentInteractionListener {
+        AppViewFragment.OnFragmentInteractionListener {
     Button showMiddleware,
             manualOnOffToggle,
             pauseCarlab,
             dumpModeButton,
             runFromTrace,
-            downloadUpdate,
             uploadFiles,
-            showInfo,
-            showDependenyMap;
-
+            showInfo;
 
     TextView statusBarTV;
     FrameLayout statusBarBackground, statusBarBackgroundWrapper;
@@ -61,7 +55,6 @@ public class ExperimentBaseActivity extends AppCompatActivity
     boolean mBound = false;
     InfoViewFragment infoFragment = new InfoViewFragment();
     MiddlewareGridFragment middlewareGridFragment = new MiddlewareGridFragment();
-    DepMapFragment dependencyMapFragment = new DepMapFragment();
 
     /********************** Receivers for CarLab and status changes **********/
     BroadcastReceiver updateReceiver = new BroadcastReceiver() {
@@ -114,7 +107,7 @@ public class ExperimentBaseActivity extends AppCompatActivity
             }
 
             sendBroadcast(new Intent(
-                    ExperimentBaseActivity.this,
+                    SandboxActivity.this,
                     ManualTrigger.class));
         }
     };
@@ -137,49 +130,7 @@ public class ExperimentBaseActivity extends AppCompatActivity
             sendBroadcast(new Intent(STATUS_CHANGED));
         }
     };
-    View.OnClickListener uploadFilesCallback = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            File[] localFiles = Utilities.listAllTripsInOrder(ExperimentBaseActivity.this);
-            uploadFiles.setText(String.format("Upload Trips (%d)", localFiles.length));
-            sendBroadcast(new Intent(ExperimentBaseActivity.this, UploadFiles.class));
-        }
-    };
-    View.OnClickListener downloadUpdateCallback = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            boolean neededUpdate = prefs.getBoolean(Experiment_New_Version_Detected, false);
-            final String shortname = prefs.getString(Experiment_Shortname, null);
-            if (shortname == null) return;
 
-            if (neededUpdate) {
-                prefs.edit().putBoolean(Experiment_New_Version_Detected, false).apply();
-                AlertDialog.Builder builder = new AlertDialog.Builder(ExperimentBaseActivity.this);
-                builder.setMessage("Press OK to download and install the latest version of the app.")
-                        .setTitle("App out of date")
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                String newApkUrl = BASE_URL
-                                        + "/experiment/download?shortname="
-                                        + shortname;
-                                Uri webpage = Uri.parse(newApkUrl);
-                                startActivity(new Intent(Intent.ACTION_VIEW, webpage));
-                            }
-                        });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // Cancel button.
-                    }
-                });
-                AlertDialog dialog = builder.create();
-                dialog.show();
-            } else {
-                sendBroadcast(new Intent(
-                        ExperimentBaseActivity.this,
-                        CheckUpdate.class));
-            }
-        }
-    };
     View.OnClickListener loadInfoActivity = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -198,7 +149,7 @@ public class ExperimentBaseActivity extends AppCompatActivity
         public void onClick(View view) {
             // Show the dialog box to select trace file
 
-            File dumpsDir = DataDumpWriter.GetDumpsDir(ExperimentBaseActivity.this);
+            File dumpsDir = DataDumpWriter.GetDumpsDir(SandboxActivity.this);
             Comparator<File> sortByLastModified = new Comparator<File>() {
                 @Override
                 public int compare(File f1, File f2) {
@@ -217,7 +168,7 @@ public class ExperimentBaseActivity extends AppCompatActivity
 
             // If they choose any of the dump files, set that value.
             // Otherwise set it to null.
-            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(ExperimentBaseActivity.this);
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(SandboxActivity.this);
             dialogBuilder
                     .setTitle("Select Trace File")
                     .setItems(
@@ -243,12 +194,6 @@ public class ExperimentBaseActivity extends AppCompatActivity
             dialog.show();
         }
     };
-    View.OnClickListener showDependenyMapCallback = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            replaceFragmentWithAnimation(dependencyMapFragment, "DEPMAP");
-        }
-    };
     View.OnClickListener dumpDataCallback = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -270,7 +215,7 @@ public class ExperimentBaseActivity extends AppCompatActivity
             // If it is set to 0, we also want to stop the carlab dump.
 
             sendBroadcast(new Intent(
-                    ExperimentBaseActivity.this,
+                    SandboxActivity.this,
                     ManualTrigger.class));
         }
     };
@@ -313,20 +258,20 @@ public class ExperimentBaseActivity extends AppCompatActivity
      */
     void checkAndRequestLocPermission() {
         // Here, thisActivity is the current activity
-        if ((ContextCompat.checkSelfPermission(ExperimentBaseActivity.this,
+        if ((ContextCompat.checkSelfPermission(SandboxActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)
 
                 ||
 
-                (ContextCompat.checkSelfPermission(ExperimentBaseActivity.this,
+                (ContextCompat.checkSelfPermission(SandboxActivity.this,
                         Manifest.permission.ACCESS_COARSE_LOCATION)
                         != PackageManager.PERMISSION_GRANTED)) {
 
-            if (!ActivityCompat.shouldShowRequestPermissionRationale(ExperimentBaseActivity.this,
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(SandboxActivity.this,
                     Manifest.permission.ACCESS_FINE_LOCATION)) {
                 // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(ExperimentBaseActivity.this,
+                ActivityCompat.requestPermissions(SandboxActivity.this,
                         new String[]{
                                 Manifest.permission.ACCESS_FINE_LOCATION,
                                 Manifest.permission.ACCESS_COARSE_LOCATION
@@ -407,12 +352,6 @@ public class ExperimentBaseActivity extends AppCompatActivity
         showInfo = findViewById(R.id.showInfo);
         showInfo.setOnClickListener(loadInfoActivity);
 
-        downloadUpdate = findViewById(R.id.downloadUpdate);
-        downloadUpdate.setOnClickListener(downloadUpdateCallback);
-
-        uploadFiles = findViewById(R.id.uploadTrips);
-        uploadFiles.setOnClickListener(uploadFilesCallback);
-
         manualOnOffToggle = findViewById(R.id.toggleCarlab);
         manualOnOffToggle.setOnClickListener(toggleCarlab);
         manualOnOffToggle.setEnabled(false);
@@ -426,9 +365,6 @@ public class ExperimentBaseActivity extends AppCompatActivity
         runFromTrace = findViewById(R.id.loadFromTrace);
         runFromTrace.setOnClickListener(selectTraceFileCallback);
 
-        showDependenyMap = findViewById(R.id.showDependencyMap);
-        showDependenyMap.setOnClickListener(showDependenyMapCallback);
-
         statusBarTV = findViewById(R.id.status_text);
         statusBarBackground = findViewById(R.id.status_background_color);
         statusBarBackgroundWrapper = findViewById(R.id.status_background_color_wrapper);
@@ -438,9 +374,7 @@ public class ExperimentBaseActivity extends AppCompatActivity
         Button button = new Button(this);
         button.setText(text);
         button.setOnClickListener(callback);
-//        button.setTextSize(
-//                TypedValue.COMPLEX_UNIT_SP,
-//                getResources().getDimension(R.dimen.controlButtonTextSize));
+
         button.setLayoutParams(new LinearLayout.LayoutParams(
                 (int) getResources().getDimension(R.dimen.controlButtonWidth),
                 (int) getResources().getDimension(R.dimen.controlButtonHeight)
@@ -587,6 +521,5 @@ public class ExperimentBaseActivity extends AppCompatActivity
     @Override
     public void onFragmentInteraction(Uri uri) {
         updateButtons();
-        ;
     }
 }

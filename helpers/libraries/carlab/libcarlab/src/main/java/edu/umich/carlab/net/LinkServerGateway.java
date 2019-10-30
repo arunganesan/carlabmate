@@ -1,22 +1,13 @@
 package edu.umich.carlab.net;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.provider.ContactsContract;
 import android.util.Log;
-import android.widget.Toast;
-
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,37 +15,27 @@ import org.json.JSONObject;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 
-import edu.umich.carlab.Constants;
 import edu.umich.carlab.DataMarshal;
-import edu.umich.carlab.hal.HardwareAbstractionLayer;
-import edu.umich.carlab.io.CLTripWriter;
 import edu.umich.carlab.io.MultipartUtility;
 import edu.umich.carlab.utils.Utilities;
 
@@ -62,12 +43,11 @@ import edu.umich.carlab.utils.Utilities;
 /**
  * Keep internal database or store in files.
  * Periodically wake up if there is data to upload it
- * See UploadFiles code.
  */
-public class PacketHandleService extends Service {
-    public final String TAG = PacketHandleService.class.getName();
+public class LinkServerGateway extends Service {
+    public final String TAG = LinkServerGateway.class.getName();
     ScheduledFuture<?> scheduled = null;
-    final IBinder mBinder = new PacketHandleService.LocalBinder();
+    final IBinder mBinder = new LinkServerGateway.LocalBinder();
     ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     Map<String, List<DataMarshal.DataObject>> allData = new HashMap<>();
@@ -115,14 +95,15 @@ public class PacketHandleService extends Service {
      * Public functions
      ***************************************************************/
     public Map<String, Object> checkNewInfo () {
-        // TODO When new info comes in, we need to call DataMarshal's "add new data"
+        // TODO When new info comes in, we need to call DataMarshal's "broadcast new data"
+        // Or directly call CLService.newData()
         DataMarshal dm = new DataMarshal(null);
         dm.broadcastData("info", "value");
         return null;
 
     }
     
-    public void outputNewInfo (DataMarshal.DataObject data) {
+    public void addNewData (DataMarshal.DataObject data) {
         /**
          * Add the data to the internal database
          * Will be uploaded asynchronously
@@ -137,13 +118,18 @@ public class PacketHandleService extends Service {
             allData.get(data.information).add(data);
         }
     }
-    
 
+
+    public static File GetTripsDir(Context context) {
+        File tracesDir = context.getExternalFilesDir("traces");
+        tracesDir.mkdirs();
+        return tracesDir;
+    }
 
     File getNewFile (String infoname) {
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.US);
         String filename = infoname + "-" + dateFormatter.format(Calendar.getInstance().getTime())+ ".json";
-        return new File(CLTripWriter.GetTripsDir(this), filename);
+        return new File(GetTripsDir(this), filename);
     }
 
     Runnable  uploadRunnable = new Runnable() {
@@ -200,7 +186,7 @@ public class PacketHandleService extends Service {
             // Get the info/file mapping
             // For each file, try uploading using "file" post.
             // If succeeds, delete that from file system and from shared prefs.
-            if (!Utilities.isConnectedAndWifi(PacketHandleService.this)) return;
+            if (!Utilities.isConnectedAndWifi(LinkServerGateway.this)) return;
 
             try {
                 fileInfoMappingJson = prefs.getString(FILE_INFO_MAPPING, "{}");
@@ -275,9 +261,9 @@ public class PacketHandleService extends Service {
 
 
     public class LocalBinder extends Binder {
-        public PacketHandleService getService() {
+        public LinkServerGateway getService() {
             // Return this instance of LocalService so clients can call public methods
-            return PacketHandleService.this;
+            return LinkServerGateway.this;
         }
     }
 }

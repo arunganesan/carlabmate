@@ -35,11 +35,9 @@ public class SensorListAppBase extends App {
         super(cl, context);
     }
 
-    TextView findOrCreateRow(String device, String sensor) {
-
-        String key = device + "-" + sensor;
-        if (tableRows.containsKey(key))
-            return tableRows.get(key);
+    TextView findOrCreateRow(String information) {
+        if (tableRows.containsKey(information))
+            return tableRows.get(information);
         else {
             TableRow newRow = new TableRow(context);
             TextView deviceTV = new TextView(context);
@@ -57,38 +55,34 @@ public class SensorListAppBase extends App {
                     TABLE_ROW_MARGIN);
             newRow.setLayoutParams(params);
 
-            deviceTV.setText("[" + device + "] ");
-            sensorTV.setText(sensor + ": ");
-            sensorTV.setGravity(Gravity.RIGHT);
+            sensorTV.setText(String.format("%s: ", information));
+            sensorTV.setGravity(Gravity.END);
             newRow.addView(deviceTV);
             newRow.addView(sensorTV);
             newRow.addView(valueTV);
 
             dataTable.addView(newRow);
-            tableRows.put(key, valueTV);
+            tableRows.put(information, valueTV);
             return valueTV;
         }
     }
 
     @Override
-    public void newData(DataMarshal.DataObject dataObject) {
+    public void newData(final DataMarshal.DataObject dataObject) {
         super.newData(dataObject);
 
         if (!initialized) return;
-        
+
         if (dataObject.dataType != DataMarshal.MessageType.DATA)
             return;
 
-        List<DataMarshal.DataObject> objects = HardwareAbstractionLayer.splitDataObjects(dataObject);
-        for (final DataMarshal.DataObject dObject : objects) {
-            parentActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    TextView tv = findOrCreateRow(dObject.device, dObject.sensor);
-                    tv.setText("" + dObject.value[0]);
-                }
-            });
-        }
+        parentActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView tv = findOrCreateRow(dataObject.information);
+                tv.setText(dataObject.value.toString());
+            }
+        });
     }
 
     @Override

@@ -142,7 +142,6 @@ public class PhoneController {
                 } catch (SecurityException se) {
                     Log.e(TAG, "GPS Security Exception.");
                     dm.broadcastData(
-                            PhoneSensors.DEVICE,
                             sensorName,
                             Constants.NO_GPS_PERMISSION_ERROR,
                             DataMarshal.MessageType.ERROR);
@@ -150,7 +149,6 @@ public class PhoneController {
                 }
 
                 dm.broadcastData(
-                        PhoneSensors.DEVICE,
                         sensorName,
                         Constants.GPS_STARTED_STATUS,
                         DataMarshal.MessageType.STATUS);
@@ -171,10 +169,6 @@ public class PhoneController {
         if (PhoneSensors.isBroadcastSensor(sensor)) {
             int sensorType = PhoneSensors.sensorNameToType(sensor);
 
-//            Set<String> relatedSensors = PhoneSensors.typeToSensorName(sensorType);
-//            for (String relatedSensor : relatedSensors)
-//                if (listeningSensors.contains(relatedSensor))
-//                    return;
 
             // Else, all related sensors have also been removed
             mSensorManager.unregisterListener(allListeners.get(sensorType));
@@ -188,10 +182,6 @@ public class PhoneController {
             Log.e(TAG, "Unregistering sensor type: " + sensorType);
             allListeners.remove(sensorType);
         } else if (sensor.equals(PhoneSensors.GPS)) {
-//            if (listeningSensors.contains(PhoneSensors.GPS_LATITUDE)
-//                    ||listeningSensors.contains(PhoneSensors.GPS_LONGITUDE)
-//                    ||listeningSensors.contains(PhoneSensors.GPS_SPEED))
-//                return;
 
             // Else, we've already unsubscribed both
             mFusedLocationClient.removeLocationUpdates(mLocationCallback);
@@ -235,38 +225,9 @@ public class PhoneController {
 
                 dm.broadcastData(
                             milliseconds,
-                            PhoneSensors.DEVICE,
                             PhoneSensors.GPS,
                             data,
                             DataMarshal.MessageType.DATA);
-
-//                if (listeningSensors.contains(PhoneSensors.GPS_LATITUDE)) {
-//                    dm.broadcastData(
-//                            milliseconds,
-//                            PhoneSensors.DEVICE,
-//                            PhoneSensors.GPS_LATITUDE,
-//                            (float)latitude,
-//                            DataMarshal.MessageType.DATA);
-//                }
-//
-//                if (listeningSensors.contains(PhoneSensors.GPS_LONGITUDE)) {
-//                    dm.broadcastData(
-//                            milliseconds,
-//                            PhoneSensors.DEVICE,
-//                            PhoneSensors.GPS_LONGITUDE,
-//                            (float)longitude,
-//                            DataMarshal.MessageType.DATA);
-//                }
-//
-//
-//                if (listeningSensors.contains(PhoneSensors.GPS_SPEED)) {
-//                    dm.broadcastData(
-//                            milliseconds,
-//                            PhoneSensors.DEVICE,
-//                            PhoneSensors.GPS_SPEED,
-//                            (float)speed,
-//                            DataMarshal.MessageType.DATA);
-//                }
             }
         };
     };
@@ -299,7 +260,6 @@ public class PhoneController {
             }
 
             dm.broadcastData(ms,
-                    DeviceName,
                     sensorGroupName,
                     values,
                     DataMarshal.MessageType.DATA);

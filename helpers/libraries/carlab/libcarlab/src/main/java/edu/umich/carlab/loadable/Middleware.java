@@ -40,11 +40,4 @@ public abstract class Middleware {
         String namespaceKey = String.format("%s:%s", getName(), key);
         return prefs.getString(namespaceKey, defaultVal);
     }
-
-    public Map<String, Float> splitValues(DataMarshal.DataObject dataObject) {
-        Map<String, Float> splitMap = new HashMap<>();
-        String device = dataObject.device;
-        splitMap.put(dataObject.sensor, dataObject.value[0]);
-        return splitMap;
-    }
 }

@@ -38,12 +38,12 @@ public class PollController {
                     // Do the callable
                     try {
                         Float result = callable.call();
-                        dm.broadcastData(DeviceName, SensorName, result, DataMarshal.MessageType.DATA);
+                        dm.broadcastData(SensorName, result, DataMarshal.MessageType.DATA);
                     } catch (Exception e) {
                         // Couldnt make the call.
                         // XXX How do we signify the error?
                         String errorMsg = "Sensor Error: " + e.getMessage();
-                        dm.broadcastData(DeviceName, SensorName, -1f, DataMarshal.MessageType.ERROR);
+                        dm.broadcastData(SensorName, -1f, DataMarshal.MessageType.ERROR);
                         //Log.e(TAG, errorMsg);
 
                         // Even if there's error, we should keep polling?

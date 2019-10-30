@@ -7,16 +7,13 @@ import edu.umich.carlab.CLService;
 import edu.umich.carlab.Constants;
 import edu.umich.carlab.DataMarshal;
 import edu.umich.carlab.hal.controllers.*;
-import edu.umich.carlab.io.AppLoader;
-import edu.umich.carlab.loadable.Middleware;
+
 import edu.umich.carlab.sensors.ObdSensors;
 import edu.umich.carlab.sensors.OpenXcSensors;
 import edu.umich.carlab.sensors.PhoneSensors;
-import edu.umich.carlab.sensors.WebSensors;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -46,7 +43,6 @@ import java.util.concurrent.Callable;
 public class HardwareAbstractionLayer {
     private ListenerMap listenerMap;
 
-    private WebController webController;
     private ObdController obdController;
     private PollController pollController;
     private PhoneController phoneController;
@@ -78,7 +74,6 @@ public class HardwareAbstractionLayer {
 
         listenerMap = new ListenerMap();
 
-        webController = new WebController(cl, dm);
         obdController = new ObdController(cl, dm);
         pollController = new PollController(cl, dm);
         phoneController = new PhoneController(cl, dm);
@@ -111,7 +106,7 @@ public class HardwareAbstractionLayer {
             return true;
 
         // Else, we will start this sensor.
-        dm.broadcastData(device, sensor, Constants.GENERAL_STATUS, DataMarshal.MessageType.STATUS);
+        dm.broadcastData(sensor, Constants.GENERAL_STATUS, DataMarshal.MessageType.STATUS);
 
         switch (device) {
             case PhoneSensors.DEVICE:
@@ -122,7 +117,7 @@ public class HardwareAbstractionLayer {
                     return true;
                 } catch (Exception e) {
                     Log.e(TAG, "Error starting listener " + listenerKey + " got error: " + e.getMessage());
-                    dm.broadcastData(device, sensor, Constants.GENERAL_ERROR, DataMarshal.MessageType.ERROR);
+                    dm.broadcastData(sensor, Constants.GENERAL_ERROR, DataMarshal.MessageType.ERROR);
 
                     // No need to destroy this sensor since we didn't really make it
                     listenerMap.removeSubscriber(listenerKey);
@@ -130,7 +125,7 @@ public class HardwareAbstractionLayer {
                 }
             case OpenXcSensors.DEVICE:
                 if (!OpenXcSensors.validSensor(sensor)) {
-                    dm.broadcastData(device, sensor,Constants.GENERAL_ERROR, DataMarshal.MessageType.ERROR);
+                    dm.broadcastData(sensor,Constants.GENERAL_ERROR, DataMarshal.MessageType.ERROR);
                     listenerMap.removeSubscriber(listenerKey);
                     return false;
                 }
@@ -138,20 +133,7 @@ public class HardwareAbstractionLayer {
                 Callable<Float> oxcTask = openXcController.createTask(sensor);
                 pollController.start(listenerKey, oxcTask, device, sensor, Constants.OXC_PERIOD);
                 return true;
-            case WebSensors.DEVICE:
-                // We poll a simple call to the server at fixed intervals.
-                // The "call to the server" happens in a separate thread.
-                // Or it could be an AsyncTask or some higher-level wrapper to a thread
-                // It is similar to adding the sensor to the sensor controller
-                if (!webController.validSensor(sensor)) {
-                    dm.broadcastData(device, sensor, Constants.GENERAL_ERROR, DataMarshal.MessageType.ERROR);
-                    listenerMap.removeSubscriber(listenerKey);
-                    return false;
-                }
 
-                Callable<Float> webTask = webController.createTask(sensor);
-                pollController.start(listenerKey, webTask, device, sensor, 1000);
-                return true;
             case ObdSensors.DEVICE:
                 // We package the OBD call into a simple Runnable command. It uses a
                 // pre-existing BT connection to just poll and get a response for a single command.
@@ -162,7 +144,7 @@ public class HardwareAbstractionLayer {
                 if (!obdController.isInitialized())
                     obdController.startupSync();
                 if (!obdController.validSensor(sensor)) {
-                    dm.broadcastData(device, sensor, Constants.GENERAL_ERROR, DataMarshal.MessageType.ERROR);
+                    dm.broadcastData(sensor, Constants.GENERAL_ERROR, DataMarshal.MessageType.ERROR);
                     listenerMap.removeSubscriber(listenerKey);
                     return false;
                 } else {
@@ -176,53 +158,10 @@ public class HardwareAbstractionLayer {
                     return true;
                 }
             default:
-                dm.broadcastData(device, sensor, Constants.GENERAL_ERROR, DataMarshal.MessageType.ERROR);
+                dm.broadcastData(sensor, Constants.GENERAL_ERROR, DataMarshal.MessageType.ERROR);
                 listenerMap.removeSubscriber(listenerKey);
                 return false;
         }
-    }
-
-
-    /**
-     * Splits data objects for writing to a file.
-     *
-     * @param dataObject
-     * @return List of split data objects
-     */
-    public static List<DataMarshal.DataObject> splitDataObjects(DataMarshal.DataObject dataObject) {
-        List<DataMarshal.DataObject> splitObjects = new ArrayList<>();
-
-        Map<String, Float> splitValues = splitValues(dataObject);
-        if (splitValues == null)  // This means there was nothing to split
-            splitObjects.add(dataObject);
-        else
-            for (Map.Entry<String, Float> sensorValue : splitValues.entrySet()) {
-                DataMarshal.DataObject dObjectClone = dataObject.clone();
-                dObjectClone.sensor = sensorValue.getKey();
-                dObjectClone.value = new Float [] { sensorValue.getValue() };
-                splitObjects.add(dObjectClone);
-            }
-
-        return splitObjects;
-    }
-
-    /**
-     * Split data objects based on their device data source.
-     * This only returns values. It loses the rest of the meta data stored in data object.
-     *
-     * @return A map of the split values.
-     */
-    public static Map<String, Float> splitValues(DataMarshal.DataObject dataObject) {
-        String dev = dataObject.device;
-        if (dev.equals(PhoneSensors.DEVICE))
-            return PhoneSensors.splitValues(dataObject);
-        else if (AppLoader.getInstance().getMiddleware().containsKey(dev)) {
-            Middleware middleware = AppLoader.getInstance().getMiddleware().get(dataObject.device);
-            return middleware.splitValues(dataObject);
-        }
-
-        // Else nothing to split.
-        return null;
     }
 
 
@@ -248,7 +187,6 @@ public class HardwareAbstractionLayer {
             case PhoneSensors.DEVICE:
                 phoneController.stopSensor(sensor);
                 return true;
-            case WebSensors.DEVICE:
             case OpenXcSensors.DEVICE:
                 pollController.stop(listenerKey);
                 return true;

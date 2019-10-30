@@ -5,37 +5,40 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
-import edu.umich.carlab.CLService;
-import edu.umich.carlab.Constants;
-import edu.umich.carlab.DataMarshal;
-import edu.umich.carlab.ManualTrigger;
-import edu.umich.carlab.io.DataDumpWriter;
 
 import java.io.File;
 import java.util.List;
 
-import static edu.umich.carlab.Constants.*;
+import edu.umich.carlab.CLService;
+import edu.umich.carlab.DataMarshal;
+import edu.umich.carlab.ManualTrigger;
+import edu.umich.carlab.io.DataDumpWriter;
+
+import static edu.umich.carlab.Constants.LIVE_MODE;
+import static edu.umich.carlab.Constants.Load_From_Trace_Duration_End;
+import static edu.umich.carlab.Constants.Load_From_Trace_Duration_Start;
+import static edu.umich.carlab.Constants.Load_From_Trace_Key;
+import static edu.umich.carlab.Constants.ManualChoiceKey;
+import static edu.umich.carlab.Constants.REPLAY_PERCENTAGE;
+import static edu.umich.carlab.Constants.REPLAY_STATUS;
+import static edu.umich.carlab.Constants.UID_key;
 
 public class TraceReplayer implements Runnable {
     final int INITIAL_WAIT_TIME = 500;
     final String TAG = "TraceReplayer";
-    boolean liveMode = false;
-
     final long broadcastUiUpdateEvery = 500L;
+    final int STOP_TIME_PADDING = 1500;
+    boolean liveMode = false;
     long lastUiBroadcast = 0L;
-
     CLService carlabService;
     File ifile;
     String tripID;
     List<DataMarshal.DataObject> traceData;
     SharedPreferences prefs;
-
-
     float specStartTime = -1,
             specEndTime = -1;
-    final int STOP_TIME_PADDING = 1500;
 
-    public TraceReplayer (CLService carlabService, String filename, int tripID) {
+    public TraceReplayer(CLService carlabService, String filename, int tripID) {
         this.carlabService = carlabService;
         ifile = new File(filename);
         this.tripID = "" + tripID;
@@ -49,10 +52,11 @@ public class TraceReplayer implements Runnable {
     }
 
     @Override
-    public void run () {
+    public void run() {
         try {
             Thread.sleep(INITIAL_WAIT_TIME);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
 
         Long startTimeInMillis = System.currentTimeMillis();
         Long dataOffsetTime = traceData.get(0).time;
@@ -77,37 +81,25 @@ public class TraceReplayer implements Runnable {
             dataObject = traceData.get(i);
             previousDataTime = dataObject.time;
 
-
-//            // If we should stop replaying we'll stop here
-//            if (specEndTime != -1
-//                    && currTime > startTimeInMillis + specEndTime * 1000 + STOP_TIME_PADDING) {
-//                Log.e(TAG, "Stopping trace replaying. Spec end time reached.");
-//                break;
-//            }
-
-//            dataObject.time -= dataOffsetTime;
-//            dataObject.time += startTimeInMillis;
-
             // Uncomment below if the trace replaying lags too much
-             dataObject.time = System.currentTimeMillis();
+            dataObject.time = System.currentTimeMillis();
 
-            dataObject.tripid = tripID;
-            dataObject.uid = uid;
             carlabService.newData(dataObject);
 
             if (i < traceData.size() - 1) {
                 try {
-                    sleepTime = traceData.get(i+1).time - previousDataTime;
+                    sleepTime = traceData.get(i + 1).time - previousDataTime;
                     if (sleepTime > 0)
                         Thread.sleep(sleepTime);
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                }
             }
 
             if (currTime > lastUiBroadcast + broadcastUiUpdateEvery) {
                 Intent intent = new Intent(REPLAY_STATUS);
-                intent.putExtra(REPLAY_PERCENTAGE, (double)i / traceData.size());
+                intent.putExtra(REPLAY_PERCENTAGE, (double) i / traceData.size());
                 carlabService.sendBroadcast(intent);
-                lastUiBroadcast  = currTime;
+                lastUiBroadcast = currTime;
             }
         }
 
