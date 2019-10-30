@@ -340,14 +340,27 @@ return currentlyStarting;
         startupThread.start();
     }
 
+    public void addMultiplexRoute (String information, String runningAlgorithmName) {
+        // This will be routed from other languages to this input
+        // Actually, even if it is internal I think we can use this.
+    }
+
+    public void addExternalMultiplexOutput (String information) {
+        // This will be placed in the outbox from any algorithm that produces it
+    }
+
+    public void turnOnSensor (String information) {
+        // Only a few of the sensors actually turn on the sensor.
+    }
+
 
     /**
      * Registers all sensors for all apps
+     * TODO THIS HAS TO CHANGE
      */
     private void registerAllSensors() {
         String device, sensor, multiplexKey;
         final String replayTraceFile = prefs.getString(Load_From_Trace_Key, null);
-
 
         for (Map.Entry<String, App> appEntry : runningApps.entrySet()) {
             List<Pair<String, String>> sensors = appEntry.getValue().getSensors();
