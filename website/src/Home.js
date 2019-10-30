@@ -4,6 +4,20 @@ import 'bootstrap/dist/css/bootstrap.css';
 import Lorem from 'react-lorem-component'
 
 
+import { 
+  Badge, 
+  Button, 
+  Col,
+  Container,
+  Card, 
+  Form, 
+  FormControl,
+  InputGroup, 
+  ToggleButton,
+  ToggleButtonGroup,
+  Row } from 'react-bootstrap';
+
+
 export default class Home extends React.Component {
 
   constructor(props) {
@@ -14,9 +28,14 @@ export default class Home extends React.Component {
 
   render() {
     return (
-        <div>
-            Home <Lorem />
-        </div>
+      <Container>
+        <Row>
+          <Col>
+          Welcome to CarLab!
+          </Col>
+        </Row>
+      </Container>
+
     );
   }
 }
