@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import React from 'react';
 import './App.css';
 import { 
@@ -17,7 +16,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import Lorem from 'react-lorem-component'
 import { createStudyPlan, Library } from './library'
 
-class App extends React.Component {
+class Designer extends React.Component {
 
   constructor(props) {
     super(props);
@@ -305,4 +304,4 @@ class App extends React.Component {
   }
 }
 
-export default App;
+export default Designer;
