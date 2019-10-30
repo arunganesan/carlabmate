@@ -6,17 +6,6 @@
 
 .App {
   background-color: #82CAFF;
-  min-height: 100vh;
-}
-
-.App-header {
-  height: 10vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: top;
-  font-size: calc(10px + 2vmin);
-  color: black;
 }
 
 .App-body {
@@ -28,6 +17,8 @@
     font-size: 1rem;
     color: black;  
 }
+
+
 
 .App-body .row {
   margin-top: 25px;
@@ -59,7 +50,7 @@
 }
 
 .information-edit-modal {
-  height: 45vh;
+  height: 40vh;
   margin-top: 25px;
 }
 
@@ -73,7 +64,7 @@
 }
 
 #input-left-side {
-  height: 100vh;
+  height: 90vh;
   overflow: scroll;
 }
 
@@ -134,4 +125,22 @@
 
 .info-edit-form-footer Button {
   margin-right: 15px;
+}
+
+
+#navigation {
+  width: 100%;
+  align-content: center;
+  justify-content: center;
+  background-color: #82CAFF;
+  min-height: 100vh;
+}
+
+.nav-link, .nav-link:hover {
+  color: rgba(0,0,0,0.5);
+}
+
+.nav-link.active {
+  font-weight: bolder;
+  color: black;  
 }
