@@ -19,6 +19,34 @@ There are three main ways to interact with `CarLab`. **Developers** can contribu
   * Libraries for each language
   * Available algorithms
 
+# Data collection designer
+The design phase is divided into two steps. The first step the designer inputs the high-level requirements. These requirements are the list of information they wish to collect, and the available devices, and any blacklisted information (e.g. location) or sensors (e.g. GPS). Using this, `CarLab` searches through the library of available algorithms and automatically finds a suitable data collection plan. 
+In the second step, the designer revises this plan by editing any individual data collection modules or by overwriting any of the strategy. After the data collection is designed, it outputs the following strategy JSON file. This is finally used to build the data collection platform.
+
+```json
+{
+  "algorithms": [
+    { "algorithm": "watchfon", "information": "car-steering", "save": true },
+    { "algorithm": "watchfon", "information": "car-speed" },
+    { "algorithm": "aligned-imu", "information": "world-aligned-gyro" },
+    { "algorithm": "aligned-imu", "information": "world-aligned-accel" },
+    { "algorithm": "aligned-imu", "information": "rotation" },
+    { "algorithm": "android-raw-sensors", "information": "gravity"},
+    { "algorithm": "android-raw-sensors", "information": "magnetometer"},
+    { "algorithm": "android-raw-sensors", "information": "gyro"},
+    { "algorithm": "android-raw-sensors", "information": "accel"},
+    { "algorithm": "android-raw-sensors", "information": "location"}
+  ],
+  "wiring": [
+    { "algorithm": 0, "inputs": [1, 3, 2] },
+    { "algorithm": 1, "inputs": [10, 4] },
+    { "algorithm": 3, "inputs": [8, 5] },
+    { "algorithm": 4, "inputs": [9, 5] },
+    { "algorithm": 5, "inputs": [6, 7] }
+  ]
+}
+```
+
 # Algorithm developer
 Algorithms are implemented as standalone libraries under each of the supported languages. The entry point into each algorithm is a class with a set of callback functions to generate each output information. This function is invoked with each of the required information as parameters. The class is created and sustained during the data collection so it can keep any internal state. 
 
