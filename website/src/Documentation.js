@@ -36,17 +36,24 @@ function MyLink (props) {
   </NavItem>);
 }
 
+
+
+function Name () {
+  return (<code>CarLab</code>)
+}
+
+
 function Overview (props) {
   return (<>
-    `CarLab` is an on-demand data collection builder for vehicular research. Using a high-level specification of the data collection requirements, it creates a custom-build data collection platform, which includes all the tools necessary to carry out the data collection campaign. 
+    <Name /> is an on-demand data collection builder for vehicular research. Using a high-level specification of the data collection requirements, it creates a custom-build data collection platform, which includes all the tools necessary to carry out the data collection campaign. 
     <p />
-    There are three main ways to interact with `CarLab`. **Developers** can contribute algorithms which power the core of `CarLab`. An algorithm takes information as input and outputs information. A **data collection campaign designer** can use `CarLab` to craft a data collection campaign. The designer inputs a data collection specification into `CarLab` and iteratively refines it until it meets the data collection requirements. A **participant** who participates in the data collection signs up through `CarLab` web interface and installs the data collection tools.
+    There are three main ways to interact with <Name />. <b>Developers</b> can contribute algorithms which power the core of <Name />. An algorithm takes information as input and outputs information. A <b>data collection campaign designer</b> can use <Name /> to craft a data collection campaign. The designer inputs a data collection specification into <Name /> and iteratively refines it until it meets the data collection requirements. A <b>participant</b> who participates in the data collection signs up through <Name /> web interface and installs the data collection tools.
     <p />
     <h3>Table of contents</h3>
     <ul>
 <li>Overview
   <ul>
-    <li>Purpose of `CarLab`</li>
+    <li>Purpose of <Name /></li>
     <li>Data collection campaign examples (a visual example of the entire process)</li>
   </ul></li>
 <li>Data collection designer
@@ -80,7 +87,7 @@ function Overview (props) {
 
 function Designer (props) {
   return (<>
-    The design phase is divided into two steps. The first step the designer inputs the high-level requirements. These requirements are the list of information they wish to collect, and the available devices, and any blacklisted information (e.g. location) or sensors (e.g. GPS). Using this, `CarLab` searches through the library of available algorithms and automatically finds a suitable data collection plan. 
+    The design phase is divided into two steps. The first step the designer inputs the high-level requirements. These requirements are the list of information they wish to collect, and the available devices, and any blacklisted information (e.g. location) or sensors (e.g. GPS). Using this, <Name /> searches through the library of available algorithms and automatically finds a suitable data collection plan. 
     <p />
     In the second step, the designer revises this plan by editing any individual data collection modules or by overwriting any of the strategy. After the data collection is designed, it outputs the following strategy JSON file. This is finally used to build the data collection platform.
     <p />
@@ -150,7 +157,7 @@ function Developer (props) {
       `}
     </Highlight>
     <p />
-    This information is used in the algorithm-generation script. The script is invoked using `gen-algorithm android spec.json` command. This creates the function stubs which are invoked during run-time. The developer can then simply fill in the stub. The generation script also creates a sandbox wrapper script which imports the algorithm library. The wrapper also provides support for feeding in dummy data for any of the input/output of the algorithm allowing rapid testing.
+    This information is used in the algorithm-generation script. The script is invoked using <code>gen-algorithm android spec.json</code> command. This creates the function stubs which are invoked during run-time. The developer can then simply fill in the stub. The generation script also creates a sandbox wrapper script which imports the algorithm library. The wrapper also provides support for feeding in dummy data for any of the input/output of the algorithm allowing rapid testing.
     <p />
     <Highlight language="java">
       {`package edu.umich.aligned_imu;

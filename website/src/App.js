@@ -6,7 +6,7 @@ import Designer from './Designer'
 import Documentation from './Documentation'
 import Home from './Home'
 import React from 'react';
-
+import NodeGraph from './NodeGraph'
 
 import { LinkContainer } from "react-router-bootstrap";
 import { Nav, NavItem, Navbar, Button } from "react-bootstrap";
@@ -43,6 +43,7 @@ class App extends React.Component {
             <MyLink to="home" />
             <MyLink to="documentation/overview" label='Documentation' />
             <MyLink to="designer" />
+            <MyLink to="nodegraph" />
           </Nav>
         </Navbar>
 
@@ -50,6 +51,7 @@ class App extends React.Component {
           <Route path={'/home'} component={Home} />
           <Route path={'/documentation'} component={Documentation} />
           <Route path={'/designer'} component={Designer} />
+          <Route path={'/nodegraph'} component={NodeGraph} />
         </div>
         </div>
       </Router>

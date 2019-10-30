@@ -184,7 +184,9 @@ public class SandboxActivity extends AppCompatActivity
                                                 getApplicationContext(),
                                                 String.format("Showing this file: %s", dumpFiles[i]),
                                                 Toast.LENGTH_SHORT).show();
-                                        prefs.edit().putString(Load_From_Trace_Key, dumpFiles[i].toString()).commit();
+                                        prefs.edit().putString(
+                                                Load_From_Trace_Key,
+                                                dumpFiles[i].toString()).commit();
                                     }
 
                                     updateButtons();
