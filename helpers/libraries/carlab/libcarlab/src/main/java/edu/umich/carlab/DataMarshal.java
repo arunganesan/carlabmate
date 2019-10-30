@@ -36,6 +36,12 @@ public class DataMarshal {
         broadcastData(seconds, information, value, dataType);
     }
 
+    public void broadcastData(String information, Serializable value) {
+        //Double seconds = (new Double(System.currentTimeMillis())) / 1e+3;
+        long seconds = System.currentTimeMillis();
+        broadcastData(seconds, information, value, MessageType.DATA);
+    }
+
     public enum MessageType {
         ERROR, STATUS, DATA;
     }

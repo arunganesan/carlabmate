@@ -115,27 +115,28 @@ public class PacketHandleService extends Service {
      * Public functions
      ***************************************************************/
     public Map<String, Object> checkNewInfo () {
-        // TODO When new info comes in, we need to call the multiplexer's "add new data"
+        // TODO When new info comes in, we need to call DataMarshal's "add new data"
+        DataMarshal dm = new DataMarshal(null);
+        dm.broadcastData("info", "value");
         return null;
 
     }
     
-    public void outputNewInfo (String info, DataMarshal.DataObject data) {
+    public void outputNewInfo (DataMarshal.DataObject data) {
         /**
          * Add the data to the internal database
          * Will be uploaded asynchronously
          */
         // Save it locally
         synchronized (allData) {
-            if (!allData.containsKey(info))
+            if (!allData.containsKey(data.information))
                 allData.put(
-                        info,
+                        data.information,
                         new ArrayList<DataMarshal.DataObject>());
 
-            allData.get(info).add(data);
+            allData.get(data.information).add(data);
         }
     }
-
     
 
 

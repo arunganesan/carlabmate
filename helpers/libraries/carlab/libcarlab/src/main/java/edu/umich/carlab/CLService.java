@@ -71,6 +71,7 @@ public class CLService extends Service implements CLDataProvider {
 
     Multiplexer multiplexer;
     Map<String, Set<String>> dataMultiplexing;
+    Set<String> toServerMultiplexing;
 
     Boolean liveMode;
     String uid, tripid;
@@ -244,10 +245,13 @@ return currentlyStarting;
 
 
         // Reset the data multiplexer
-        if (dataMultiplexing != null)
+        if (dataMultiplexing != null) {
             dataMultiplexing.clear();
+            toServerMultiplexing.clear();
+        }
 
         dataMultiplexing = null;
+        toServerMultiplexing = null;
         runningApps = null;
 
 
@@ -301,6 +305,7 @@ return currentlyStarting;
                 } else {
                     runningApps = new HashMap<>();
                     dataMultiplexing = new HashMap<>();
+                    toServerMultiplexing = new Set<>();
 
                     if (!liveMode) {
                         clTripWriter.startNewTrip();
@@ -351,59 +356,21 @@ return currentlyStarting;
 
     public void addExternalMultiplexOutput (String information) {
         // This will be placed in the outbox from any algorithm that produces it
-        add this to a special set.
-        IF we reach this data, then go to the bound "packet" guy and place it?
-
+        // add this to a special set.
+        // IF we reach this data, then go to the bound "packet" guy and place it?
+        toServerMultiplexing.add(information);
     }
 
-    public void turnOnSensor (String information) {
-        // Only a few of the sensors actually turn on the sensor.
-    }
-
-
-    /**
-     * Registers all sensors for all apps
-     * TODO THIS HAS TO CHANGE
-     */
-    private void registerAllSensors() {
-        String device, sensor, multiplexKey;
-        for (Map.Entry<String, App> appEntry : runningApps.entrySet()) {
-            List<Pair<String, String>> sensors = appEntry.getValue().getSensors();
-            for (Pair<String, String> devSensor : sensors) {
-                device = devSensor.first;
-                sensor = devSensor.second;
-                // Add this to the sensor multiplexing
-                multiplexKey = toMultiplexKey(device, sensor);
-                if (!dataMultiplexing.containsKey(multiplexKey))
-                    dataMultiplexing.put(multiplexKey, new HashSet<String>());
-                dataMultiplexing.get(multiplexKey).add(appEntry.getKey());
-                lastDataUpdate.get(appEntry.getKey()).put(multiplexKey, 0L);
-
-                // Then turn it on a little while later
-                try {
-
-                    Thread.sleep(250);
-                } catch (Exception e) {
-                }
-                hal.turnOnSensor(device, sensor);
-
-            }
+    public void turnOnSensor (String device, String sensor) {
+        // Only a few of the sensors actually turn on the sensors
+        try {
+            Thread.sleep(250);
+        } catch (Exception e) {
         }
+
+        hal.turnOnSensor(device, sensor);
     }
 
-    /**
-     * Converting device and sensor to the multiplex key.
-     * Just useful to put this in a function since we need it
-     * in multiple places and we don't want to mess it up due to
-     * a typo.
-     *
-     * @param dev
-     * @param sen
-     * @return
-     */
-    String toMultiplexKey(String dev, String sen) {
-        return dev + ":" + sen;
-    }
 
     /**
      * Brings all apps to life using their class name
@@ -472,12 +439,13 @@ return currentlyStarting;
 
                 // Throttle the data rate for each sensor
                 if (currTime > lastDataUpdate.get(appClassName).get(multiplexKey) + DATA_UPDATE_INTERVAL_IN_MS) {
-                    // The app gets new data
-                    // dataObject.appClassName = appClassName;
                     app.newData(dataObject);
 
-                    if (!liveMode)
-                        clTripWriter.addNewData(appClassName, dataObject);
+                    // if (!liveMode)
+                    //    clTripWriter.addNewData(appClassName, dataObject);
+                    if (toServerMultiplexing.contains(dataObject.information))
+                        clTripWriter.addNewData(dataObject);
+
                     lastDataUpdate.get(appClassName).put(multiplexKey, currTime);
                 }
 

@@ -113,11 +113,7 @@ public class CLTripWriter {
     /**
      * @param dataObject
      */
-    public synchronized void addNewData(String appClassName, DataMarshal.DataObject dataObject) {
-        appsEncountered.add(appClassName);
-        sensorsSaved.add(dataObject.device + "/" + dataObject.sensor);
-
-
+    public synchronized void addNewData(DataMarshal.DataObject dataObject) {
         // If data object has more than 1 sensor, we have to split it up
         if (dataObject.value.length > 1) {
             List<DataMarshal.DataObject> splitObjects = HardwareAbstractionLayer.splitDataObjects(dataObject);
@@ -163,7 +159,6 @@ public class CLTripWriter {
 
             // Save this to shared prefs when we load the file
             prefs.edit()
-                    .putStringSet(filename + ":apps", appsEncountered)
                     .putStringSet(filename + ":sensors", sensorsSaved)
                     .putLong(filename + ":duration", durationInMillis)
                     .apply();
