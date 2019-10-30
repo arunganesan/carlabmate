@@ -343,10 +343,17 @@ return currentlyStarting;
     public void addMultiplexRoute (String information, String runningAlgorithmName) {
         // This will be routed from other languages to this input
         // Actually, even if it is internal I think we can use this.
+        if (!dataMultiplexing.containsKey(information))
+            dataMultiplexing.put(information, new HashSet<String>());
+        dataMultiplexing.get(information).add(runningAlgorithmName);
+        lastDataUpdate.get(runningAlgorithmName).put(information, 0L);
     }
 
     public void addExternalMultiplexOutput (String information) {
         // This will be placed in the outbox from any algorithm that produces it
+        add this to a special set.
+        IF we reach this data, then go to the bound "packet" guy and place it?
+
     }
 
     public void turnOnSensor (String information) {
@@ -360,8 +367,6 @@ return currentlyStarting;
      */
     private void registerAllSensors() {
         String device, sensor, multiplexKey;
-        final String replayTraceFile = prefs.getString(Load_From_Trace_Key, null);
-
         for (Map.Entry<String, App> appEntry : runningApps.entrySet()) {
             List<Pair<String, String>> sensors = appEntry.getValue().getSensors();
             for (Pair<String, String> devSensor : sensors) {
@@ -375,28 +380,14 @@ return currentlyStarting;
                 lastDataUpdate.get(appEntry.getKey()).put(multiplexKey, 0L);
 
                 // Then turn it on a little while later
-                if (replayTraceFile == null) {
-                    try {
+                try {
 
-                        Thread.sleep(250);
-                    } catch (Exception e) {
-                    }
-                    hal.turnOnSensor(device, sensor);
+                    Thread.sleep(250);
+                } catch (Exception e) {
                 }
+                hal.turnOnSensor(device, sensor);
+
             }
-        }
-
-
-
-        // Turn on trace replayer only after all apps are registered and wired
-        // If we turn it on before, we lose some data and the historical data timestamps get mixed up
-        if (replayTraceFile != null) {
-            // This means we will read from the trace file instead
-            int tripId = (liveMode) ? 42 : clTripWriter.getCurrentTripRecord().getID();
-            replayer = new TraceReplayer(this, replayTraceFile, tripId);
-            Thread replayerThread = new Thread(replayer);
-            replayerThread.setName("Replayer Thread");
-            replayerThread.start();
         }
     }
 

@@ -19,7 +19,57 @@ There are three main ways to interact with `CarLab`. **Developers** can contribu
   * Libraries for each language
   * Available algorithms
 
-# Algorithms
+# Algorithm developer
+Algorithms are implemented as standalone libraries under each of the supported languages. The entry point into each algorithm is a class with a set of callback functions to generate each output information. This function is invoked with each of the required information as parameters. The class is created and sustained during the data collection so it can keep any internal state. 
+
+The overall process of generating and filling in the algorithm is shown in the following figure. 
+![algorithm-generation](images/algorithm-generation.png)
+
+The entry point into an algorithm is the algorithm spec JSON file. This file gives the main details of the algorithm. It specifies which information is produced by this algorithm and their corresponding input. 
+
+```JSON
+[{
+    "module": "aligned-imu",
+    "classname": "AlignedIMU",
+    "functions": [
+        { 
+            "output": "rotation", 
+            "input": ["gravity", "magnetometer"] 
+        },{ 
+            "output": "world-aligned-gyro", 
+            "input": ["gyro", "rotation"] 
+        },{ 
+            "output": "world-aligned-accel", 
+            "input": ["accel", "rotation"] 
+        }
+    ]
+}]
+```
+
+This information is used in the algorithm-generation script. The script is invoked using `gen-algorithm android spec.json` command. This creates the function stubs which are invoked during run-time. The developer can then simply fill in the stub. The generation script also creates a sandbox wrapper script which imports the algorithm library. The wrapper also provides support for feeding in dummy data for any of the input/output of the algorithm allowing rapid testing.
+
+```java
+package edu.umich.aligned_imu;
+import android.content.Context;
+import edu.umich.carlab.CLDataProvider;
+
+public class AlignedIMU extends Algorithm {
+    public AlignedIMU(CLDataProvider cl, Context context) {
+        super(cl, context);
+    }
+
+    @Override
+    public float[][] produceRotation (Float [] m, Float [] g) {}
+
+    @Override
+    public Float[] produceAlignedGyro (Float [] gyro, float [][] rm) {}
+
+    @Override
+    public Float[] produceAlignedAccel (Float [] accel, float [] [] rm) {}
+}
+```
+
+# Reference documentation
 Algorithms can be implemented in one of four development environments -- Android, Python, React and React-Native. Each modality is summarized in the following table.
 
 | Modality  | Resides on  | Initiated by  | Language | Compilation steps   |

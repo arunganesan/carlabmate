@@ -2,8 +2,25 @@
     "module": "aligned-imu",
     "classname": "AlignedIMU",
     "functions": [
-        { "output": "rotation", "input": ["gravity", "magnetometer"] },
-        { "output": "world-aligned-gyro", "input": ["gyro", "rotation"] },
-        { "output": "world-aligned-accel", "input": ["accel", "rotation"] }
+        { 
+            "output": "rotation", 
+            "input": ["gravity", "magnetometer"] 
+        },{ 
+            "output": "world-aligned-gyro", 
+            "input": ["gyro", "rotation"] 
+        },{ 
+            "output": "world-aligned-accel", 
+            "input": ["accel", "rotation"] 
+        }
     ]
 }]
+
+
+
+
+
+
+
+
+
+
