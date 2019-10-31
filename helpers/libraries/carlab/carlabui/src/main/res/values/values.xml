@@ -1,3 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string-array name="sandbox_input_array">
+        <item>Fake</item>
+        <item>Fixed</item>
+        <item>Trace</item>
+        <item>Sensor</item>
+    </string-array>
 </resources>

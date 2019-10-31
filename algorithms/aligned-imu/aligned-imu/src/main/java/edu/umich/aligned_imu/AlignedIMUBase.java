@@ -2,12 +2,17 @@ package edu.umich.aligned_imu;
 
 import android.content.Context;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.umich.carlab.CLDataProvider;
 import edu.umich.carlab.DataMarshal;
+import edu.umich.carlab.loadable.Algorithm;
+import edu.umich.carlab.loadable.AlgorithmSpecs;
 import edu.umich.carlab.loadable.App;
 import edu.umich.carlab.sensors.PhoneSensors;
 
-public abstract class Algorithm extends App {
+public abstract class AlignedIMUBase extends Algorithm {
     private float[] lastMagnet,
             lastGravity,
             lastGyro,
@@ -20,9 +25,26 @@ public abstract class Algorithm extends App {
     final String ALIGNED_GYRO = "world-aligned-gyro";
     final String ALIGNED_ACCEL = "world-aligned-accel";
 
+    /*[{
+        "module": "aligned-imu",
+        "classname": "AlignedIMU",
+        "functions": [
+            {
+                "output": "rotation",
+                    "input": ["gravity", "magnetometer"]
+            },{
+                "output": "world-aligned-gyro",
+                        "input": ["gyro", "rotation"]
+            },{
+                "output": "world-aligned-accel",
+                        "input": ["accel", "rotation"]
+            }
+        ]
+    }]*/
+
     private boolean calculatedRotation = false;
 
-    public Algorithm(CLDataProvider cl, Context context) {
+    public AlignedIMUBase(CLDataProvider cl, Context context) {
         super(cl, context);
 
         name = "world_aligned_imu";
@@ -30,6 +52,19 @@ public abstract class Algorithm extends App {
         subscribe(PhoneSensors.DEVICE, PhoneSensors.MAGNET);
         subscribe(PhoneSensors.DEVICE, PhoneSensors.GYRO);
         subscribe(PhoneSensors.DEVICE, PhoneSensors.ACCEL);
+
+        algorithmFunctions = new ArrayList<>();
+        algorithmFunctions.add(new AlgorithmSpecs.AppFunction(
+                "rotation",
+                "gravity", "magnetometer"));
+
+        algorithmFunctions.add(new AlgorithmSpecs.AppFunction(
+                "world-aligned-gyro",
+                "gyro", "rotation"));
+
+        algorithmFunctions.add(new AlgorithmSpecs.AppFunction(
+                "world-aligned-accel",
+                "accel", "rotation"));
     }
 
     @Override

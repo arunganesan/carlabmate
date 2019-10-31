@@ -10,6 +10,9 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,7 +52,8 @@ public abstract class App implements IApp {
         Map<Long, // Seconds bucket
                 List<DataSample>>> historicalData = new HashMap<>();
 
-    private App() {
+    public App() {
+        this(null, null);
     }
 
     public App(CLDataProvider cl, Context context) {
@@ -59,6 +63,7 @@ public abstract class App implements IApp {
         if (context != null)
             prefs = context.getSharedPreferences(this.getClass().getCanonicalName(), Context.MODE_PRIVATE);
     }
+
 
     /**
      * Load this value from the shared prefs. This is useful to keep track of values that must persist across
