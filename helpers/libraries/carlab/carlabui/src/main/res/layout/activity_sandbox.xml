@@ -16,9 +16,7 @@
     <Button
         android:id="@+id/closeButton"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="25dp"
-        android:layout_marginBottom="25dp"
+        style="@style/MyButton"
         android:text="List of algorithms" />
 
     <TextView
@@ -28,10 +26,9 @@
         android:layout_gravity="center"
         android:layout_marginHorizontal="25dp"
         android:layout_marginBottom="25dp"
-        android:fontFamily="sans-serif-black"
+        style="@style/MyTextView"
         android:text="Alg 1"
         android:textAlignment="center"
-        android:textColor="#000"
         android:textSize="30sp" />
 
 
@@ -69,9 +66,7 @@
     <Button
         android:id="@+id/button8"
         android:layout_width="match_parent"
-        android:layout_marginHorizontal="25dp"
-        android:layout_marginBottom="25dp"
-        android:layout_height="wrap_content"
+        style="@style/MyButton"
         android:text="Start Test" />
 
 
@@ -121,9 +116,7 @@
     <Button
         android:id="@+id/button9"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="25dp"
-        android:layout_marginBottom="25dp"
+        style="@style/MyButton"
         android:text="Save output" />
 
 

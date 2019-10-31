@@ -36,8 +36,6 @@ public class LocalAlgorithmsActivity extends AppCompatActivity {
                         func.outputInformation,
                         String.join(", ", func.inputInformation)));
 
-
-                button.setHeight(300);
                 button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
