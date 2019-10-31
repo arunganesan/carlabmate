@@ -9,7 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".SandboxActivity"></activity>
+        <activity android:name=".AlgorithmSandboxActivity"></activity>
         <activity android:name=".LocalAlgorithmsActivity" />
         <activity
             android:name=".AlgorithmsListActivity"

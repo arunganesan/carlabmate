@@ -4,15 +4,14 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
-import edu.umich.carlab.io.AppLoader;
-//import edu.umich.carlabui.ExperimentBaseActivity;
 import edu.umich.carlabui.LocalAlgorithmsActivity;
-import edu.umich.carlabui.SandboxActivity;
 
-import static edu.umich.carlab.Constants.*;
+import static edu.umich.carlab.Constants.Experiment_New_Version_Detected;
+import static edu.umich.carlab.Constants.LIVE_MODE;
+import static edu.umich.carlab.Constants.Main_Activity;
 
 
-public class ExperimentBase extends LocalAlgorithmsActivity {
+public class Sandbox extends LocalAlgorithmsActivity {
     SharedPreferences prefs;
 
     @Override
@@ -20,18 +19,15 @@ public class ExperimentBase extends LocalAlgorithmsActivity {
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefs
                 .edit()
-//                .putString(UID_key, getString(edu.umich.carlab.watchfon.R.string.uid))
+                // .putString(UID_key, getString(edu.umich.carlab.watchfon.R.string.uid))
                 .putBoolean(LIVE_MODE, true)
                 .putBoolean(Experiment_New_Version_Detected, false)
-                .putString(Main_Activity, ExperimentBase.class.getCanonicalName())
+                .putString(Main_Activity, Sandbox.class.getCanonicalName())
                 .commit();
 
         super.onCreate(savedInstanceState);
-
-        AppLoader instance = AppLoader.getInstance();
-
-        instance.loadApps(new Class<?>[]{
-                edu.umich.aligned_imu.AlignedIMU.class,
-        });
+        createModuleButtons(
+                new edu.umich.aligned_imu.AlignedIMU(null, null),
+                edu.umich.aligned_imu.Algorithm.class.getDeclaredMethods());
     }
 }
