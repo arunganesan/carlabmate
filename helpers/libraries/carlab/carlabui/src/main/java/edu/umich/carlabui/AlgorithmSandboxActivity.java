@@ -2,13 +2,17 @@ package edu.umich.carlabui;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.util.Pair;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,29 +20,142 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import edu.umich.carlab.loadable.AlgorithmSpecs;
 
-import static edu.umich.carlab.Constants.Load_From_Trace_Key;
-
-/*
-    <string-array name="sandbox_input_array">
-        <item>Fake</item>
-        <item>Fixed</item>
-        <item>Trace</item>
-        <item>Sensor</item>
-    </string-array>
- */
-
 public class AlgorithmSandboxActivity extends AppCompatActivity {
-    LinearLayout inputCardList, outputCardList;
-
     final int FAKE = 0;
     final int FIXED = 1;
     final int TRACE = 2;
     final int SENSOR = 3;
     final String TAG = "AlgorithmSandboxActivity";
+    LinearLayout inputCardList, outputCardList;
+
+    Map<String, List<RangeInfo>> fakeValuesRange = new HashMap<>();
+
+    enum RangeEndpoint {
+        MIN, MAX
+    }
+
+    public class RangeInfo {
+        public float first;
+        public float second;
+
+        public RangeInfo(float first, float second) {
+            this.first = first;
+            this.second = second;
+        }
+
+
+
+        public String toString() {
+            return String.format("(%f, %f)", first, second);
+        }
+    }
+
+    public class FakeRangeSpecific {
+        public String information;
+        public int index;
+        public RangeEndpoint minOrMax;
+
+        public FakeRangeSpecific(
+                String information,
+                int index,
+                RangeEndpoint minOrMax) {
+            this.information = information;
+            this.index = index;
+            this.minOrMax = minOrMax;
+        }
+    }
+
+
+    TextView.OnEditorActionListener doneChangeRange = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView target, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
+                    actionId == EditorInfo.IME_ACTION_DONE ||
+                    event != null &&
+                            event.getAction() == KeyEvent.ACTION_DOWN &&
+                            event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                if (event == null || !event.isShiftPressed()) {
+                    FakeRangeSpecific fakeRangeDetails = (FakeRangeSpecific)target.getTag();
+                    String s = target.getText().toString();
+
+                    if (fakeRangeDetails.minOrMax == RangeEndpoint.MIN)
+                        fakeValuesRange
+                                .get(fakeRangeDetails.information)
+                                .get(fakeRangeDetails.index)
+                                .first = Float.parseFloat(s);
+                    else
+                        fakeValuesRange
+                                .get(fakeRangeDetails.information)
+                                .get(fakeRangeDetails.index)
+                                .second = Float.parseFloat(s);
+
+                    return true; // consume.
+                }
+            }
+            return false;
+        }
+    };
+
+
+
+
+    View.OnClickListener fakeModeDialog = new View.OnClickListener() {
+        @Override
+        public void onClick(final View v) {
+
+            Log.v(TAG, "Range for first guy: " + fakeValuesRange.get("gravity").get(0).toString());
+            String information = (String) v.getTag();
+            final float[] obj = (float[]) AlgorithmSpecs.InformationDatatypes.get(information);
+
+            LinearLayout ll = new LinearLayout(AlgorithmSandboxActivity.this);
+            ll.setOrientation(LinearLayout.VERTICAL);
+
+            LinearLayout _ll;
+            TextView _fieldIdTv;
+            EditText _minVal, _maxVal;
+
+            for (int i = 0; i < obj.length; i++) {
+                _ll = (LinearLayout)getLayoutInflater().inflate(R.layout.fake_input_dialog, ll, false);
+                _fieldIdTv = _ll.findViewById(R.id.fieldId); _fieldIdTv.setText("" + i);
+
+                _minVal = _ll.findViewById(R.id.minFakeValue);
+                _minVal.setText("" + fakeValuesRange.get(information).get(i).first);
+                _minVal.setTag(new FakeRangeSpecific(information, i, RangeEndpoint.MIN));
+                _minVal.setOnEditorActionListener(doneChangeRange);
+
+                _maxVal = _ll.findViewById(R.id.maxFakeValue);
+                _maxVal.setText("" + fakeValuesRange.get(information).get(i).second);
+                _maxVal.setTag(new FakeRangeSpecific(information, i, RangeEndpoint.MAX));
+                _maxVal.setOnEditorActionListener(doneChangeRange);
+
+                ll.addView(_ll);
+            }
+
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(
+                    AlgorithmSandboxActivity.this);
+            dialogBuilder
+                    .setTitle("Set distribution")
+                    .setView(ll)
+                    .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            Log.v(TAG, String.format(
+                                    "Set info for information: %s. Num elements %d",
+                                    v.getTag(), obj.length));
+                        }
+                    });
+
+            AlertDialog dialog = dialogBuilder.create();
+            dialog.show();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,17 +169,26 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
 
 
         findViewById(R.id.closeButton).setOnClickListener(
-            new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    finish();
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        finish();
+                    }
                 }
-            }
         );
 
+        initializeFakeValueRanges();
         createUI();
     }
 
+    void initializeFakeValueRanges() {
+        for (String information : StaticObjects.selectedAppFunction.inputInformation) {
+            final float[] obj = (float[]) AlgorithmSpecs.InformationDatatypes.get(information);
+            fakeValuesRange.put(information, new ArrayList<RangeInfo>());
+            for (int i = 0; i < obj.length; i++)
+                fakeValuesRange.get(information).add(new RangeInfo(0, 1));
+        }
+    }
 
     void createUI() {
         inputCardList = findViewById(R.id.algorithmInputList);
@@ -70,7 +196,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
 
         for (String inputInfo : StaticObjects.selectedAppFunction.inputInformation) {
             LayoutInflater inflater = getLayoutInflater();
-            final LinearLayout inputLinear = (LinearLayout)inflater.inflate(
+            final LinearLayout inputLinear = (LinearLayout) inflater.inflate(
                     R.layout.sandbox_input_configuration,
                     inputCardList,
                     false);
@@ -83,20 +209,20 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
             // Initialize the dropdown-specific controls
             Spinner choiceSpinner = inputLinear.findViewById(R.id.inputChoice);
             choiceSpinner.setOnItemSelectedListener(
-                new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(
-                            AdapterView<?> parent,
-                            View view, int position,
-                            long id) {
-                        initializeComponent(inputLinear, position);
-                    }
+                    new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(
+                                AdapterView<?> parent,
+                                View view, int position,
+                                long id) {
+                            initializeComponent(inputLinear, position);
+                        }
 
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {
 
+                        }
                     }
-                }
             );
 
             // call the initialization one time
@@ -108,8 +234,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
         outputCardList.addView(tv);
     }
 
-
-    void initializeComponent (LinearLayout inputLinear, int selectionId) {
+    void initializeComponent(LinearLayout inputLinear, int selectionId) {
         String buttonText = "";
         View.OnClickListener dialogCallback = null;
         switch (selectionId) {
@@ -136,31 +261,5 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
         button.setTag(inputLinear.getTag());
         button.setOnClickListener(dialogCallback);
     }
-
-    View.OnClickListener fakeModeDialog = new View.OnClickListener() {
-        @Override
-        public void onClick(final View v) {
-            LinearLayout fakeInputDialog = (LinearLayout)getLayoutInflater().inflate(
-                    R.layout.fake_input_dialog,
-                    null);
-            EditText minValue = fakeInputDialog.findViewById(R.id.minFakeValue);
-            EditText maxValue = fakeInputDialog.findViewById(R.id.maxFakeValue);
-            minValue.setText("123");
-
-            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(
-                    AlgorithmSandboxActivity.this);
-            dialogBuilder
-                    .setTitle("Set distribution")
-                    .setView(fakeInputDialog)
-                    .setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            Log.v(TAG, "Set info for information: " + v.getTag());
-                        }
-                    });
-
-            AlertDialog dialog = dialogBuilder.create();
-            dialog.show();
-        }
-    };
 
 }

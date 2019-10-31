@@ -16,9 +16,7 @@ public abstract class AlignedIMUBase extends Algorithm {
     private float[] lastMagnet,
             lastGravity,
             lastGyro,
-            lastAccel;
-
-    float [] [] lastRotation = null;
+            lastAccel, lastRotation;
 
 
     final String ROTATION = "rotation";
@@ -88,7 +86,7 @@ public abstract class AlignedIMUBase extends Algorithm {
                 lastAccel = (float[])dObject.value;
                 break;
             case ROTATION:
-                lastRotation = (float[][])dObject.value;
+                lastRotation = (float[])dObject.value;
                 break;
         }
 
@@ -111,9 +109,9 @@ public abstract class AlignedIMUBase extends Algorithm {
 
 
 
-    public abstract float[][] produceRotation (float [] m, float [] g);
+    public abstract float[] produceRotation (float [] m, float [] g);
 
-    public abstract float[] produceAlignedGyro (float [] gyro, float [][] rm);
+    public abstract float[] produceAlignedGyro (float [] gyro, float [] rm);
 
-    public abstract float[] produceAlignedAccel (float [] accel, float [] [] rm);
+    public abstract float[] produceAlignedAccel (float [] accel, float [] rm);
 }
