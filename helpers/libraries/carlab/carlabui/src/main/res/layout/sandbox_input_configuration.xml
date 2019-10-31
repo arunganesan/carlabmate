@@ -14,7 +14,6 @@
             android:fontFamily="sans-serif-black"
             android:textColor="#000"
             android:textSize="15sp"
-
             android:text="Information name" />
 
         <Spinner
@@ -24,6 +23,12 @@
             android:layout_weight="1"
             android:entries="@array/sandbox_input_array"
             android:spinnerMode="dropdown" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/inputSpecificControl"
+            android:layout_weight="1">
+
+        </FrameLayout>
 </LinearLayout>
-
-
