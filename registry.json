@@ -2,7 +2,7 @@
     { "name": "mood", "description": "User's mood"},
     { "name": "home-work", "description": "User's home/work locations"},
 
-    { "name": "rotation", "type": "float[3][3]"},
+    { "name": "rotation", "type": "float[9]"},
     { "output": "world-aligned-gyro", "type": "float[3]" },
     { "output": "world-aligned-accel", "type": "float[3]" },
 

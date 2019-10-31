@@ -10,7 +10,7 @@ public class AlgorithmSpecs {
     public static Map<String, Object> InformationDatatypes;
     static {
         InformationDatatypes = new HashMap<>();
-        InformationDatatypes.put("rotation", new float[3][3]);
+        InformationDatatypes.put("rotation", new float[9]);
         InformationDatatypes.put("gravity", new float[3]);
         InformationDatatypes.put("world-aligned-gyro", new float[3]);
         InformationDatatypes.put("world-aligned-accel", new float[3]);

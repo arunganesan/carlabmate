@@ -1,59 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center"
     android:padding="20dp">
 
-
-        <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                >
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    style="@style/MyTextView"
-                    android:text="Minimum" />
-
-
-                <EditText
-                    android:id="@+id/minFakeValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ems="10"
-                    android:inputType="number" />
-
-        </LinearLayout>
-
-
-
-        <LinearLayout
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            >
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    style="@style/MyTextView"
-                    android:layout_weight="1"
-                    android:text="Maximum" />
+            android:layout_margin="0sp"
+            android:layout_weight="1"
+            style="@style/MyTextView"
+            android:id="@+id/fieldId"
+            android:text="ID" />
 
 
-                <EditText
-                    android:id="@+id/maxFakeValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ems="10"
-                    android:inputType="number" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            style="@style/MyTextView"
+            android:layout_margin="0sp"
+            android:text="Min" />
 
-        </LinearLayout>
+
+        <EditText
+            android:id="@+id/minFakeValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:layout_margin="0sp"
+            android:imeOptions="actionDone"
+            android:inputType="number" />
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/MyTextView"
+            android:layout_weight="1"
+            android:layout_margin="0sp"
+            android:text="Max" />
+
+
+        <EditText
+            android:id="@+id/maxFakeValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:layout_margin="0sp"
+            android:imeOptions="actionDone"
+            android:inputType="number" />
+
 </LinearLayout>

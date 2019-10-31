@@ -15,9 +15,9 @@ public class AlignedIMU extends AlignedIMUBase {
     }
 
     @Override
-    public float[][] produceRotation (float [] m, float [] g) {
+    public float[] produceRotation (float [] m, float [] g) {
         // Cross product of magnet and gravity
-        float[][] rm = new float[3][3];
+        float[] rm = new float[9];
 
         float[] c = {
                 m[1]*g[2]-m[2]*g[1],
@@ -39,28 +39,28 @@ public class AlignedIMU extends AlignedIMUBase {
         };
 
         // Assign values
-        rm[0][0] = c[0];    rm[0][1] = c[1];    rm[0][2] = c[2];
-        rm[1][0] = nm[0];   rm[1][1] = nm[1];   rm[1][2] = nm[2];
-        rm[2][0] = g[0];    rm[2][1] = g[1];    rm[2][2] = g[2];
+        rm[0] = c[0];    rm[1] = c[1];    rm[2] = c[2];
+        rm[3] = nm[0];   rm[3+1] = nm[1];   rm[3+2] = nm[2];
+        rm[2*3] = g[0];    rm[2*3+1] = g[1];    rm[2*3+2] = g[2];
 
         return rm;
     }
 
     @Override
-    public float[] produceAlignedGyro (float [] gyro, float [][] rm) {
+    public float[] produceAlignedGyro (float [] gyro, float [] rm) {
         return MatrixMul(gyro, rm);
     }
 
     @Override
-    public float[] produceAlignedAccel (float [] accel, float [] [] rm) {
+    public float[] produceAlignedAccel (float [] accel, float [] rm) {
         return MatrixMul(accel, rm);
     }
 
-    public float[] MatrixMul(float[] T, float[][] RotMat) {
+    public float[] MatrixMul(float[] T, float[] RotMat) {
         float[] temp = T.clone();
         for (int i = 0; i < RotMat.length; i++)
             for (int j = 0; j < T.length; j++) {
-                temp[i] = temp[i] + T[j] * RotMat[j][i];
+                temp[i] = temp[i] + T[j] * RotMat[j*3+i];
             }
         return temp;
     }
