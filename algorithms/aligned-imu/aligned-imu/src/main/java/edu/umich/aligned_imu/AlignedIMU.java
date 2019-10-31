@@ -4,9 +4,14 @@ import android.content.Context;
 
 import edu.umich.carlab.CLDataProvider;
 
-public class AlignedIMU extends Algorithm {
+public class AlignedIMU extends AlignedIMUBase {
+    public AlignedIMU() {
+        this(null, null);
+    }
+
     public AlignedIMU(CLDataProvider cl, Context context) {
         super(cl, context);
+        this.name = "world-aligned-imu";
     }
 
     @Override

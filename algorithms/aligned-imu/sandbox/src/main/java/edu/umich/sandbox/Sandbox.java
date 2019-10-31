@@ -4,6 +4,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
+import edu.umich.aligned_imu.AlignedIMU;
+import edu.umich.aligned_imu.AlignedIMUBase;
 import edu.umich.carlabui.LocalAlgorithmsActivity;
 
 import static edu.umich.carlab.Constants.Experiment_New_Version_Detected;
@@ -26,8 +28,7 @@ public class Sandbox extends LocalAlgorithmsActivity {
                 .commit();
 
         super.onCreate(savedInstanceState);
-        createModuleButtons(
-                new edu.umich.aligned_imu.AlignedIMU(null, null),
-                edu.umich.aligned_imu.Algorithm.class.getDeclaredMethods());
+
+        createModuleButtons(new edu.umich.aligned_imu.AlignedIMU());
     }
 }

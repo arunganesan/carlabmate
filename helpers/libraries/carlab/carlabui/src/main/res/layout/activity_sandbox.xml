@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,87 +8,125 @@
     android:orientation="vertical"
     tools:context=".AlgorithmSandboxActivity">
 
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <LinearLayout
+    <Button
+        android:id="@+id/closeButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_marginHorizontal="25dp"
+        android:layout_marginBottom="25dp"
+        android:text="List of algorithms" />
 
-
-        <Button
-            android:id="@+id/closeButton"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="Back" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/lobstertwo_bold"
-            android:id="@+id/sandboxAppTitle"
-            android:textSize="37dp"
-            android:textAlignment="center"
-            android:textColor="#000"
-            android:layout_weight="8"
-            android:layout_margin="10dp"
-            android:text="Alg 1" />
-
-
-        <Button
-            android:id="@+id/button8"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="Start" />
-
-
-    </LinearLayout>
-
-    <ScrollView
+    <TextView
+        android:id="@+id/sandboxAppTitle"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginHorizontal="25dp"
+        android:layout_marginBottom="25dp"
+        android:fontFamily="sans-serif-black"
+        android:text="Alg 1"
+        android:textAlignment="center"
+        android:textColor="#000"
+        android:textSize="30sp" />
 
 
-    <LinearLayout
+
+
+    <android.support.v7.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:id="@+id/sandboxActivityLayout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-
-        <android.support.v7.widget.CardView
+        android:layout_height="250dp"
+        android:layout_marginHorizontal="25dp"
+        android:layout_marginBottom="25dp"
+        android:id="@+id/algorithmInputCard">
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="250dp">
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:id="@+id/algorithmInputList"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
             <TextView
                 android:id="@+id/textView"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Input" />
-        </android.support.v7.widget.CardView>
+                android:text="Inputs"
+                android:textAlignment="center"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
-        <android.support.v7.widget.CardView
+    </android.support.v7.widget.CardView>
+
+    <Button
+        android:id="@+id/button8"
+        android:layout_width="match_parent"
+        android:layout_marginHorizontal="25dp"
+        android:layout_marginBottom="25dp"
+        android:layout_height="wrap_content"
+        android:text="Start Test" />
+
+
+
+    <android.support.v7.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="250dp">
+            android:layout_height="250dp"
+            android:layout_marginHorizontal="25dp"
+            android:layout_marginBottom="25dp"
+            android:id="@+id/algorithmUICard">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:text="Optional UI visualization" />
         </android.support.v7.widget.CardView>
 
         <android.support.v7.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="250dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Output card" />
+            android:layout_height="250dp"
+            android:layout_marginHorizontal="25dp"
+            android:layout_marginBottom="25dp"
+            android:id="@+id/algorithmOutputCard">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:id="@+id/algorithmOutputList"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Output"
+                    android:textAlignment="center"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
         </android.support.v7.widget.CardView>
 
-    </LinearLayout>
-    </ScrollView>
+
+    <Button
+        android:id="@+id/button9"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="25dp"
+        android:layout_marginBottom="25dp"
+        android:text="Save output" />
+
+
+
 </LinearLayout>
+</ScrollView>
