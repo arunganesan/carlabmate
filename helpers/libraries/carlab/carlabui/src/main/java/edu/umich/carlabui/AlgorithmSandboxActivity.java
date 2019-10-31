@@ -1,18 +1,26 @@
 package edu.umich.carlabui;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import edu.umich.carlab.loadable.AlgorithmSpecs;
+
+import static edu.umich.carlab.Constants.Load_From_Trace_Key;
 
 /*
     <string-array name="sandbox_input_array">
@@ -30,6 +38,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
     final int FIXED = 1;
     final int TRACE = 2;
     final int SENSOR = 3;
+    final String TAG = "AlgorithmSandboxActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,22 +51,14 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
         text.setText(StaticObjects.selectedAlgorithm.getName());
 
 
-        findViewById(R.id.closeButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // TODO need to shut down CarLab before we go back
-                finish();
+        findViewById(R.id.closeButton).setOnClickListener(
+            new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                }
             }
-        });
-
-
-        /*
-        AppLoader instance = AppLoader.getInstance();
-        // TODO This should be loaded during run time
-        instance.loadApps(new Class<?>[]{
-                edu.umich.aligned_imu.AlignedIMU.class,
-        });*/
-
+        );
 
         createUI();
     }
@@ -74,20 +75,29 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
                     inputCardList,
                     false);
 
+            inputLinear.setTag(inputInfo);
             TextView tv = inputLinear.findViewById(R.id.inputName);
-            tv.setText(String.format("%s => %s",
-                    inputInfo,
-                    AlgorithmSpecs.InformationDatatypes.get(inputInfo).getClass().getSimpleName()));
+            tv.setText(inputInfo);
             inputCardList.addView(inputLinear);
 
             // Initialize the dropdown-specific controls
             Spinner choiceSpinner = inputLinear.findViewById(R.id.inputChoice);
-            choiceSpinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    initializeComponent(inputLinear, position);
+            choiceSpinner.setOnItemSelectedListener(
+                new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(
+                            AdapterView<?> parent,
+                            View view, int position,
+                            long id) {
+                        initializeComponent(inputLinear, position);
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
                 }
-            });
+            );
 
             // call the initialization one time
             initializeComponent(inputLinear, choiceSpinner.getSelectedItemPosition());
@@ -100,28 +110,57 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
 
 
     void initializeComponent (LinearLayout inputLinear, int selectionId) {
-        int resource = R.layout.sandbox_input_fake;
+        String buttonText = "";
+        View.OnClickListener dialogCallback = null;
         switch (selectionId) {
-            case FIXED:
-                resource = R.layout.sandbox_input_fixed;
-                break;
             case FAKE:
-                resource = R.layout.sandbox_input_fake;
+                buttonText = "Adjust distribution";
+                dialogCallback = fakeModeDialog;
+                break;
+            case FIXED:
+                buttonText = "Set fixed value";
+                dialogCallback = fakeModeDialog;
                 break;
             case SENSOR:
-                resource = R.layout.sandbox_input_sensor;
+                buttonText = "Choose sensor";
+                dialogCallback = fakeModeDialog;
                 break;
             case TRACE:
-                resource = R.layout.sandbox_input_trace;
+                buttonText = "Choose trace";
+                dialogCallback = fakeModeDialog;
                 break;
         }
 
-        FrameLayout customization = inputLinear.findViewById(R.id.inputSpecificControl);
-        LayoutInflater inflater = getLayoutInflater();
-        customization.removeAllViews();
-        customization.addView(inflater.inflate(
-                resource,
-                customization,
-                false));
+        Button button = inputLinear.findViewById(R.id.inputButtonConfiguration);
+        button.setText(buttonText);
+        button.setTag(inputLinear.getTag());
+        button.setOnClickListener(dialogCallback);
     }
+
+    View.OnClickListener fakeModeDialog = new View.OnClickListener() {
+        @Override
+        public void onClick(final View v) {
+            LinearLayout fakeInputDialog = (LinearLayout)getLayoutInflater().inflate(
+                    R.layout.fake_input_dialog,
+                    null);
+            EditText minValue = fakeInputDialog.findViewById(R.id.minFakeValue);
+            EditText maxValue = fakeInputDialog.findViewById(R.id.maxFakeValue);
+            minValue.setText("123");
+
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(
+                    AlgorithmSandboxActivity.this);
+            dialogBuilder
+                    .setTitle("Set distribution")
+                    .setView(fakeInputDialog)
+                    .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            Log.v(TAG, "Set info for information: " + v.getTag());
+                        }
+                    });
+
+            AlertDialog dialog = dialogBuilder.create();
+            dialog.show();
+        }
+    };
+
 }

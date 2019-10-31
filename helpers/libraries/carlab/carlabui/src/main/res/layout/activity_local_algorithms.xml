@@ -14,15 +14,14 @@
         android:orientation="vertical">
 
         <TextView
+            style="@style/MyTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="25dp"
             android:layout_marginBottom="25dp"
-            android:fontFamily="sans-serif-black"
-            android:text="List of algorithms"
             android:textAlignment="center"
-            android:textColor="#000"
-            android:textSize="37dp" />
+            android:text="List of algorithms"
+            android:textSize="37sp" />
 
     </LinearLayout>
 </ScrollView>
