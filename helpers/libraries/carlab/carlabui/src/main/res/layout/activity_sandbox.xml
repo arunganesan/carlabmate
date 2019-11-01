@@ -125,11 +125,12 @@
         </android.support.v7.widget.CardView>
 
 
-        <Button
-            android:id="@+id/button9"
+        <ToggleButton
+            android:id="@+id/saveToggleButton"
             style="@style/MyButton"
             android:layout_width="match_parent"
-            android:text="Save output" />
+            android:textOn="Stop saving trace"
+            android:textOff="Save output trace" />
 
 
     </LinearLayout>
