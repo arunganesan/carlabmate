@@ -21,17 +21,6 @@ public class LocalAlgorithmsActivity extends AppCompatActivity {
     protected DataReceiver dataReceiver = new DataReceiver();
     LinearLayout moduleLayout;
 
-    @Override
-    protected void onCreate (Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_local_algorithms);
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.hide();
-
-        StaticObjects.dataReceiver = dataReceiver;
-        moduleLayout = findViewById(R.id.localAlgorithmsListView);
-    }
-
     protected void createModuleButtons (Algorithm... loadedAlgorithms) {
         for (final Algorithm algorithm : loadedAlgorithms) {
             for (final AlgorithmSpecs.AppFunction func : algorithm.algorithmFunctions) {
@@ -54,6 +43,17 @@ public class LocalAlgorithmsActivity extends AppCompatActivity {
                 moduleLayout.addView(button);
             }
         }
+    }
+
+    @Override
+    protected void onCreate (Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_local_algorithms);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.hide();
+
+        StaticObjects.dataReceiver = dataReceiver;
+        moduleLayout = findViewById(R.id.localAlgorithmsListView);
     }
 
     public class DataReceiver implements CLDataProvider {

@@ -2,6 +2,7 @@ package edu.umich.carlabui;
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.ViewGroup;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -18,6 +19,7 @@ import edu.umich.carlab.DataMarshal;
 
 public class LineShadow implements Shadow {
     final float MAX_TIMESCALE = 10;
+    final String TAG = "LineShadow";
     int[] colors = {Color.BLACK, Color.BLUE, Color.RED, Color.GREEN, Color.MAGENTA, Color.CYAN,
             Color.YELLOW, Color.WHITE};
     Map<String, LineDataSet> dataset;
@@ -40,6 +42,7 @@ public class LineShadow implements Shadow {
 
         for (int i = 0; i < values.length; i++) {
             String key = String.format("%s[%d]", info, i);
+            Log.v(TAG, String.format("%s = %f", key, values[i]));
             if (!dataset.containsKey(key)) {
                 entries.put(key, new ArrayList<Entry>());
                 dataset.put(key, new LineDataSet(entries.get(key), key));
@@ -70,7 +73,16 @@ public class LineShadow implements Shadow {
         }
     }
 
+    public void destroyVisualization () {
+    }
+
     public void initializeVisualization (Activity parentActivity, ViewGroup parentLayout) {
+        if (this.parentActivity != null) {
+            parentLayout.removeView(lineChart);
+            lineChart = null;
+        }
+
+
         this.parentActivity = parentActivity;
         this.parentLayout = parentLayout;
 
