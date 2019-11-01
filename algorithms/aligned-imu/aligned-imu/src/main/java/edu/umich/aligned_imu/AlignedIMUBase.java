@@ -13,7 +13,7 @@ import edu.umich.carlab.loadable.App;
 import edu.umich.carlab.sensors.PhoneSensors;
 
 public abstract class AlignedIMUBase extends Algorithm {
-    private float[] lastMagnet,
+    private Float[] lastMagnet,
             lastGravity,
             lastGyro,
             lastAccel, lastRotation;
@@ -74,19 +74,19 @@ public abstract class AlignedIMUBase extends Algorithm {
 
         switch (sensor) {
             case PhoneSensors.GRAVITY:
-                lastGravity = (float[])dObject.value;
+                lastGravity = (Float[])dObject.value;
                 break;
             case PhoneSensors.MAGNET:
-                lastMagnet = (float[])dObject.value;
+                lastMagnet = (Float[])dObject.value;
                 break;
             case PhoneSensors.GYRO:
-                lastGyro = (float[])dObject.value;
+                lastGyro = (Float[])dObject.value;
                 break;
             case PhoneSensors.ACCEL:
-                lastAccel = (float[])dObject.value;
+                lastAccel = (Float[])dObject.value;
                 break;
             case ROTATION:
-                lastRotation = (float[])dObject.value;
+                lastRotation = (Float[])dObject.value;
                 break;
         }
 
@@ -109,9 +109,9 @@ public abstract class AlignedIMUBase extends Algorithm {
 
 
 
-    public abstract float[] produceRotation (float [] m, float [] g);
+    public abstract Float[] produceRotation (Float [] m, Float [] g);
 
-    public abstract float[] produceAlignedGyro (float [] gyro, float [] rm);
+    public abstract Float[] produceAlignedGyro (Float [] gyro, Float [] rm);
 
-    public abstract float[] produceAlignedAccel (float [] accel, float [] rm);
+    public abstract Float[] produceAlignedAccel (Float [] accel, Float [] rm);
 }

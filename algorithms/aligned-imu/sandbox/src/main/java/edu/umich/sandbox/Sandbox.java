@@ -12,7 +12,6 @@ import static edu.umich.carlab.Constants.Experiment_New_Version_Detected;
 import static edu.umich.carlab.Constants.LIVE_MODE;
 import static edu.umich.carlab.Constants.Main_Activity;
 
-
 public class Sandbox extends LocalAlgorithmsActivity {
     SharedPreferences prefs;
 
@@ -29,6 +28,6 @@ public class Sandbox extends LocalAlgorithmsActivity {
 
         super.onCreate(savedInstanceState);
 
-        createModuleButtons(new edu.umich.aligned_imu.AlignedIMU());
+        createModuleButtons(new edu.umich.aligned_imu.AlignedIMU(dataReceiver, this));
     }
 }
