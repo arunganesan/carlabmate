@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:padding="20dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="0sp"
+            android:layout_weight="1"
+            style="@style/MyTextView"
+            android:id="@+id/fieldId"
+            android:text="ID" />
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            style="@style/MyTextView"
+            android:layout_margin="0sp"
+            android:text="Value" />
+
+
+        <EditText
+            android:id="@+id/fixedValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:layout_margin="0sp"
+            android:imeOptions="actionDone"
+            android:inputType="number" />
+
+</LinearLayout>

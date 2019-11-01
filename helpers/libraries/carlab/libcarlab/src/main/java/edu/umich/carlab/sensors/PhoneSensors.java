@@ -19,7 +19,7 @@ public class PhoneSensors {
 
     public final static String ACCEL = "accel";
     public final static String GYRO = "gyro";
-    public final static String MAGNET = "magnet";
+    public final static String MAGNET = "magnetometer";
     public final static String GRAVITY = "gravity";
     public final static String ORIENT = "orientation";
     public final static String GPS = "gps";

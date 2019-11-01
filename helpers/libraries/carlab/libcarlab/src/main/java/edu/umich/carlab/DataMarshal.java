@@ -52,6 +52,14 @@ public class DataMarshal {
         public Serializable value;
         public MessageType dataType;
 
+        public DataObject() { }
+
+        public DataObject (String information, Serializable value) {
+            this.information = information;
+            this.value = value;
+            this.dataType = MessageType.DATA;
+        }
+
         public DataObject clone() {
             DataObject dobj = new DataObject();
             dobj.time = time;

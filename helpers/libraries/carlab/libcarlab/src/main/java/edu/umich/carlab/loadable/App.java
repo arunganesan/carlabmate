@@ -158,7 +158,9 @@ public abstract class App implements IApp {
         d.information = information;
         d.dataType = DataMarshal.MessageType.DATA;
         d.value = values;
-        cl.newData(d);
+
+        if (cl != null)
+            cl.newData(d);
     }
 
     public DataMarshal.DataObject outputData(
