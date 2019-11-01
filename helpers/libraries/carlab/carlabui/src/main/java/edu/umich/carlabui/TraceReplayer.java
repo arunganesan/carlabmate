@@ -41,7 +41,7 @@ public class TraceReplayer implements Runnable {
         ifile = new File(filename);
         this.tripID = "" + tripID;
         DataDumpWriter dataDumpWriter = new DataDumpWriter(carlabService);
-        traceData = dataDumpWriter.readData(ifile);
+        traceData = dataDumpWriter.ReadData(ifile);
         prefs = PreferenceManager.getDefaultSharedPreferences(carlabService);
         liveMode = prefs.getBoolean(LIVE_MODE, false);
 
