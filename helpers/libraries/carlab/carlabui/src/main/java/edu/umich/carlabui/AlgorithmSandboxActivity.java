@@ -180,10 +180,10 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
 
             for (int i = 0; i < numArgs; i++) {
                 String inputInfo = StaticObjects.selectedAppFunction.inputInformation.get(i);
-                Serializable[] values = fixedValues.get(inputInfo);
+                Serializable[] values = fixedValues.get(inputInfo).clone();
                 DataMarshal.DataObject inputData = new DataMarshal.DataObject(inputInfo, values);
-                StaticObjects.selectedAlgorithm.newData(inputData);
                 if (shadow != null) shadow.addData(inputData);
+                StaticObjects.selectedAlgorithm.newData(inputData);
             }
 
             String outputInfoName = StaticObjects.selectedAppFunction.outputInformation;
@@ -217,6 +217,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
                 scheduledHandler.postDelayed(callAlgorithm, runPeriod);
             } else {
                 startToggleButton.setText("Start test");
+                shadow.destroyVisualization();
                 scheduledHandler.removeCallbacks(callAlgorithm);
             }
         }

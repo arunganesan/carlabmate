@@ -3,25 +3,18 @@ package edu.umich.aligned_imu;
 import android.content.Context;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import edu.umich.carlab.CLDataProvider;
 import edu.umich.carlab.DataMarshal;
 import edu.umich.carlab.loadable.Algorithm;
 import edu.umich.carlab.loadable.AlgorithmSpecs;
-import edu.umich.carlab.loadable.App;
 import edu.umich.carlab.sensors.PhoneSensors;
 
 public abstract class AlignedIMUBase extends Algorithm {
-    private Float[] lastMagnet,
-            lastGravity,
-            lastGyro,
-            lastAccel, lastRotation;
-
-
-    final String ROTATION = "rotation";
-    final String ALIGNED_GYRO = "world-aligned-gyro";
     final String ALIGNED_ACCEL = "world-aligned-accel";
+    final String ALIGNED_GYRO = "world-aligned-gyro";
+    final String ROTATION = "rotation";
+    private boolean calculatedRotation = false;
 
     /*[{
         "module": "aligned-imu",
@@ -39,10 +32,9 @@ public abstract class AlignedIMUBase extends Algorithm {
             }
         ]
     }]*/
+    private Float[] lastMagnet, lastGravity, lastGyro, lastAccel, lastRotation;
 
-    private boolean calculatedRotation = false;
-
-    public AlignedIMUBase(CLDataProvider cl, Context context) {
+    public AlignedIMUBase (CLDataProvider cl, Context context) {
         super(cl, context);
 
         name = "world_aligned_imu";
@@ -52,21 +44,18 @@ public abstract class AlignedIMUBase extends Algorithm {
         subscribe(PhoneSensors.DEVICE, PhoneSensors.ACCEL);
 
         algorithmFunctions = new ArrayList<>();
-        algorithmFunctions.add(new AlgorithmSpecs.AppFunction(
-                "rotation",
-                "gravity", "magnetometer"));
+        algorithmFunctions
+                .add(new AlgorithmSpecs.AppFunction("rotation", "gravity", "magnetometer"));
 
-        algorithmFunctions.add(new AlgorithmSpecs.AppFunction(
-                "world-aligned-gyro",
-                "gyro", "rotation"));
+        algorithmFunctions
+                .add(new AlgorithmSpecs.AppFunction("world-aligned-gyro", "gyro", "rotation"));
 
-        algorithmFunctions.add(new AlgorithmSpecs.AppFunction(
-                "world-aligned-accel",
-                "accel", "rotation"));
+        algorithmFunctions
+                .add(new AlgorithmSpecs.AppFunction("world-aligned-accel", "accel", "rotation"));
     }
 
     @Override
-    public void newData(DataMarshal.DataObject dObject) {
+    public void newData (DataMarshal.DataObject dObject) {
         super.newData(dObject);
         String sensor = dObject.information;
         if (dObject.dataType != DataMarshal.MessageType.DATA) return;
@@ -74,19 +63,19 @@ public abstract class AlignedIMUBase extends Algorithm {
 
         switch (sensor) {
             case PhoneSensors.GRAVITY:
-                lastGravity = (Float[])dObject.value;
+                lastGravity = (Float[]) dObject.value;
                 break;
             case PhoneSensors.MAGNET:
-                lastMagnet = (Float[])dObject.value;
+                lastMagnet = (Float[]) dObject.value;
                 break;
             case PhoneSensors.GYRO:
-                lastGyro = (Float[])dObject.value;
+                lastGyro = (Float[]) dObject.value;
                 break;
             case PhoneSensors.ACCEL:
-                lastAccel = (Float[])dObject.value;
+                lastAccel = (Float[]) dObject.value;
                 break;
             case ROTATION:
-                lastRotation = (Float[])dObject.value;
+                lastRotation = (Float[]) dObject.value;
                 break;
         }
 
@@ -107,11 +96,9 @@ public abstract class AlignedIMUBase extends Algorithm {
         }
     }
 
+    public abstract Float[] produceAlignedAccel (Float[] accel, Float[] rm);
 
+    public abstract Float[] produceAlignedGyro (Float[] gyro, Float[] rm);
 
-    public abstract Float[] produceRotation (Float [] m, Float [] g);
-
-    public abstract Float[] produceAlignedGyro (Float [] gyro, Float [] rm);
-
-    public abstract Float[] produceAlignedAccel (Float [] accel, Float [] rm);
+    public abstract Float[] produceRotation (Float[] m, Float[] g);
 }
