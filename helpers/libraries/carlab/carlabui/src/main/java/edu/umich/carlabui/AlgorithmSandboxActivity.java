@@ -27,8 +27,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +49,52 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
     final String TAG = "AlgorithmSandboxActivity";
     boolean currentlyRunning = false;
     boolean dataDumpEnalbed = false;
+    File dataDumpReplayFile;
     DataDumpWriter dataDumpWriter;
+    View.OnClickListener dialogTraceMode = new View.OnClickListener() {
+        @Override
+        public void onClick (final View v) {
+            final String information = (String) v.getTag();
+            File dumpsDir = DataDumpWriter.GetDumpsDir(AlgorithmSandboxActivity.this);
+            Comparator<File> sortByLastModified = new Comparator<File>() {
+                @Override
+                public int compare (File f1, File f2) {
+                    if (f1.lastModified() == f2.lastModified()) return 0;
+                    if (f1.lastModified() < f2.lastModified()) return -1;
+                    return 1;
+                }
+            };
+
+            List<File> allFiles = Arrays.asList(dumpsDir.listFiles(new FilenameFilter() {
+                @Override
+                public boolean accept (File dir, String name) {
+                    return name.contains(information);
+                }
+            }));
+
+            Collections.sort(allFiles, sortByLastModified);
+            final File[] dumpFiles = allFiles.toArray(new File[]{});
+
+            List<CharSequence> filenames = new ArrayList<>();
+            for (File ifile : dumpFiles) {
+                filenames.add(ifile.getName());
+            }
+
+            AlertDialog.Builder dialogBuilder =
+                    new AlertDialog.Builder(AlgorithmSandboxActivity.this);
+            dialogBuilder.setTitle("Select trace file")
+                         .setItems(filenames.toArray(new CharSequence[]{}),
+                                   new DialogInterface.OnClickListener() {
+                                       @Override
+                                       public void onClick (DialogInterface dialogInterface,
+                                                            int i) {
+                                           dataDumpReplayFile = dumpFiles[i];
+                                       }
+                                   });
+            AlertDialog dialog = dialogBuilder.create();
+            dialog.show();
+        }
+    };
     Map<String, List<RangeInfo>> fakeValuesRange = new HashMap<>();
     TextView.OnEditorActionListener doneChangeRange = new TextView.OnEditorActionListener() {
         @Override
@@ -69,7 +119,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
             return false;
         }
     };
-    View.OnClickListener fakeModeDialog = new View.OnClickListener() {
+    View.OnClickListener dialogFakeMode = new View.OnClickListener() {
         @Override
         public void onClick (final View v) {
             String information = (String) v.getTag();
@@ -118,6 +168,52 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
         }
     };
     Map<String, Serializable[]> fixedValues = new HashMap<>();
+
+    // Show the dialog box to select trace file
+
+    // File dumpsDir = DataDumpWriter.GetDumpsDir(ExperimentBaseActivity.this);
+    // Comparator<File> sortByLastModified = new Comparator<File>() {
+    //     @Override
+    //     public int compare(File f1, File f2) {
+    //         if (f1.lastModified() == f2.lastModified()) return 0;
+    //         if (f1.lastModified() < f2.lastModified()) return -1;
+    //         return 1;
+    //     }
+    // };
+    //
+    // List<File> allFiles = Arrays.asList(dumpsDir.listFiles());
+    //         Collections.sort(allFiles, sortByLastModified);
+    // final File[] dumpFiles = allFiles.toArray(new File[]{});
+    //
+    // List<CharSequence> filenames = getFilenames(dumpFiles);
+    //         filenames.add("None");
+    //
+    // // If they choose any of the dump files, set that value.
+    // // Otherwise set it to null.
+    // AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(ExperimentBaseActivity.this);
+    //         dialogBuilder
+    //                 .setTitle("Select Trace File")
+    //                 .setItems(
+    //         filenames.toArray(new CharSequence[]{}),
+    //         new DialogInterface.OnClickListener() {
+    //     @Override
+    //     public void onClick(DialogInterface dialogInterface, int i) {
+    //         if (i == dumpFiles.length) {
+    //             // This is the undefined one
+    //             prefs.edit().putString(Load_From_Trace_Key, null).commit();
+    //         } else {
+    //             Toast.makeText(
+    //                     getApplicationContext(),
+    //                     String.format("Showing this file: %s", dumpFiles[i]),
+    //                     Toast.LENGTH_SHORT).show();
+    //             prefs.edit().putString(Load_From_Trace_Key, dumpFiles[i].toString()).commit();
+    //         }
+    //
+    //         updateButtons();
+    //     }
+    // });
+    // AlertDialog dialog = dialogBuilder.create();
+    //         dialog.show();
     TextView.OnEditorActionListener doneChangeFixedValue = new TextView.OnEditorActionListener() {
         @Override
         public boolean onEditorAction (TextView target, int actionId, KeyEvent event) {
@@ -138,7 +234,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
             return false;
         }
     };
-    View.OnClickListener fixedModeDialog = new View.OnClickListener() {
+    View.OnClickListener dialogFixedMode = new View.OnClickListener() {
         @Override
         public void onClick (final View v) {
             String information = (String) v.getTag();
@@ -368,12 +464,12 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
         switch (selectionId) {
             case SEL_FAKE:
                 buttonText = "Adjust distribution";
-                dialogCallback = fakeModeDialog;
+                dialogCallback = dialogFakeMode;
                 dataFeedMode = DataFeedMode.FAKE;
                 break;
             case SEL_FIXED:
                 buttonText = "Set fixed value";
-                dialogCallback = fixedModeDialog;
+                dialogCallback = dialogFixedMode;
                 dataFeedMode = DataFeedMode.FIXED;
                 break;
             case SEL_SENSOR:
@@ -383,7 +479,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
                 break;
             case SEL_TRACE:
                 buttonText = "Choose trace";
-                dialogCallback = fakeModeDialog;
+                dialogCallback = dialogTraceMode;
                 dataFeedMode = DataFeedMode.TRACE;
                 break;
         }
