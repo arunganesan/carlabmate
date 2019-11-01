@@ -58,7 +58,7 @@ public class AlignedIMU extends AlignedIMUBase {
 
     public Float[] MatrixMul (Float[] T, Float[] RotMat) {
         Float[] temp = T.clone();
-        for (int i = 0; i < RotMat.length; i++)
+        for (int i = 0; i < T.length; i++)
             for (int j = 0; j < T.length; j++) {
                 temp[i] = temp[i] + T[j] * RotMat[j * 3 + i];
             }

@@ -49,7 +49,9 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
     final String TAG = "AlgorithmSandboxActivity";
     boolean currentlyRunning = false;
     boolean dataDumpEnalbed = false;
-    File dataDumpReplayFile;
+    File dataDumpReplayFile = null;
+    int dataDumpReplayerIndex = 0;
+    List<DataMarshal.DataObject> dataDumpReplayerObjects;
     DataDumpWriter dataDumpWriter;
     View.OnClickListener dialogTraceMode = new View.OnClickListener() {
         @Override
@@ -88,7 +90,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
                                        @Override
                                        public void onClick (DialogInterface dialogInterface,
                                                             int i) {
-                                           dataDumpReplayFile = dumpFiles[i];
+                                           loadDumpFile(dumpFiles[i]);
                                        }
                                    });
             AlertDialog dialog = dialogBuilder.create();
@@ -289,10 +291,20 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
 
             for (int i = 0; i < numArgs; i++) {
                 String inputInfo = StaticObjects.selectedAppFunction.inputInformation.get(i);
-                if (inputDataModes.get(inputInfo) != DataFeedMode.SENSOR) {
+                DataMarshal.DataObject inputData = null;
+                if (inputDataModes.get(inputInfo) == DataFeedMode.FAKE ||
+                    inputDataModes.get(inputInfo) == DataFeedMode.FIXED) {
                     Serializable[] values = fixedValues.get(inputInfo).clone();
-                    DataMarshal.DataObject inputData =
-                            new DataMarshal.DataObject(inputInfo, values);
+                    inputData = new DataMarshal.DataObject(inputInfo, values);
+                } else if (inputDataModes.get(inputInfo) == DataFeedMode.TRACE) {
+                    if (dataDumpReplayFile != null) {
+                        inputData = dataDumpReplayerObjects.get(dataDumpReplayerIndex);
+                        dataDumpReplayerIndex =
+                                (dataDumpReplayerIndex + 1) % dataDumpReplayerObjects.size();
+                    }
+                }
+
+                if (inputData != null) {
                     if (inputShadow != null) inputShadow.addData(inputData);
                     StaticObjects.selectedAlgorithm.newData(inputData);
                 }
@@ -516,6 +528,12 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
                 fixedValues.get(information)[i] = 1.0F;
             }
         }
+    }
+
+    void loadDumpFile (File file) {
+        dataDumpReplayFile = file;
+        dataDumpReplayerObjects = DataDumpWriter.ReadData(file);
+        dataDumpReplayerIndex = 0;
     }
 
     @Override

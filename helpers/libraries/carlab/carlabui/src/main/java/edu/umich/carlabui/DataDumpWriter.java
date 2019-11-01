@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,7 +23,7 @@ import edu.umich.carlab.DataMarshal;
  */
 
 public class DataDumpWriter {
-    private final String TAG = "DumpWriter";
+    private static final String TAG = "DumpWriter";
     Context context;
     List<DataMarshal.DataObject> dataObjects;
     private String filename;
@@ -43,9 +42,25 @@ public class DataDumpWriter {
         return tracesDir;
     }
 
+    public static List<DataMarshal.DataObject> ReadData (File ifile) {
+        List<DataMarshal.DataObject> returnData = null;
+
+        try {
+            FileInputStream fis = new FileInputStream(ifile);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            returnData = (List<DataMarshal.DataObject>) ois.readObject();
+            ois.close();
+            fis.close();
+            Log.v(TAG, "Loaded data");
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to write file");
+        }
+
+        return returnData;
+    }
+
     public void addData (DataMarshal.DataObject dataObject) {
-        if (dataObjects != null)
-            dataObjects.add(dataObject);
+        if (dataObjects != null) dataObjects.add(dataObject);
     }
 
     public String saveFile () {
@@ -64,23 +79,6 @@ public class DataDumpWriter {
         dataObjects.clear();
         dataObjects = null;
         return saveFile.getName();
-    }
-
-    public List<DataMarshal.DataObject> readData (File ifile) {
-        List<DataMarshal.DataObject> returnData = null;
-
-        try {
-            FileInputStream fis = new FileInputStream(ifile);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            returnData = (List<DataMarshal.DataObject>) ois.readObject();
-            ois.close();
-            fis.close();
-            Log.v(TAG, "Loaded data");
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to write file");
-        }
-
-        return returnData;
     }
 
     public void startNewFile (String infoname) {
