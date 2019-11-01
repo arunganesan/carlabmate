@@ -14,6 +14,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -30,19 +31,11 @@ import edu.umich.carlab.loadable.AlgorithmSpecs;
 public class AlgorithmSandboxActivity extends AppCompatActivity {
     final int FAKE = 0;
     final int FIXED = 1;
-    final int TRACE = 2;
     final int SENSOR = 3;
     final String TAG = "AlgorithmSandboxActivity";
-    LinearLayout inputCardList, outputCardList;
+    final int TRACE = 2;
     boolean currentlyRunning = false;
-    Button startToggleButton;
-
-    Handler scheduledHandler;
-    long runPeriod = 100;
     Map<String, List<RangeInfo>> fakeValuesRange = new HashMap<>();
-    Map<String, Serializable[]> fixedValues = new HashMap<>();
-    Map<String, TextView> outputValueMap = new HashMap<>();
-
     TextView.OnEditorActionListener doneChangeRange = new TextView.OnEditorActionListener() {
         @Override
         public boolean onEditorAction (TextView target, int actionId, KeyEvent event) {
@@ -66,29 +59,6 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
             return false;
         }
     };
-
-    TextView.OnEditorActionListener doneChangeFixedValue = new TextView.OnEditorActionListener() {
-        @Override
-        public boolean onEditorAction (TextView target, int actionId, KeyEvent event) {
-            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
-                actionId == EditorInfo.IME_ACTION_DONE ||
-                event != null && event.getAction() == KeyEvent.ACTION_DOWN &&
-                event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
-                if (event == null || !event.isShiftPressed()) {
-                    FakeRangeSpecific fakeRangeDetails = (FakeRangeSpecific) target.getTag();
-                    String s = target.getText().toString();
-
-                    fixedValues.get(fakeRangeDetails.information)[fakeRangeDetails.index] =
-                            Float.parseFloat(s);
-
-
-                    return true; // consume.
-                }
-            }
-            return false;
-        }
-    };
-
     View.OnClickListener fakeModeDialog = new View.OnClickListener() {
         @Override
         public void onClick (final View v) {
@@ -137,7 +107,27 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
             dialog.show();
         }
     };
+    Map<String, Serializable[]> fixedValues = new HashMap<>();
+    TextView.OnEditorActionListener doneChangeFixedValue = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction (TextView target, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
+                actionId == EditorInfo.IME_ACTION_DONE ||
+                event != null && event.getAction() == KeyEvent.ACTION_DOWN &&
+                event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                if (event == null || !event.isShiftPressed()) {
+                    FakeRangeSpecific fakeRangeDetails = (FakeRangeSpecific) target.getTag();
+                    String s = target.getText().toString();
 
+                    fixedValues.get(fakeRangeDetails.information)[fakeRangeDetails.index] =
+                            Float.parseFloat(s);
+
+                    return true;
+                }
+            }
+            return false;
+        }
+    };
     View.OnClickListener fixedModeDialog = new View.OnClickListener() {
         @Override
         public void onClick (final View v) {
@@ -178,6 +168,11 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
             dialog.show();
         }
     };
+    LinearLayout inputCardList, outputCardList;
+    Map<String, TextView> outputValueMap = new HashMap<>();
+    long runPeriod = 100;
+    Handler scheduledHandler;
+    Shadow shadow = null;
     Runnable callAlgorithm = new Runnable() {
         @Override
         public void run () {
@@ -186,26 +181,30 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
             for (int i = 0; i < numArgs; i++) {
                 String inputInfo = StaticObjects.selectedAppFunction.inputInformation.get(i);
                 Serializable[] values = fixedValues.get(inputInfo);
-                StaticObjects.selectedAlgorithm
-                        .newData(new DataMarshal.DataObject(inputInfo, values));
+                DataMarshal.DataObject inputData = new DataMarshal.DataObject(inputInfo, values);
+                StaticObjects.selectedAlgorithm.newData(inputData);
+                if (shadow != null) shadow.addData(inputData);
             }
 
             String outputInfoName = StaticObjects.selectedAppFunction.outputInformation;
             Map<String, DataMarshal.DataObject> receivedData =
                     StaticObjects.dataReceiver.latestData;
             if (receivedData.containsKey(outputInfoName)) {
+                DataMarshal.DataObject outputData = receivedData.get(outputInfoName);
+                if (shadow != null) shadow.addData(outputData);
+                Float[] outputVal = (Float[]) outputData.value;
+                String[] outputValStrings = new String[outputVal.length];
+                for (int i = 0; i < outputVal.length; i++)
+                    outputValStrings[i] = outputVal[i].toString();
 
-                final float[] obj =
-                        (float[]) AlgorithmSpecs.InformationDatatypes.get(outputInfoName);
-
-                Float[] outputVal = (Float[])receivedData.get(outputInfoName).value;
-                outputValueMap.get(outputInfoName)
-                              .setText(outputVal.toString());
+                outputValueMap.get(outputInfoName).setText(String.join(", ", outputValStrings));
             }
 
             if (currentlyRunning) scheduledHandler.postDelayed(callAlgorithm, runPeriod);
         }
     };
+    FrameLayout shadowContentFrameLayout;
+    Button startToggleButton;
     View.OnClickListener toggleDataFlow = new View.OnClickListener() {
         @Override
         public void onClick (View v) {
@@ -213,6 +212,8 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
 
             if (currentlyRunning) {
                 startToggleButton.setText("Stop test");
+                shadow.initializeVisualization(AlgorithmSandboxActivity.this,
+                                               shadowContentFrameLayout);
                 scheduledHandler.postDelayed(callAlgorithm, runPeriod);
             } else {
                 startToggleButton.setText("Start test");
@@ -221,44 +222,10 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
         }
     };
 
-    @Override
-    protected void onCreate (Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sandbox);
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.hide();
-
-        TextView text = findViewById(R.id.sandboxAppTitle);
-        text.setText(StaticObjects.selectedAlgorithm.getName());
-
-
-        findViewById(R.id.closeButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick (View v) {
-                finish();
-            }
-        });
-
-        scheduledHandler = new Handler();
-        initializeValueRanges();
-        createUI();
-    }
-
-    void initializeValueRanges () {
-        for (String information : StaticObjects.selectedAppFunction.inputInformation) {
-            final float[] obj = (float[]) AlgorithmSpecs.InformationDatatypes.get(information);
-            fakeValuesRange.put(information, new ArrayList<RangeInfo>());
-            fixedValues.put(information, new Float[obj.length]);
-            for (int i = 0; i < obj.length; i++) {
-                fakeValuesRange.get(information).add(new RangeInfo(0, 1));
-                fixedValues.get(information)[i] = 1.0F;
-            }
-        }
-    }
-
     void createUI () {
         inputCardList = findViewById(R.id.algorithmInputList);
         outputCardList = findViewById(R.id.algorithmOutputList);
+
         LayoutInflater inflater = getLayoutInflater();
 
         for (String inputInfo : StaticObjects.selectedAppFunction.inputInformation) {
@@ -287,16 +254,16 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
 
             // call the initialization one time
             initializeComponent(inputLinear, choiceSpinner.getSelectedItemPosition());
+            shadow = new LineShadow();
         }
 
         LinearLayout outputLinear =
                 (LinearLayout) inflater.inflate(R.layout.sandbox_output_row, outputCardList, false);
         TextView outputNameTv = outputLinear.findViewById(R.id.outputName);
         TextView outputValueTv = outputLinear.findViewById(R.id.outputValue);
+        shadowContentFrameLayout = outputLinear.findViewById(R.id.shadowContentWrapper);
 
         String outputInfo = StaticObjects.selectedAppFunction.outputInformation;
-
-
         outputNameTv.setText(outputInfo);
         outputValueMap.put(outputInfo, outputValueTv);
         outputCardList.addView(outputLinear);
@@ -333,8 +300,55 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
         button.setOnClickListener(dialogCallback);
     }
 
+    void initializeValueRanges () {
+        for (String information : StaticObjects.selectedAppFunction.inputInformation) {
+            final float[] obj = (float[]) AlgorithmSpecs.InformationDatatypes.get(information);
+            fakeValuesRange.put(information, new ArrayList<RangeInfo>());
+            fixedValues.put(information, new Float[obj.length]);
+            for (int i = 0; i < obj.length; i++) {
+                fakeValuesRange.get(information).add(new RangeInfo(0, 1));
+                fixedValues.get(information)[i] = 1.0F;
+            }
+        }
+    }
+
+    @Override
+    protected void onCreate (Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_sandbox);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.hide();
+
+        TextView text = findViewById(R.id.sandboxAppTitle);
+        text.setText(StaticObjects.selectedAlgorithm.getName());
+
+
+        findViewById(R.id.closeButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick (View v) {
+                finish();
+            }
+        });
+
+        scheduledHandler = new Handler();
+        initializeValueRanges();
+        createUI();
+    }
+
     enum RangeEndpoint {
         MIN, MAX
+    }
+
+    public class FakeRangeSpecific {
+        public int index;
+        public String information;
+        public RangeEndpoint minOrMax;
+
+        public FakeRangeSpecific (String information, int index, RangeEndpoint minOrMax) {
+            this.information = information;
+            this.index = index;
+            this.minOrMax = minOrMax;
+        }
     }
 
     public class RangeInfo {
@@ -349,18 +363,6 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
 
         public String toString () {
             return String.format("(%f, %f)", first, second);
-        }
-    }
-
-    public class FakeRangeSpecific {
-        public String information;
-        public int index;
-        public RangeEndpoint minOrMax;
-
-        public FakeRangeSpecific (String information, int index, RangeEndpoint minOrMax) {
-            this.information = information;
-            this.index = index;
-            this.minOrMax = minOrMax;
         }
     }
 
