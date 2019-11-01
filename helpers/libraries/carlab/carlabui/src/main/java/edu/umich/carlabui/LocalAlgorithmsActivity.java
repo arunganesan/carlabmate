@@ -18,8 +18,8 @@ import edu.umich.carlab.loadable.Algorithm;
 import edu.umich.carlab.loadable.AlgorithmSpecs;
 
 public class LocalAlgorithmsActivity extends AppCompatActivity {
-    LinearLayout moduleLayout;
     protected DataReceiver dataReceiver = new DataReceiver();
+    LinearLayout moduleLayout;
 
     @Override
     protected void onCreate (Bundle savedInstanceState) {
