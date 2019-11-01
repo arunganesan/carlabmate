@@ -11,6 +11,7 @@ import java.util.Map;
 public class AlgorithmSpecs {
     public static Map<String, Object> InformationDatatypes;
     public static Map<String, Integer> LowLevelSensors;
+    public static Map<String, String> LowLevelSensorsNames;
 
     static {
         InformationDatatypes = new HashMap<>();
@@ -30,6 +31,19 @@ public class AlgorithmSpecs {
         LowLevelSensors.put("accel", Sensor.TYPE_ACCELEROMETER);
         LowLevelSensors.put("gyro", Sensor.TYPE_GYROSCOPE);
         LowLevelSensors.put("magnetometer", Sensor.TYPE_MAGNETIC_FIELD);
+
+
+
+
+
+        LowLevelSensorsNames = new HashMap<>();
+        LowLevelSensorsNames.put("rotation", Sensor.STRING_TYPE_ROTATION_VECTOR);
+        LowLevelSensorsNames.put("gravity", Sensor.STRING_TYPE_GRAVITY);
+        LowLevelSensorsNames.put("world-aligned-gyro", "");
+        LowLevelSensorsNames.put("world-aligned-accel", "");
+        LowLevelSensorsNames.put("accel", Sensor.STRING_TYPE_ACCELEROMETER);
+        LowLevelSensorsNames.put("gyro", Sensor.STRING_TYPE_GYROSCOPE);
+        LowLevelSensorsNames.put("magnetometer", Sensor.STRING_TYPE_MAGNETIC_FIELD);
     }
 
     public static class AppFunction {
