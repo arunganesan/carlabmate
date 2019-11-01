@@ -46,7 +46,7 @@ public class DataMarshal {
         ERROR, STATUS, DATA;
     }
 
-    public static class DataObject {
+    public static class DataObject implements Serializable {
         public long time;
         public String information;
         public Serializable value;

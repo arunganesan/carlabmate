@@ -45,7 +45,6 @@ public class LineShadow implements Shadow {
 
         for (int i = 0; i < values.length; i++) {
             String key = String.format("%s[%d]", info, i);
-            Log.v(TAG, String.format("%s = %f", key, values[i]));
             if (!dataset.containsKey(key)) {
                 entries.put(key, new ArrayList<Entry>());
                 dataset.put(key, new LineDataSet(entries.get(key), key));
@@ -90,7 +89,6 @@ public class LineShadow implements Shadow {
             parentLayout.removeView(lineChart);
             lineChart = null;
         }
-
 
         this.parentActivity = parentActivity;
         this.parentLayout = parentLayout;

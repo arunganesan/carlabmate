@@ -18,11 +18,14 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -40,6 +43,8 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
     final int SEL_TRACE = 3;
     final String TAG = "AlgorithmSandboxActivity";
     boolean currentlyRunning = false;
+    boolean dataDumpEnalbed = false;
+    DataDumpWriter dataDumpWriter;
     Map<String, List<RangeInfo>> fakeValuesRange = new HashMap<>();
     TextView.OnEditorActionListener doneChangeRange = new TextView.OnEditorActionListener() {
         @Override
@@ -179,6 +184,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
     FrameLayout inputShadowContentFrameLayout, outputShadowContentFrameLayout;
     Map<String, TextView> outputValueMap = new HashMap<>();
     long runPeriod = 100;
+    ToggleButton saveToggleButton;
     Handler scheduledHandler;
     Runnable callAlgorithm = new Runnable() {
         @Override
@@ -201,7 +207,10 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
                     StaticObjects.dataReceiver.latestData;
             if (receivedData.containsKey(outputInfoName)) {
                 DataMarshal.DataObject outputData = receivedData.get(outputInfoName);
+
                 if (outputShadow != null) outputShadow.addData(outputData);
+                if (dataDumpEnalbed) dataDumpWriter.addData(outputData);
+
                 Float[] outputVal = (Float[]) outputData.value;
                 String[] outputValStrings = new String[outputVal.length];
                 for (int i = 0; i < outputVal.length; i++)
@@ -277,6 +286,22 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
             }
         }
     };
+    CompoundButton.OnCheckedChangeListener toggleSavingData =
+            new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged (CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
+                        String outputInfoName = StaticObjects.selectedAppFunction.outputInformation;
+                        dataDumpWriter.startNewFile(outputInfoName);
+                        dataDumpEnalbed = true;
+                    } else {
+                        dataDumpEnalbed = false;
+                        String filename = dataDumpWriter.saveFile();
+                        Toast.makeText(AlgorithmSandboxActivity.this, filename, Toast.LENGTH_SHORT)
+                             .show();
+                    }
+                }
+            };
 
     void createUI () {
         inputCardList = findViewById(R.id.algorithmInputList);
@@ -328,6 +353,10 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
 
         startToggleButton = findViewById(R.id.toggleTest);
         startToggleButton.setOnClickListener(toggleDataFlow);
+
+        saveToggleButton = findViewById(R.id.saveToggleButton);
+        saveToggleButton.setOnCheckedChangeListener(toggleSavingData);
+        dataDumpWriter = new DataDumpWriter(this);
     }
 
     void initializeComponent (LinearLayout inputLinear, int selectionId) {
