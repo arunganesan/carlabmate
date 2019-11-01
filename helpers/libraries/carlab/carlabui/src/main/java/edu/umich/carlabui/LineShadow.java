@@ -19,16 +19,19 @@ import edu.umich.carlab.DataMarshal;
 
 public class LineShadow implements Shadow {
     final float MAX_TIMESCALE = 10;
+    final int UPDATEEVERY = 100;
     final String TAG = "LineShadow";
     int[] colors = {Color.BLACK, Color.BLUE, Color.RED, Color.GREEN, Color.MAGENTA, Color.CYAN,
             Color.YELLOW, Color.WHITE};
     Map<String, LineDataSet> dataset;
     Map<String, List<Entry>> entries;
+    Map<String, Long> lastUpdateTime;
     LineChart lineChart;
     LineData lineData;
     Activity parentActivity;
     ViewGroup parentLayout;
     long starttime = 0, latesttime = 0;
+
 
     public void addData (DataMarshal.DataObject dataObject) {
         if (lineChart == null) return;
@@ -53,7 +56,13 @@ public class LineShadow implements Shadow {
                 dataset.get(key).setLineWidth(5);
                 dataset.get(key).setDrawValues(false);
                 dataset.get(key).setMode(LineDataSet.Mode.CUBIC_BEZIER);
+
+                lastUpdateTime.put(key, currtime);
             }
+
+            if (lastUpdateTime.get(key) + UPDATEEVERY > currtime)
+                continue;
+            lastUpdateTime.put(key, currtime);
 
             entries.get(key).add(new Entry((float) timeInSeconds, values[i]));
 
@@ -88,6 +97,7 @@ public class LineShadow implements Shadow {
 
         entries = new HashMap<>();
         dataset = new HashMap<>();
+        lastUpdateTime = new HashMap<>();
         lineData = new LineData();
         lineChart = new LineChart(parentActivity);
         lineChart.setData(lineData);

@@ -34,14 +34,13 @@ import edu.umich.carlab.DataMarshal;
 import edu.umich.carlab.loadable.AlgorithmSpecs;
 
 public class AlgorithmSandboxActivity extends AppCompatActivity {
-    final int FAKE = 0;
-    final int FIXED = 1;
-    final int SENSOR = 3;
+    final int SEL_FAKE = 2;
+    final int SEL_FIXED = 1;
+    final int SEL_SENSOR = 0;
+    final int SEL_TRACE = 3;
     final String TAG = "AlgorithmSandboxActivity";
-    final int TRACE = 2;
     boolean currentlyRunning = false;
     Map<String, List<RangeInfo>> fakeValuesRange = new HashMap<>();
-    Map<Integer, String> sensorTypeToInformation = new HashMap<>();
     TextView.OnEditorActionListener doneChangeRange = new TextView.OnEditorActionListener() {
         @Override
         public boolean onEditorAction (TextView target, int actionId, KeyEvent event) {
@@ -176,29 +175,11 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
     };
     LinearLayout inputCardList, outputCardList;
     Map<String, DataFeedMode> inputDataModes = new HashMap<>();
+    Shadow inputShadow, outputShadow;
+    FrameLayout inputShadowContentFrameLayout, outputShadowContentFrameLayout;
     Map<String, TextView> outputValueMap = new HashMap<>();
     long runPeriod = 100;
     Handler scheduledHandler;
-    SensorEventListener sensorListener = new SensorEventListener() {
-        @Override
-        public void onAccuracyChanged (Sensor sensor, int accuracy) {
-
-        }
-
-        @Override
-        public void onSensorChanged (SensorEvent event) {
-            Float [] values = new Float[event.values.length];
-            for (int i = 0; i < event.values.length; i++) {
-                values[i] = event.values[i];
-            }
-
-            StaticObjects.selectedAlgorithm.newData(new DataMarshal.DataObject(
-                    sensorTypeToInformation.get(event.sensor.getType()),
-                    values
-            ));
-        }
-    };
-    Shadow shadow = null;
     Runnable callAlgorithm = new Runnable() {
         @Override
         public void run () {
@@ -210,7 +191,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
                     Serializable[] values = fixedValues.get(inputInfo).clone();
                     DataMarshal.DataObject inputData =
                             new DataMarshal.DataObject(inputInfo, values);
-                    if (shadow != null) shadow.addData(inputData);
+                    if (inputShadow != null) inputShadow.addData(inputData);
                     StaticObjects.selectedAlgorithm.newData(inputData);
                 }
             }
@@ -220,7 +201,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
                     StaticObjects.dataReceiver.latestData;
             if (receivedData.containsKey(outputInfoName)) {
                 DataMarshal.DataObject outputData = receivedData.get(outputInfoName);
-                if (shadow != null) shadow.addData(outputData);
+                if (outputShadow != null) outputShadow.addData(outputData);
                 Float[] outputVal = (Float[]) outputData.value;
                 String[] outputValStrings = new String[outputVal.length];
                 for (int i = 0; i < outputVal.length; i++)
@@ -232,7 +213,27 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
             if (currentlyRunning) scheduledHandler.postDelayed(callAlgorithm, runPeriod);
         }
     };
-    FrameLayout shadowContentFrameLayout;
+    Map<Integer, String> sensorTypeToInformation = new HashMap<>();
+    SensorEventListener sensorListener = new SensorEventListener() {
+        @Override
+        public void onAccuracyChanged (Sensor sensor, int accuracy) {
+
+        }
+
+        @Override
+        public void onSensorChanged (SensorEvent event) {
+            Float[] values = new Float[event.values.length];
+            for (int i = 0; i < event.values.length; i++) {
+                values[i] = event.values[i];
+            }
+            DataMarshal.DataObject d =
+                    new DataMarshal.DataObject(sensorTypeToInformation.get(event.sensor.getType()),
+                                               values);
+
+            StaticObjects.selectedAlgorithm.newData(d);
+            inputShadow.addData(d);
+        }
+    };
     Button startToggleButton;
     View.OnClickListener toggleDataFlow = new View.OnClickListener() {
         @Override
@@ -241,8 +242,10 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
 
             if (currentlyRunning) {
                 startToggleButton.setText("Stop test");
-                shadow.initializeVisualization(AlgorithmSandboxActivity.this,
-                                               shadowContentFrameLayout);
+                inputShadow.initializeVisualization(AlgorithmSandboxActivity.this,
+                                                    inputShadowContentFrameLayout);
+                outputShadow.initializeVisualization(AlgorithmSandboxActivity.this,
+                                                     outputShadowContentFrameLayout);
                 scheduledHandler.postDelayed(callAlgorithm, runPeriod);
 
                 for (Map.Entry<String, DataFeedMode> entry : inputDataModes.entrySet()) {
@@ -258,7 +261,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
                 }
             } else {
                 startToggleButton.setText("Start test");
-                shadow.destroyVisualization();
+                inputShadow.destroyVisualization();
                 scheduledHandler.removeCallbacks(callAlgorithm);
 
                 for (Map.Entry<String, DataFeedMode> entry : inputDataModes.entrySet()) {
@@ -307,14 +310,16 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
 
             // call the initialization one time
             initializeComponent(inputLinear, choiceSpinner.getSelectedItemPosition());
-            shadow = new LineShadow();
+            inputShadow = new LineShadow();
+            outputShadow = new LineShadow();
         }
 
         LinearLayout outputLinear =
                 (LinearLayout) inflater.inflate(R.layout.sandbox_output_row, outputCardList, false);
         TextView outputNameTv = outputLinear.findViewById(R.id.outputName);
         TextView outputValueTv = outputLinear.findViewById(R.id.outputValue);
-        shadowContentFrameLayout = outputLinear.findViewById(R.id.shadowContentWrapper);
+        inputShadowContentFrameLayout = findViewById(R.id.inputShadowWrapper);
+        outputShadowContentFrameLayout = findViewById(R.id.outputShadowWrapper);
 
         String outputInfo = StaticObjects.selectedAppFunction.outputInformation;
         outputNameTv.setText(outputInfo);
@@ -332,22 +337,22 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
         String infoName = (String) inputLinear.getTag();
 
         switch (selectionId) {
-            case FAKE:
+            case SEL_FAKE:
                 buttonText = "Adjust distribution";
                 dialogCallback = fakeModeDialog;
                 dataFeedMode = DataFeedMode.FAKE;
                 break;
-            case FIXED:
+            case SEL_FIXED:
                 buttonText = "Set fixed value";
                 dialogCallback = fixedModeDialog;
                 dataFeedMode = DataFeedMode.FIXED;
                 break;
-            case SENSOR:
+            case SEL_SENSOR:
                 buttonText = "Choose sensor";
                 dialogCallback = null;
                 dataFeedMode = DataFeedMode.SENSOR;
                 break;
-            case TRACE:
+            case SEL_TRACE:
                 buttonText = "Choose trace";
                 dialogCallback = fakeModeDialog;
                 dataFeedMode = DataFeedMode.TRACE;
@@ -356,7 +361,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
 
         Button button = inputLinear.findViewById(R.id.inputButtonConfiguration);
 
-        if (selectionId == SENSOR) {
+        if (selectionId == SEL_SENSOR) {
             int lowLevelSensor = AlgorithmSpecs.LowLevelSensors.get(infoName);
             button.setEnabled(false);
             if (lowLevelSensor == -1) buttonText = "No usable sensor";
