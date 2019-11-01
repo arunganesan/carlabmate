@@ -1,7 +1,12 @@
 package edu.umich.carlabui;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBar;
@@ -36,6 +41,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
     final int TRACE = 2;
     boolean currentlyRunning = false;
     Map<String, List<RangeInfo>> fakeValuesRange = new HashMap<>();
+    Map<Integer, String> sensorTypeToInformation = new HashMap<>();
     TextView.OnEditorActionListener doneChangeRange = new TextView.OnEditorActionListener() {
         @Override
         public boolean onEditorAction (TextView target, int actionId, KeyEvent event) {
@@ -169,9 +175,29 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
         }
     };
     LinearLayout inputCardList, outputCardList;
+    Map<String, DataFeedMode> inputDataModes = new HashMap<>();
     Map<String, TextView> outputValueMap = new HashMap<>();
     long runPeriod = 100;
     Handler scheduledHandler;
+    SensorEventListener sensorListener = new SensorEventListener() {
+        @Override
+        public void onAccuracyChanged (Sensor sensor, int accuracy) {
+
+        }
+
+        @Override
+        public void onSensorChanged (SensorEvent event) {
+            Float [] values = new Float[event.values.length];
+            for (int i = 0; i < event.values.length; i++) {
+                values[i] = event.values[i];
+            }
+
+            StaticObjects.selectedAlgorithm.newData(new DataMarshal.DataObject(
+                    sensorTypeToInformation.get(event.sensor.getType()),
+                    values
+            ));
+        }
+    };
     Shadow shadow = null;
     Runnable callAlgorithm = new Runnable() {
         @Override
@@ -180,10 +206,13 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
 
             for (int i = 0; i < numArgs; i++) {
                 String inputInfo = StaticObjects.selectedAppFunction.inputInformation.get(i);
-                Serializable[] values = fixedValues.get(inputInfo).clone();
-                DataMarshal.DataObject inputData = new DataMarshal.DataObject(inputInfo, values);
-                if (shadow != null) shadow.addData(inputData);
-                StaticObjects.selectedAlgorithm.newData(inputData);
+                if (inputDataModes.get(inputInfo) != DataFeedMode.SENSOR) {
+                    Serializable[] values = fixedValues.get(inputInfo).clone();
+                    DataMarshal.DataObject inputData =
+                            new DataMarshal.DataObject(inputInfo, values);
+                    if (shadow != null) shadow.addData(inputData);
+                    StaticObjects.selectedAlgorithm.newData(inputData);
+                }
             }
 
             String outputInfoName = StaticObjects.selectedAppFunction.outputInformation;
@@ -215,10 +244,33 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
                 shadow.initializeVisualization(AlgorithmSandboxActivity.this,
                                                shadowContentFrameLayout);
                 scheduledHandler.postDelayed(callAlgorithm, runPeriod);
+
+                for (Map.Entry<String, DataFeedMode> entry : inputDataModes.entrySet()) {
+                    if (entry.getValue() == DataFeedMode.SENSOR) {
+                        int sensorType = AlgorithmSpecs.LowLevelSensors.get(entry.getKey());
+                        if (sensorType != -1) {
+                            SensorManager sensorManager = (SensorManager) getApplicationContext()
+                                    .getSystemService(Context.SENSOR_SERVICE);
+                            sensorManager.registerListener(sensorListener, sensorManager
+                                    .getDefaultSensor(sensorType), 1000, 1000);
+                        }
+                    }
+                }
             } else {
                 startToggleButton.setText("Start test");
                 shadow.destroyVisualization();
                 scheduledHandler.removeCallbacks(callAlgorithm);
+
+                for (Map.Entry<String, DataFeedMode> entry : inputDataModes.entrySet()) {
+                    if (entry.getValue() == DataFeedMode.SENSOR) {
+                        int sensorType = AlgorithmSpecs.LowLevelSensors.get(entry.getKey());
+                        if (sensorType != -1) {
+                            SensorManager sensorManager = (SensorManager) getApplicationContext()
+                                    .getSystemService(Context.SENSOR_SERVICE);
+                            sensorManager.unregisterListener(sensorListener);
+                        }
+                    }
+                }
             }
         }
     };
@@ -275,30 +327,53 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
 
     void initializeComponent (LinearLayout inputLinear, int selectionId) {
         String buttonText = "";
+        DataFeedMode dataFeedMode = DataFeedMode.FAKE;
         View.OnClickListener dialogCallback = null;
+        String infoName = (String) inputLinear.getTag();
+
         switch (selectionId) {
             case FAKE:
                 buttonText = "Adjust distribution";
                 dialogCallback = fakeModeDialog;
+                dataFeedMode = DataFeedMode.FAKE;
                 break;
             case FIXED:
                 buttonText = "Set fixed value";
                 dialogCallback = fixedModeDialog;
+                dataFeedMode = DataFeedMode.FIXED;
                 break;
             case SENSOR:
                 buttonText = "Choose sensor";
-                dialogCallback = fakeModeDialog;
+                dialogCallback = null;
+                dataFeedMode = DataFeedMode.SENSOR;
                 break;
             case TRACE:
                 buttonText = "Choose trace";
                 dialogCallback = fakeModeDialog;
+                dataFeedMode = DataFeedMode.TRACE;
                 break;
         }
 
         Button button = inputLinear.findViewById(R.id.inputButtonConfiguration);
+
+        if (selectionId == SENSOR) {
+            int lowLevelSensor = AlgorithmSpecs.LowLevelSensors.get(infoName);
+            button.setEnabled(false);
+            if (lowLevelSensor == -1) buttonText = "No usable sensor";
+            else {
+                buttonText = AlgorithmSpecs.LowLevelSensorsNames.get(infoName);
+                sensorTypeToInformation.put(lowLevelSensor, infoName);
+            }
+        } else {
+            button.setEnabled(true);
+        }
+
+        inputDataModes.put(infoName, dataFeedMode);
+
         button.setText(buttonText);
-        button.setTag(inputLinear.getTag());
-        button.setOnClickListener(dialogCallback);
+        button.setTag(infoName);
+
+        if (dialogCallback != null) button.setOnClickListener(dialogCallback);
     }
 
     void initializeValueRanges () {
@@ -334,6 +409,10 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
         scheduledHandler = new Handler();
         initializeValueRanges();
         createUI();
+    }
+
+    enum DataFeedMode {
+        FAKE, FIXED, SENSOR, TRACE
     }
 
     enum RangeEndpoint {
