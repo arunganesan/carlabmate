@@ -22,3 +22,13 @@
     { "algorithm": 5, "inputs": [6, 7] }
   ]
 }
+
+
+
+{
+  "algorithms": [
+    { "algorithm": "aligned-imu", "information": "world-aligned-gyro", "save": true },
+    { "algorithm": "aligned-imu", "information": "world-aligned-accel", "save": true },
+    { "algorithm": "aligned-imu", "information": "rotation" },
+  ],
+}
