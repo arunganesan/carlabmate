@@ -9,7 +9,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import edu.umich.carlab.CLDataProvider;
@@ -27,9 +29,17 @@ public class LocalAlgorithmsActivity extends AppCompatActivity {
                 LayoutInflater inflater = getLayoutInflater();
                 Button button =
                         (Button) inflater.inflate(R.layout.sandbox_algorithm, moduleLayout, false);
+
+
+                List<String> inputInfoNames = new ArrayList<>();
+                for (AlgorithmSpecs.Information info : func.inputInformation) {
+                    inputInfoNames.add(info.name);
+                }
+
+
                 button.setText(String.format("%s\nInput: %s\nOutput: %s", algorithm.getName(),
-                                             func.outputInformation,
-                                             String.join(", ", func.inputInformation)));
+                                             func.outputInformation.name,
+                                             String.join(", ", inputInfoNames)));
 
                 button.setOnClickListener(new View.OnClickListener() {
                     @Override
