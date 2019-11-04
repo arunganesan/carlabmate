@@ -51,8 +51,8 @@ public class PackageCLService extends edu.umich.carlab.CLService {
                                                                   true)));
         strategyRequirements
                 .add(new AlgorithmInformation(alignedIMU, new AlgorithmSpecs.InfoRotation(false)));
-        saveInformation.add("world-aligned-accel");
-        saveInformation.add("world-aligned-gyro");
+
+
         super.initializeRouting();
     }
 

@@ -54,9 +54,7 @@ public class LinkServerGateway extends Service {
     SharedPreferences prefs;
     final String FILE_INFO_MAPPING = "saved file info mapping";
 
-
-    final int USERID = 21;
-    final String UPLOAD_URL = "http://localhost:3000/packet/upload?information=%s&person=" + USERID;
+    final String UPLOAD_URL = "http://35.3.120.242:3000/packet/upload?information=%s";
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -234,10 +232,13 @@ public class LinkServerGateway extends Service {
 
             } catch (MalformedURLException mue) {
                 Log.e(TAG, "Malformed URL: " + mue.getLocalizedMessage());
+                mue.printStackTrace();
             } catch (IOException e) {
                 Log.e(TAG, "Couldn't write Packet info to file");
+                e.printStackTrace();
             } catch (JSONException je) {
                 Log.e(TAG, "Couldn't load file info mapping JSON file");
+                je.printStackTrace();
             }
         }
     };
@@ -248,8 +249,8 @@ public class LinkServerGateway extends Service {
             scheduled = scheduler.scheduleAtFixedRate(
                     uploadRunnable,
                     0,
-                    1,
-                    TimeUnit.MINUTES);
+                    10,
+                    TimeUnit.SECONDS);
         }
     }
 
