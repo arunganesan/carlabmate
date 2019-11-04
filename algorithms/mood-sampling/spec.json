@@ -1,6 +1,6 @@
 [{
-    "module": "mood-sample",
-    "classname": "MoodSampler",
+    "module": "mood_sampling",
+    "classname": "MoodSampling",
     "functions": [
         { 
             "output": "mood", 
