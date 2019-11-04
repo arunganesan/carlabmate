@@ -7,11 +7,11 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,8 +21,6 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.umich.carlab.hal.HardwareAbstractionLayer;
-import edu.umich.carlab.hal.TraceReplayer;
-import edu.umich.carlab.io.AppLoader;
 import edu.umich.carlab.io.DataDumpWriter;
 import edu.umich.carlab.loadable.Algorithm;
 import edu.umich.carlab.loadable.AlgorithmSpecs;
@@ -32,16 +30,12 @@ import edu.umich.carlab.utils.DevSen;
 import edu.umich.carlab.utils.NotificationsHelper;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
-import static edu.umich.carlab.Constants.CARLAB_NOTIFICATION_ID;
 import static edu.umich.carlab.Constants.CLSERVICE_STOPPED;
 import static edu.umich.carlab.Constants.DONE_INITIALIZING_CL;
 import static edu.umich.carlab.Constants.DUMP_BYTES;
 import static edu.umich.carlab.Constants.DUMP_COLLECTED_STATUS;
 import static edu.umich.carlab.Constants.Dump_Data_Mode_Key;
 import static edu.umich.carlab.Constants.LIVE_MODE;
-import static edu.umich.carlab.Constants.Load_From_Trace_Key;
-import static edu.umich.carlab.Constants.Trip_Id_Offset;
-import static edu.umich.carlab.Constants.UID_key;
 
 /**
  * CL Service has life beyond the presense of an activity.
@@ -66,40 +60,39 @@ import static edu.umich.carlab.Constants.UID_key;
  */
 
 public class CLService extends Service implements CLDataProvider {
+
     static boolean runningDataCollection = false;
-    final int CL_NOTIFICATION_ID = CARLAB_NOTIFICATION_ID;
     final long DATA_UPDATE_INTERVAL_IN_MS = 0; // 100;
     final String TAG = "CarLab Service";
     final long UPDATE_NOTIFICATION_INTERVAL = 5000;
     final long dataDumpBroadcastEvery = 500L;
     final IBinder mBinder = new LocalBinder();
     public long startTimestamp;
+    protected Map<Algorithm, Set<String>> algorithmInputWiring = new HashMap<>();
+    protected Set<Class<?>> algorithmsToStart = new HashSet<>();
+    protected Map<String, Set<String>> dataMultiplexing;
+    protected Map<String, Map<String, Long>> lastDataUpdate = new HashMap<>();
+    protected Map<String, DataMarshal.MessageType> lastStateUpdate = new HashMap<>();
+    protected Set<DevSen> rawSensorsToStart = new HashSet<>();
+    protected Set<String> saveInformation = new HashSet<>();
+    protected Set<AlgorithmInformation> strategyRequirements = new HashSet<>();
+    protected Set<String> toServerMultiplexing;
     boolean currentlyStarting = false;
     long dataDumpLastBroadcastTime = 0L;
     List<DataMarshal.DataObject> dataDumpStorage;
-    Map<String, Set<String>> dataMultiplexing;
     HardwareAbstractionLayer hal;
-    // Downclock everything to 50 ms at least.
-    // Eventually we want to add the option for apps to specify the data rate.
-    Map<String, Map<String, Long>> lastDataUpdate = new HashMap<>();
     long lastNotificationUpdate = 0;
-    Map<String, DataMarshal.MessageType> lastStateUpdate = new HashMap<>();
     LinkServerGateway linkServerGateway;
     boolean linkServerGatewayBound = false;
     Boolean liveMode;
     SharedPreferences prefs;
-    Set<DevSen> rawSensorsToStart = new HashSet<>();
-    TraceReplayer replayer;
     Map<String, App> runningApps;
-    Set<String> toServerMultiplexing;
-    String uid, tripid;
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected (ComponentName className, IBinder service) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             LinkServerGateway.LocalBinder binder = (LinkServerGateway.LocalBinder) service;
             linkServerGateway = binder.getService();
-
             linkServerGatewayBound = true;
         }
 
@@ -110,29 +103,16 @@ public class CLService extends Service implements CLDataProvider {
         }
     };
 
-
     public CLService () {
         Log.e(TAG, "Service constructor");
     }
 
-    public static void turnOffCarLab (Context context) {
-        Intent intent = new Intent(context, CLService.class);
-        intent.setAction(Constants.MASTER_SWITCH_OFF);
-        context.startService(intent);
+    public static void turnOffCarLab (Context c) {
+
     }
 
-    public static void turnOnCarLab (Context context) {
-        // This means we havent' connected in a while.
-        // And this re-establishment isn't due to a temporary break
-        // And we just connected to the actual OBD device
+    public static void turnOnCarLab (Context c) {
 
-        Intent intent = new Intent(context, CLService.class);
-        intent.setAction(Constants.MASTER_SWITCH_ON);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(intent);
-        } else {
-            context.startService(intent);
-        }
     }
 
     public void addExternalMultiplexOutput (String information) {
@@ -147,11 +127,8 @@ public class CLService extends Service implements CLDataProvider {
         // Actually, even if it is internal I think we can use this.
         if (!dataMultiplexing.containsKey(information))
             dataMultiplexing.put(information, new HashSet<String>());
-        dataMultiplexing.get(information).add(algorithm.getName());
-        lastDataUpdate.get(algorithm.getName()).put(information, 0L);
-
-        // TODO Make sure wiring uses the right String to key into data multiplexing
-        // Anyway, pretty sure this is new territory lol
+        dataMultiplexing.get(information).add(algorithm.getClass().getName());
+        lastDataUpdate.get(algorithm.getClass().getName()).put(information, 0L);
 
         if (AlgorithmSpecs.RawSensors.contains(information)) {
             // Get the mapping from information to device/sensor that the hal speaks
@@ -163,51 +140,37 @@ public class CLService extends Service implements CLDataProvider {
      * Brings all apps to life using their class name
      */
     private void bringAppsToLife () {
-
-        List<App> apps = AppLoader.getInstance().instantiateApps(this, this);
-        for (App appInstance : apps) {
-            String classname = appInstance.getClass().getCanonicalName();
-            runningApps.put(classname, appInstance);
-            lastStateUpdate.put(classname, null);
-            lastDataUpdate.put(classname, new HashMap<String, Long>());
+        for (Class<?> algo : algorithmsToStart) {
+            String classname = algo.getName();
+            try {
+                Constructor<?> constructor =
+                        algo.getConstructor(CLDataProvider.class, Context.class);
+                Algorithm appInstance = (Algorithm) constructor.newInstance(this, this);
+                runningApps.put(classname, appInstance);
+                lastStateUpdate.put(classname, null);
+                lastDataUpdate.put(classname, new HashMap<String, Long>());
+            } catch (Exception e) {
+                Log.e(TAG, "Error creating alive app: " + e + algo.getCanonicalName());
+            }
         }
 
-        for (DevSen devSen : rawSensorsToStart) {
+
+        for (Algorithm alg : algorithmInputWiring.keySet())
+            for (String info : algorithmInputWiring.get(alg))
+                addMultiplexRoute(info, alg);
+
+
+        for (DevSen devSen : rawSensorsToStart)
             hal.turnOnSensor(devSen.device, devSen.sensor);
+
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
         }
     }
 
-    public boolean carlabCurrentlyStarting () {
-        return currentlyStarting;
-    }
+    protected void initializeRouting () {
 
-    public Map<String, App> getAllRunningApps () {
-        return runningApps;
-    }
-
-    /**
-     * The app fragment will bind to this on resume and get the initial values from this function
-     *
-     * @param classname
-     * @return
-     */
-    public DataMarshal.MessageType getLastStateUpdate (String classname) {
-        if (!lastStateUpdate.containsKey(classname)) return null;
-        else return lastStateUpdate.get(classname);
-    }
-
-    /**
-     * Outside people can bind to this service and get running apps.
-     * This is used in app details. That binds to this
-     * service and renders the visualization of the running app.
-     *
-     * @param classname
-     * @return
-     */
-    public App getRunningApp (String classname) {
-        if (runningApps == null) return null;
-        if (!runningApps.containsKey(classname)) return null;
-        return runningApps.get(classname);
     }
 
     public boolean isCarLabRunning () {
@@ -259,9 +222,6 @@ public class CLService extends Service implements CLDataProvider {
                 if (currTime > lastDataUpdate.get(appClassName).get(multiplexKey) +
                                DATA_UPDATE_INTERVAL_IN_MS) {
                     app.newData(dataObject);
-
-                    // if (!liveMode)
-                    //    clTripWriter.addNewData(appClassName, dataObject);
                     if (toServerMultiplexing.contains(dataObject.information))
                         linkServerGateway.addNewData(dataObject);
 
@@ -329,29 +289,20 @@ public class CLService extends Service implements CLDataProvider {
                 shutdownSequence();
             }
 
-            int tripOffset = prefs.getInt(Trip_Id_Offset, -1);
-
-            if (!liveMode) {
-                if (tripOffset == -1) {
-                    Toast.makeText(this, "Couldn't start CarLab. Unable to get existing trip ID.",
-                                   Toast.LENGTH_SHORT).show();
-                    return Service.START_NOT_STICKY;
-                }
-            }
-
             Log.e(TAG, "Service on start cmd: " + startTimestamp);
             NotificationsHelper.setNotificationForeground(this,
                                                           NotificationsHelper.Notifications.COLLECTING_DATA);
 
             startupSequence();
-            Toast.makeText(this, "CarLab starting data collection. T=" + tripid, Toast.LENGTH_SHORT)
-                 .show();
             return Service.START_NOT_STICKY;
         } else if (intent.getAction().equals(Constants.MASTER_SWITCH_OFF)) {
-            if (dumpMode) if (dataDumpStorage != null) Toast.makeText(this, String.format(
-                    Locale.getDefault(), "Turning off data dump. We collected %d total data points",
-                    dataDumpStorage.size()), Toast.LENGTH_SHORT).show();
-            else {
+            if (dumpMode) {
+                if (dataDumpStorage != null) Toast.makeText(this, String.format(Locale.getDefault(),
+                                                                                "Turning off data dump. We collected %d total data points",
+                                                                                dataDumpStorage
+                                                                                        .size()),
+                                                            Toast.LENGTH_SHORT).show();
+            } else {
                 Toast.makeText(this, "Turning off CarLab data collection.", Toast.LENGTH_SHORT)
                      .show();
             }
@@ -361,6 +312,7 @@ public class CLService extends Service implements CLDataProvider {
             stopSelf();
             return Service.START_NOT_STICKY;
         }
+
         return Service.START_NOT_STICKY;
     }
 
@@ -435,10 +387,6 @@ public class CLService extends Service implements CLDataProvider {
     private void startupSequence () {
         runningDataCollection = true;
         currentlyStarting = true;
-        uid = prefs.getString(UID_key, null);
-        if (uid == null && !liveMode) {
-            Log.e(TAG, "Problem setting the UID in carlab start");
-        }
 
         bindService(new Intent(this, LinkServerGateway.class), mConnection,
                     Context.BIND_AUTO_CREATE);
@@ -450,25 +398,15 @@ public class CLService extends Service implements CLDataProvider {
             @Override
             public void run () {
                 Log.e(TAG, "Starting CL! Thread ID: " + Thread.currentThread().getId());
-                boolean loadingFromTraceFile = prefs.getString(Load_From_Trace_Key, null) != null;
-                hal = new HardwareAbstractionLayer(CLService.this);
-
-
                 runningApps = new HashMap<>();
                 dataMultiplexing = new HashMap<>();
                 toServerMultiplexing = new HashSet<>();
+                lastDataUpdate = new HashMap<>();
+                hal = new HardwareAbstractionLayer(CLService.this);
 
+                initializeRouting();
                 bringAppsToLife();
 
-                if (!loadingFromTraceFile) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (Exception e) {
-                    }
-                }
-                Log.v(TAG, "Just returned from bringing apps to life");
-
-                // TODO Make sure things are properly wired
 
                 Log.v(TAG, "Finished startup sequence. We are multiplexing these keys: ");
                 for (Map.Entry<String, Set<String>> appEntry : dataMultiplexing.entrySet()) {
@@ -492,6 +430,15 @@ public class CLService extends Service implements CLDataProvider {
         startupThread.start();
     }
 
+    public class AlgorithmInformation {
+        public Algorithm algorithm;
+        public String information;
+
+        public AlgorithmInformation (Algorithm a, String i) {
+            algorithm = a;
+            information = i;
+        }
+    }
 
     public class LocalBinder extends Binder {
         public CLService getService () {
