@@ -76,11 +76,12 @@ public class Constants {
     /* Intents flying around */
     public static final String MASTER_SWITCH_ON = "MasterSwitchON";
     public static final String MASTER_SWITCH_OFF = "MasterSwitchOFF";
-    public static final String DONE_INITIALIZING_CL = "CanEnableMSNow";
     public static final String TRIGGER_BT_SEARCH = "TriggerBTSearch";
-    public static final String CLSERVICE_STOPPED = "CLSERVICE_STOPPED";
-    public static final String STATUS_CHANGED = "StatusChanged";
     public static final String BT_FAILED = "bluetooth failed";
+
+    public static final String CARLAB_STATUS = "CLSTATUS";
+    public static final String GATEWAY_STATUS = "GATEWAY";
+    public static final String _STATUS_MESSAGE = "MESSAGE";
 
     public static final String REPLAY_STATUS = "ReplayStatus";
     public static final String DUMP_COLLECTED_STATUS = "DumpCollectedStatus";

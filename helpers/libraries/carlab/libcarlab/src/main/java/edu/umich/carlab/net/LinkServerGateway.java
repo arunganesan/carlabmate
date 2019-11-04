@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.telecom.GatewayInfo;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -39,6 +40,9 @@ import edu.umich.carlab.DataMarshal;
 import edu.umich.carlab.io.MultipartUtility;
 import edu.umich.carlab.utils.Utilities;
 
+import static edu.umich.carlab.Constants.GATEWAY_STATUS;
+import static edu.umich.carlab.Constants._STATUS_MESSAGE;
+
 
 /**
  * Keep internal database or store in files.
@@ -54,7 +58,7 @@ public class LinkServerGateway extends Service {
     SharedPreferences prefs;
     final String FILE_INFO_MAPPING = "saved file info mapping";
 
-    final String UPLOAD_URL = "http://35.3.120.242:3000/packet/upload?information=%s";
+    final String UPLOAD_URL = "http://35.3.120.242:3000/packet/upload?information=%s&person=21";
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -148,7 +152,6 @@ public class LinkServerGateway extends Service {
                 for (String info : dataHolder.keySet()) {
                     File saveFile = getNewFile(info);
 
-
                     FileOutputStream fos = new FileOutputStream(saveFile);
                     GZIPOutputStream gos = new GZIPOutputStream(fos);
                     OutputStreamWriter osw = new OutputStreamWriter(gos);
@@ -198,10 +201,18 @@ public class LinkServerGateway extends Service {
                 int returnCode;
                 List<String> failedUploads = new ArrayList<>();
 
+
                 while (keysIterator.hasNext()) {
                     info = keysIterator.next();
 
                     filenames = fileInfoMapping.getJSONArray(info);
+
+                    Intent intent = new Intent(GATEWAY_STATUS);
+                    intent.putExtra(_STATUS_MESSAGE, String.format(
+                            "Uploading %s - %d files", info, filenames.length()));
+                    LinkServerGateway.this.sendBroadcast(intent);
+
+
                     for (int i = 0; i < filenames.length(); i++) {
                         filename = filenames.getString(i);
                         file = new File(filename);
@@ -228,6 +239,11 @@ public class LinkServerGateway extends Service {
                 prefs.edit()
                         .putString(FILE_INFO_MAPPING, remainingFileInfoMapping.toString())
                         .commit();
+
+                Intent intent = new Intent(GATEWAY_STATUS);
+                intent.putExtra(_STATUS_MESSAGE, String.format(
+                        "Done uploading"));
+                LinkServerGateway.this.sendBroadcast(intent);
 
 
             } catch (MalformedURLException mue) {

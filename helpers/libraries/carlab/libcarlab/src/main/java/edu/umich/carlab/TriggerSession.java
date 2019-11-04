@@ -95,6 +95,6 @@ public abstract class TriggerSession extends BroadcastReceiver {
     abstract protected boolean checkWakeupCondition();
 
     void broadcastStatusChange() {
-        context.sendBroadcast(new Intent(Constants.STATUS_CHANGED));
+        // context.sendBroadcast(new Intent(Constants.STATUS_CHANGED));
     }
 }

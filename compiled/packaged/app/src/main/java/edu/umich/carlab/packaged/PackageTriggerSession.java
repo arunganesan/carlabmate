@@ -13,6 +13,8 @@ import edu.umich.carlab.Constants;
 import edu.umich.carlab.utils.Utilities;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
+import static edu.umich.carlab.Constants.CARLAB_STATUS;
+import static edu.umich.carlab.Constants._STATUS_MESSAGE;
 
 public class PackageTriggerSession extends BroadcastReceiver {
     final String TAG = "Trigger";
@@ -64,7 +66,9 @@ public class PackageTriggerSession extends BroadcastReceiver {
     };
 
     void broadcastStatusChange () {
-        context.sendBroadcast(new Intent(Constants.STATUS_CHANGED));
+        Intent i = new Intent(CARLAB_STATUS);
+        i.putExtra(_STATUS_MESSAGE, "Trigger status flipped");
+        context.sendBroadcast(i);
     }
 
     protected boolean checkSleepCondition () {
