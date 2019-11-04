@@ -14,7 +14,6 @@ public abstract class AlignedIMUBase extends Algorithm {
     final String ALIGNED_ACCEL = "world-aligned-accel";
     final String ALIGNED_GYRO = "world-aligned-gyro";
     final String ROTATION = "rotation";
-    private boolean calculatedRotation = false;
 
     /*[{
         "module": "aligned-imu",
@@ -45,13 +44,19 @@ public abstract class AlignedIMUBase extends Algorithm {
 
         algorithmFunctions = new ArrayList<>();
         algorithmFunctions
-                .add(new AlgorithmSpecs.AppFunction("rotation", "gravity", "magnetometer"));
+                .add(new AlgorithmSpecs.AppFunction(new AlgorithmSpecs.InfoRotation(false),
+                                                    new AlgorithmSpecs.InfoMagnetometer(false),
+                                                    new AlgorithmSpecs.InfoGravity(false)));
 
         algorithmFunctions
-                .add(new AlgorithmSpecs.AppFunction("world-aligned-gyro", "gyro", "rotation"));
+                .add(new AlgorithmSpecs.AppFunction(new AlgorithmSpecs.InfoWorldAlignedGyro(false),
+                                                    new AlgorithmSpecs.InfoGyro(false),
+                                                    new AlgorithmSpecs.InfoRotation(false)));
 
         algorithmFunctions
-                .add(new AlgorithmSpecs.AppFunction("world-aligned-accel", "accel", "rotation"));
+                .add(new AlgorithmSpecs.AppFunction(new AlgorithmSpecs.InfoWorldAlignedAccel(false),
+                                                    new AlgorithmSpecs.InfoAccel(false),
+                                                    new AlgorithmSpecs.InfoRotation(false)));
     }
 
     @Override
