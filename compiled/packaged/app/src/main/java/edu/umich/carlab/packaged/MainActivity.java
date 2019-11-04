@@ -1,6 +1,8 @@
 package edu.umich.carlab.packaged;
 
 import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -29,19 +31,14 @@ import edu.umich.carlab.loadable.AlgorithmSpecs;
 
 public class MainActivity extends AppCompatActivity {
     public final static String TAG = "MainActivity";
-    Map<Algorithm, Set<String>> algorithmInputWiring = new HashMap<>();
     CLService carlabService;
     boolean mBound = false;
-    Set<String> saveInformation = new HashSet<>();
-    Set<AlgorithmInformation> strategyRequirements = new HashSet<>();
+
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected (ComponentName className, IBinder service) {
             CLService.LocalBinder binder = (CLService.LocalBinder) service;
             carlabService = binder.getService();
-            for (Map.Entry<Algorithm, Set<String>> wiring : algorithmInputWiring.entrySet())
-                for (String info : wiring.getValue())
-                    carlabService.addMultiplexRoute(info, wiring.getKey());
             mBound = true;
         }
 
@@ -51,35 +48,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    void initializeRouting () {
-        Algorithm alignedIMU = new AlignedIMU(null, this);
-        strategyRequirements.add(new AlgorithmInformation(alignedIMU, "world-aligned-gyro"));
-        strategyRequirements.add(new AlgorithmInformation(alignedIMU, "world-aligned-accel"));
-        strategyRequirements.add(new AlgorithmInformation(alignedIMU, "rotation"));
 
-        saveInformation.add("world-aligned-accel");
-        saveInformation.add("world-aligned-gyro");
-
-        // For all requirements
-        for (AlgorithmInformation algorithmInformation : strategyRequirements) {
-
-            // Get the function which produces that
-            for (AlgorithmSpecs.AppFunction function : alignedIMU.algorithmFunctions)
-
-                // Make sure that this algorithm gets all the INPUT to that function
-                // Just make sure it's wired. Nothing fancy.
-                if (function.outputInformation.equals(algorithmInformation.information)) {
-                    if (!algorithmInputWiring.containsKey(algorithmInformation.algorithm))
-                        algorithmInputWiring
-                                .put(algorithmInformation.algorithm, new HashSet<String>());
-
-                    algorithmInputWiring.get(algorithmInformation.algorithm)
-                                        .addAll(function.inputInformation);
-
-                    break;
-                }
-        }
-    }
 
     @Override
     protected void onCreate (Bundle savedInstanceState) {
@@ -90,19 +59,45 @@ public class MainActivity extends AppCompatActivity {
         List<AlgorithmSpecs.AppFunction> functions = algorithm.algorithmFunctions;
 
         // 1. Routing
-        initializeRouting();
 
         // 2. Start/stop carlab (manual or automatic)
+        // How does CarLab get the algorithmInputWiring?
+        // On that note, how does it get the list of Algorithms? Do we initialize them here?
+        // We could... wait ... hm. We could bind to it and just call the "start" function with the actual objects
+        // Then it could save the objects. Done.
+        // Besides I think it does run on the same thread...
+        // Either way it should all share the same virtual space.
+
         // 3. Send and receive from linkserver
+        // This is a separate service/thread. It wakes up occasionally to get new downloads.
+        // It also uploads any data we have.
+
+
+        // Previously we did the manual trigger
+        // Then a trigger service wakes up occasionally to check and then launch if needed
+        // That still makes hella sense. Lets keep that. Use a button.
+        // However! That does mean it's not trivial how we get data to CLService.
+        //     Especially since we're not starting that frmo the Main Activity where it is wired together
+        // IDEA: Why even use a main activity? That should just be for display.
+        //     What if we extended CLService and HARD CODED the fucking things. (statically coded)
+        //     That way, the ONLY purpose of main activity is to tell you some feedback or hacve a manual button
+        //     Everything else starts elsewhere.
+        //     No need for weird passing shit arouund.
+        // Love it.
     }
 
-    public class AlgorithmInformation {
-        public Algorithm algorithm;
-        public String information;
+    @Override
+    public void onResume () {
+        super.onResume();
+        bindService(new Intent(this, CLService.class), mConnection, Context.BIND_AUTO_CREATE);
+    }
 
-        public AlgorithmInformation (Algorithm a, String i) {
-            algorithm = a;
-            information = i;
+    @Override
+    public void onStop () {
+        super.onStop();
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
         }
     }
 }

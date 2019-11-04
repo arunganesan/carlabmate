@@ -50,10 +50,10 @@
                 android:enabled="true"
                 android:exported="true" />
 
-        <receiver android:name="edu.umich.carlab.recurring.UploadFiles" />
-        <receiver android:name="edu.umich.carlab.clog.UploadLog" />
+<!--        <receiver android:name="edu.umich.carlab.recurring.UploadFiles" />-->
+<!--        <receiver android:name="edu.umich.carlab.clog.UploadLog" />-->
         <receiver android:name="edu.umich.carlab.net.GetLatestTrip" />
-        <receiver android:name="edu.umich.carlab.net.CheckUpdate" />
+<!--        <receiver android:name="edu.umich.carlab.net.CheckUpdate" />-->
         <receiver android:name="edu.umich.carlab.ManualTrigger" />
 
 
