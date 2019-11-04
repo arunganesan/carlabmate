@@ -31,12 +31,10 @@ import edu.umich.carlab.utils.DevSen;
 import edu.umich.carlab.utils.NotificationsHelper;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
-import static edu.umich.carlab.Constants.CLSERVICE_STOPPED;
-import static edu.umich.carlab.Constants.DONE_INITIALIZING_CL;
-import static edu.umich.carlab.Constants.DUMP_BYTES;
-import static edu.umich.carlab.Constants.DUMP_COLLECTED_STATUS;
+import static edu.umich.carlab.Constants.CARLAB_STATUS;
 import static edu.umich.carlab.Constants.Dump_Data_Mode_Key;
 import static edu.umich.carlab.Constants.LIVE_MODE;
+import static edu.umich.carlab.Constants._STATUS_MESSAGE;
 
 /**
  * CL Service has life beyond the presense of an activity.
@@ -76,7 +74,7 @@ public class CLService extends Service implements CLDataProvider {
     protected Map<String, DataMarshal.MessageType> lastStateUpdate = new HashMap<>();
     protected Set<DevSen> rawSensorsToStart = new HashSet<>();
     protected Set<AlgorithmInformation> strategyRequirements = new HashSet<>();
-    protected Set<String> toServerMultiplexing;
+    protected Set<String> toServerMultiplexing = new HashSet<>();
     boolean currentlyStarting = false;
     long dataDumpLastBroadcastTime = 0L;
     List<DataMarshal.DataObject> dataDumpStorage;
@@ -103,8 +101,50 @@ public class CLService extends Service implements CLDataProvider {
         }
     };
 
+    protected void loadRequirements() {
+
+    }
+
     public CLService () {
-        Log.e(TAG, "Service constructor");
+        // For all requirements (extract INFO from ALGO)
+        // Get the function WITHIN that algorithm which produces that
+        // Get all REQINFO for THAT function
+        // Add a wiring to go from that REQINFO to this ALGO
+
+        loadRequirements();
+
+        // For all requirements
+        for (AlgorithmInformation algorithmInformation : strategyRequirements) {
+
+            // Get the function which produces that
+            AlgorithmSpecs.AppFunction producingFunction = null;
+
+            for (AlgorithmSpecs.AppFunction func : algorithmInformation.algorithm.algorithmFunctions)
+                if (func.outputInformation.name.equals(algorithmInformation.information.name)) {
+                    producingFunction = func;
+                    break;
+                }
+
+
+            // Feed all required info for this function into this algorithm
+            if (producingFunction == null)
+                Log.e(TAG, "Function routing failed for one input function");
+            else {
+                if (!algorithmInputWiring.containsKey(algorithmInformation.algorithm))
+                    algorithmInputWiring.put(algorithmInformation.algorithm,
+                                             new HashSet<AlgorithmSpecs.Information>());
+                algorithmInputWiring.get(algorithmInformation.algorithm)
+                                    .addAll(producingFunction.inputInformation);
+            }
+
+            if (algorithmInformation.information.shouldSave) {
+                addExternalMultiplexOutput(algorithmInformation.information);
+            }
+        }
+    }
+
+    public Set<AlgorithmInformation> getStrategy () {
+        return strategyRequirements;
     }
 
     public static void turnOffCarLab (Context c) {
@@ -169,42 +209,7 @@ public class CLService extends Service implements CLDataProvider {
         }
     }
 
-    protected void initializeRouting () {
-        // For all requirements (extract INFO from ALGO)
-        // Get the function WITHIN that algorithm which produces that
-        // Get all REQINFO for THAT function
-        // Add a wiring to go from that REQINFO to this ALGO
 
-
-        // For all requirements
-        for (AlgorithmInformation algorithmInformation : strategyRequirements) {
-
-            // Get the function which produces that
-            AlgorithmSpecs.AppFunction producingFunction = null;
-
-            for (AlgorithmSpecs.AppFunction func : algorithmInformation.algorithm.algorithmFunctions)
-                if (func.outputInformation.name.equals(algorithmInformation.information.name)) {
-                    producingFunction = func;
-                    break;
-                }
-
-
-            // Feed all required info for this function into this algorithm
-            if (producingFunction == null)
-                Log.e(TAG, "Function routing failed for one input function");
-            else {
-                if (!algorithmInputWiring.containsKey(algorithmInformation.algorithm))
-                    algorithmInputWiring.put(algorithmInformation.algorithm,
-                                             new HashSet<AlgorithmSpecs.Information>());
-                algorithmInputWiring.get(algorithmInformation.algorithm)
-                                    .addAll(producingFunction.inputInformation);
-            }
-
-            if (algorithmInformation.information.shouldSave) {
-                addExternalMultiplexOutput(algorithmInformation.information);
-            }
-        }
-    }
 
     public boolean isCarLabRunning () {
         return runningDataCollection;
@@ -337,6 +342,7 @@ public class CLService extends Service implements CLDataProvider {
         return Service.START_NOT_STICKY;
     }
 
+
     @Override
     public boolean onUnbind (Intent intent) {
         // All clients have unbound with unbindService()
@@ -372,11 +378,9 @@ public class CLService extends Service implements CLDataProvider {
         // Reset the data multiplexer
         if (dataMultiplexing != null) {
             dataMultiplexing.clear();
-            toServerMultiplexing.clear();
         }
 
         dataMultiplexing = null;
-        toServerMultiplexing = null;
         runningApps = null;
 
         if (dumpMode) {
@@ -386,8 +390,8 @@ public class CLService extends Service implements CLDataProvider {
             prefs.edit().putBoolean(Dump_Data_Mode_Key, false).commit();
         }
 
-        Intent stoppedIntent = new Intent();
-        stoppedIntent.setAction(CLSERVICE_STOPPED);
+        Intent stoppedIntent = new Intent(CARLAB_STATUS);
+        stoppedIntent.putExtra(_STATUS_MESSAGE, "Stopped");
         sendBroadcast(stoppedIntent);
 
 
@@ -421,11 +425,9 @@ public class CLService extends Service implements CLDataProvider {
                 Log.e(TAG, "Starting CL! Thread ID: " + Thread.currentThread().getId());
                 runningApps = new HashMap<>();
                 dataMultiplexing = new HashMap<>();
-                toServerMultiplexing = new HashSet<>();
                 lastDataUpdate = new HashMap<>();
                 hal = new HardwareAbstractionLayer(CLService.this);
 
-                initializeRouting();
                 bringAppsToLife();
                 linkServerGateway.scheduleUploads();
 
@@ -442,7 +444,8 @@ public class CLService extends Service implements CLDataProvider {
                 // We can enable master switch now
                 Intent doneIntent = new Intent();
                 currentlyStarting = false;
-                doneIntent.setAction(DONE_INITIALIZING_CL);
+                doneIntent.setAction(CARLAB_STATUS);
+                doneIntent.putExtra(_STATUS_MESSAGE, "Running");
                 CLService.this.sendBroadcast(doneIntent);
             }
         };

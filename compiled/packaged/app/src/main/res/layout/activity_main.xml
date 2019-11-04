@@ -1,31 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:layout_gravity="center"
-    android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/statusText"
+
+    <GridView
+        android:id="@+id/algorithm_grid"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginBottom="32dp"
+        android:columnWidth="90dp"
+        android:gravity="center"
+        android:horizontalSpacing="20dp"
+        android:numColumns="auto_fit"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="20dp"
+
         android:layout_margin="50dp"
-        android:fontFamily="@font/quicksand"
-        android:text="TextView"
-        android:textAlignment="center"
-        android:textColor="@android:color/black"
-        android:textSize="50sp" />
+        app:layout_constraintBottom_toTopOf="@id/toggleButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
 
     <ToggleButton
         android:id="@+id/toggleButton"
         android:layout_width="match_parent"
-        android:layout_height="150sp"
+        android:layout_height="100sp"
         android:layout_margin="50dp"
-        android:textOff="Start"
-        android:textOn="Stop"
-        android:text="ToggleButton" />
 
-</LinearLayout>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/statusbar"
+        android:text="ToggleButton"
+        android:textOff="Start"
+        android:textOn="Stop" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:id="@+id/statusbar"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/carlabStatusText"
+            android:layout_width="wrap_content"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="@font/quicksand"
+            android:text="Carlab Status"
+            android:textAlignment="center"
+            android:textColor="@android:color/black" />
+
+
+        <TextView
+            android:id="@+id/gatewayStatusText"
+            android:layout_width="wrap_content"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/quicksand"
+            android:text="Gateway Status"
+            android:layout_gravity="center"
+            android:textAlignment="center"
+            android:textColor="@android:color/holo_blue_dark" />
+
+    </LinearLayout>
+
+</android.support.constraint.ConstraintLayout>

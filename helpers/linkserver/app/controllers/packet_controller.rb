@@ -76,6 +76,26 @@ class PacketController < ApplicationController
     end
 
 
+
+    def listall
+        # Must be get
+        # Must contain params about info and person and last date
+        
+        if !request.get? or !params.has_key? :person
+            head :invalid
+            return
+        end
+
+        render :json => Packet.where('person_id = :person_id', {
+            person_id: params[:person],
+        })
+    end
+
+
+
+
+
+
     def list 
         # Must be get
         # Must contain params about info and person and last date
