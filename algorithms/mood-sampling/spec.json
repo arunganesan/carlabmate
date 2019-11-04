@@ -1,0 +1,10 @@
+[{
+    "module": "mood-sample",
+    "classname": "MoodSampler",
+    "functions": [
+        { 
+            "output": "mood", 
+            "input": ["location"]
+        }
+    ]
+}]
