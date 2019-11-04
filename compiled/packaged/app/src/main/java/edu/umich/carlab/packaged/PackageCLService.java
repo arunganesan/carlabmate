@@ -1,29 +1,19 @@
 package edu.umich.carlab.packaged;
 
-import java.util.HashMap;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
+
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 import edu.umich.aligned_imu.AlignedIMU;
+import edu.umich.carlab.Constants;
 import edu.umich.carlab.loadable.Algorithm;
 import edu.umich.carlab.loadable.AlgorithmSpecs;
 
-public class PackageCLService extends CLService {
-    Map<Algorithm, Set<String>> algorithmInputWiring = new HashMap<>();
-    Set<String> saveInformation = new HashSet<>();
-    Set<AlgorithmInformation> strategyRequirements = new HashSet<>();
-
-
-
-
-    PackageCLService() {
-        initializeRouting();
-    }
-
-    void initializeRouting () {
-        // 1. Routing
-
+public class PackageCLService extends edu.umich.carlab.CLService {
+    @Override
+    protected void initializeRouting () {
          /*
         [
             // Says we want to use THIS algorithm to get THIS information
@@ -33,13 +23,15 @@ public class PackageCLService extends CLService {
         ]
          */
 
-        Algorithm alignedIMU = new AlignedIMU(null, this);
+        Algorithm alignedIMU = new AlignedIMU(this, this);
         strategyRequirements.add(new AlgorithmInformation(alignedIMU, "world-aligned-gyro"));
         strategyRequirements.add(new AlgorithmInformation(alignedIMU, "world-aligned-accel"));
         strategyRequirements.add(new AlgorithmInformation(alignedIMU, "rotation"));
 
         saveInformation.add("world-aligned-accel");
         saveInformation.add("world-aligned-gyro");
+
+        algorithmsToStart.add(AlignedIMU.class);
 
         // For all requirements
         for (AlgorithmInformation algorithmInformation : strategyRequirements) {
@@ -60,6 +52,7 @@ public class PackageCLService extends CLService {
         }
 
 
+
         // 2. Start/stop carlab (manual or automatic)
         // How does CarLab get the algorithmInputWiring?
         // On that note, how does it get the list of Algorithms? Do we initialize them here?
@@ -71,7 +64,6 @@ public class PackageCLService extends CLService {
         // 3. Send and receive from linkserver
         // This is a separate service/thread. It wakes up occasionally to get new downloads.
         // It also uploads any data we have.
-
 
         // Previously we did the manual trigger
         // Then a trigger service wakes up occasionally to check and then launch if needed
@@ -86,7 +78,6 @@ public class PackageCLService extends CLService {
         // Love it.
 
 
-
         // We no longer need this! This IS CarLab lol
         // for (Map.Entry<Algorithm, Set<String>> wiring : algorithmInputWiring.entrySet())
         //     for (String info : wiring.getValue())
@@ -94,13 +85,28 @@ public class PackageCLService extends CLService {
     }
 
 
-    public class AlgorithmInformation {
-        public Algorithm algorithm;
-        public String information;
 
-        public AlgorithmInformation (Algorithm a, String i) {
-            algorithm = a;
-            information = i;
+    public static void turnOffCarLab (Context context) {
+        Intent intent = new Intent(context, PackageCLService.class);
+        intent.setAction(Constants.MASTER_SWITCH_OFF);
+        context.startService(intent);
+    }
+
+    public static void turnOnCarLab (Context context) {
+        // This means we havent' connected in a while.
+        // And this re-establishment isn't due to a temporary break
+        // And we just connected to the actual OBD device
+
+        Intent intent = new Intent(context, PackageCLService.class);
+        intent.setAction(Constants.MASTER_SWITCH_ON);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(intent);
+        } else {
+            context.startService(intent);
         }
     }
+
+
+
+
 }

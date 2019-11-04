@@ -25,6 +25,7 @@ public class PackageTriggerSession extends BroadcastReceiver {
         public void run () {
             prefs = getDefaultSharedPreferences(context);
             sessionState = SessionState.values()[prefs.getInt(Constants.Session_State_Key, 1)];
+            // sessionState = SessionState.OFF;
 
             Log.v(TAG, "Checking state");
             if ((sessionState == PackageTriggerSession.SessionState.ON ||

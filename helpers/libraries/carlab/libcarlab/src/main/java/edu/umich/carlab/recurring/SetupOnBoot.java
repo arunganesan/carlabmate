@@ -20,7 +20,7 @@ public class SetupOnBoot extends BroadcastReceiver {
 
         // Wake up the main activity on boot
         // That will schedule everything else
-        Utilities.wakeUpMainActivity(context);
+        // Utilities.wakeUpMainActivity(context);
 
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
