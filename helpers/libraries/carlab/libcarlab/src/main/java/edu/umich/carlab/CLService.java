@@ -24,6 +24,7 @@ import edu.umich.carlab.hal.HardwareAbstractionLayer;
 import edu.umich.carlab.io.DataDumpWriter;
 import edu.umich.carlab.loadable.Algorithm;
 import edu.umich.carlab.loadable.AlgorithmSpecs;
+import edu.umich.carlab.loadable.AlgorithmSpecs.AlgorithmInformation;
 import edu.umich.carlab.loadable.App;
 import edu.umich.carlab.net.LinkServerGateway;
 import edu.umich.carlab.utils.DevSen;
@@ -68,8 +69,7 @@ public class CLService extends Service implements CLDataProvider {
     final long dataDumpBroadcastEvery = 500L;
     final IBinder mBinder = new LocalBinder();
     public long startTimestamp;
-    protected Map<Algorithm, Set<String>> algorithmInputWiring = new HashMap<>();
-    protected Set<Class<?>> algorithmsToStart = new HashSet<>();
+    protected Map<Algorithm, Set<AlgorithmSpecs.Information>> algorithmInputWiring = new HashMap<>();
     protected Map<String, Set<String>> dataMultiplexing;
     protected Map<String, Map<String, Long>> lastDataUpdate = new HashMap<>();
     protected Map<String, DataMarshal.MessageType> lastStateUpdate = new HashMap<>();
@@ -122,17 +122,17 @@ public class CLService extends Service implements CLDataProvider {
         toServerMultiplexing.add(information);
     }
 
-    public void addMultiplexRoute (String information, Algorithm algorithm) {
+    public void addMultiplexRoute (AlgorithmSpecs.Information information, Algorithm algorithm) {
         // This will be routed from other languages to this input
         // Actually, even if it is internal I think we can use this.
-        if (!dataMultiplexing.containsKey(information))
-            dataMultiplexing.put(information, new HashSet<String>());
-        dataMultiplexing.get(information).add(algorithm.getClass().getName());
-        lastDataUpdate.get(algorithm.getClass().getName()).put(information, 0L);
+        if (!dataMultiplexing.containsKey(information.name))
+            dataMultiplexing.put(information.name, new HashSet<String>());
+        dataMultiplexing.get(information.name).add(algorithm.getClass().getName());
+        lastDataUpdate.get(algorithm.getClass().getName()).put(information.name, 0L);
 
-        if (AlgorithmSpecs.RawSensors.contains(information)) {
+        if (information.lowLevelSensor != -1) {
             // Get the mapping from information to device/sensor that the hal speaks
-            rawSensorsToStart.add(AlgorithmSpecs.DevSenMapping.get(information));
+            rawSensorsToStart.add(information.devSensor);
         }
     }
 
@@ -140,7 +140,8 @@ public class CLService extends Service implements CLDataProvider {
      * Brings all apps to life using their class name
      */
     private void bringAppsToLife () {
-        for (Class<?> algo : algorithmsToStart) {
+        for (Algorithm alg : algorithmInputWiring.keySet()) {
+            Class<?> algo = alg.getClass();
             String classname = algo.getName();
             try {
                 Constructor<?> constructor =
@@ -156,9 +157,8 @@ public class CLService extends Service implements CLDataProvider {
 
 
         for (Algorithm alg : algorithmInputWiring.keySet())
-            for (String info : algorithmInputWiring.get(alg))
+            for (AlgorithmSpecs.Information info : algorithmInputWiring.get(alg))
                 addMultiplexRoute(info, alg);
-
 
         for (DevSen devSen : rawSensorsToStart)
             hal.turnOnSensor(devSen.device, devSen.sensor);
@@ -170,7 +170,22 @@ public class CLService extends Service implements CLDataProvider {
     }
 
     protected void initializeRouting () {
-
+        // For all requirements
+        for (AlgorithmInformation algorithmInformation : strategyRequirements) {
+            // Get the function which produces that
+            for (Algorithm algorithm : algorithmInputWiring.keySet())
+                for (AlgorithmSpecs.AppFunction function : algorithm.algorithmFunctions)
+                    // Make sure that this algorithm gets all the INPUT to that function
+                    // Just make sure it's wired. Nothing fancy.
+                    if (function.outputInformation.equals(algorithmInformation.information)) {
+                        if (!algorithmInputWiring.containsKey(algorithmInformation.algorithm))
+                            algorithmInputWiring
+                                    .put(algorithmInformation.algorithm, new HashSet<AlgorithmSpecs.Information>());
+                        algorithmInputWiring.get(algorithmInformation.algorithm)
+                                            .addAll(function.inputInformation);
+                        break;
+                    }
+        }
     }
 
     public boolean isCarLabRunning () {
@@ -430,15 +445,6 @@ public class CLService extends Service implements CLDataProvider {
         startupThread.start();
     }
 
-    public class AlgorithmInformation {
-        public Algorithm algorithm;
-        public String information;
-
-        public AlgorithmInformation (Algorithm a, String i) {
-            algorithm = a;
-            information = i;
-        }
-    }
 
     public class LocalBinder extends Binder {
         public CLService getService () {

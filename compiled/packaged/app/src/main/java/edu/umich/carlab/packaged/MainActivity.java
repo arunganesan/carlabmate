@@ -36,13 +36,14 @@ public class MainActivity extends AppCompatActivity {
             statusText.setText("Stopped");
         }
     };
+    ToggleButton toggleButton;
     BroadcastReceiver clStarted = new BroadcastReceiver() {
         @Override
         public void onReceive (Context context, Intent intent) {
             statusText.setText("Started");
+            toggleButton.setEnabled(true);
         }
     };
-    ToggleButton toggleButton;
     BroadcastReceiver updateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive (Context context, Intent intent) {
