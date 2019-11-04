@@ -1,4 +1,29 @@
 class DevController < ApplicationController
+    def sync_registry 
+        ActiveRecord::Base.logger = nil
+
+        # Person.delete_all
+        Information.delete_all
+        Packet.delete_all
+
+        # for i in 1..50 do
+        #     Person.create(:name => "Person #{i}")
+        # end
+
+        # TODO add more
+        Information.create(:name = > "rotation")
+        Information.create(:name = > "world-aligned-gyro")
+        Information.create(:name = > "world-aligned-accel")
+        Information.create(:name = > "world-aligned-location")
+
+        render :json => {
+            'information': Information.all,
+            'people': Person.all,
+            'packets': Packet.all            
+        }
+    end
+
+
     def dummy_database 
         ActiveRecord::Base.logger = nil
 
