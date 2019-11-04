@@ -30,5 +30,10 @@
     { "algorithm": "aligned-imu", "information": "world-aligned-gyro", "save": true },
     { "algorithm": "aligned-imu", "information": "world-aligned-accel", "save": true },
     { "algorithm": "aligned-imu", "information": "rotation" },
+
+
+    # certain algorithms use the raw sensors
+    # that is inherent to the algorithm
+    # aligned IMU needs Gyro, which is a raw sensor.
   ],
 }
