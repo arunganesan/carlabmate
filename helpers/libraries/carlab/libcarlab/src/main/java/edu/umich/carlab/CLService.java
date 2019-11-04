@@ -28,8 +28,6 @@ import edu.umich.carlab.loadable.Algorithm;
 import edu.umich.carlab.loadable.AlgorithmSpecs;
 import edu.umich.carlab.loadable.App;
 import edu.umich.carlab.net.LinkServerGateway;
-import edu.umich.carlab.sensors.OpenXcSensors;
-import edu.umich.carlab.sensors.PhoneSensors;
 import edu.umich.carlab.utils.DevSen;
 import edu.umich.carlab.utils.NotificationsHelper;
 
@@ -80,7 +78,6 @@ public class CLService extends Service implements CLDataProvider {
     long dataDumpLastBroadcastTime = 0L;
     List<DataMarshal.DataObject> dataDumpStorage;
     Map<String, Set<String>> dataMultiplexing;
-    Set<DevSen> rawSensorsToStart = new HashSet<>();
     HardwareAbstractionLayer hal;
     // Downclock everything to 50 ms at least.
     // Eventually we want to add the option for apps to specify the data rate.
@@ -91,6 +88,7 @@ public class CLService extends Service implements CLDataProvider {
     boolean linkServerGatewayBound = false;
     Boolean liveMode;
     SharedPreferences prefs;
+    Set<DevSen> rawSensorsToStart = new HashSet<>();
     TraceReplayer replayer;
     Map<String, App> runningApps;
     Set<String> toServerMultiplexing;
@@ -111,7 +109,6 @@ public class CLService extends Service implements CLDataProvider {
             linkServerGatewayBound = false;
         }
     };
-
 
 
     public CLService () {
@@ -351,13 +348,10 @@ public class CLService extends Service implements CLDataProvider {
                  .show();
             return Service.START_NOT_STICKY;
         } else if (intent.getAction().equals(Constants.MASTER_SWITCH_OFF)) {
-            if (dumpMode) {
-                if (dataDumpStorage != null) Toast.makeText(this, String.format(Locale.getDefault(),
-                                                                                "Turning off data dump. We collected %d total data points",
-                                                                                dataDumpStorage
-                                                                                        .size()),
-                                                            Toast.LENGTH_SHORT).show();
-            } else {
+            if (dumpMode) if (dataDumpStorage != null) Toast.makeText(this, String.format(
+                    Locale.getDefault(), "Turning off data dump. We collected %d total data points",
+                    dataDumpStorage.size()), Toast.LENGTH_SHORT).show();
+            else {
                 Toast.makeText(this, "Turning off CarLab data collection.", Toast.LENGTH_SHORT)
                      .show();
             }
@@ -367,7 +361,6 @@ public class CLService extends Service implements CLDataProvider {
             stopSelf();
             return Service.START_NOT_STICKY;
         }
-
         return Service.START_NOT_STICKY;
     }
 
@@ -499,15 +492,6 @@ public class CLService extends Service implements CLDataProvider {
         startupThread.start();
     }
 
-    public void turnOnSensor (String device, String sensor) {
-        // Only a few of the sensors actually turn on the sensors
-        try {
-            Thread.sleep(250);
-        } catch (Exception e) {
-        }
-
-        hal.turnOnSensor(device, sensor);
-    }
 
     public class LocalBinder extends Binder {
         public CLService getService () {
