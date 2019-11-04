@@ -69,12 +69,12 @@ public class CLService extends Service implements CLDataProvider {
     final long dataDumpBroadcastEvery = 500L;
     final IBinder mBinder = new LocalBinder();
     public long startTimestamp;
-    protected Map<Algorithm, Set<AlgorithmSpecs.Information>> algorithmInputWiring = new HashMap<>();
+    protected Map<Algorithm, Set<AlgorithmSpecs.Information>> algorithmInputWiring =
+            new HashMap<>();
     protected Map<String, Set<String>> dataMultiplexing;
     protected Map<String, Map<String, Long>> lastDataUpdate = new HashMap<>();
     protected Map<String, DataMarshal.MessageType> lastStateUpdate = new HashMap<>();
     protected Set<DevSen> rawSensorsToStart = new HashSet<>();
-    protected Set<String> saveInformation = new HashSet<>();
     protected Set<AlgorithmInformation> strategyRequirements = new HashSet<>();
     protected Set<String> toServerMultiplexing;
     boolean currentlyStarting = false;
@@ -115,25 +115,19 @@ public class CLService extends Service implements CLDataProvider {
 
     }
 
-    public void addExternalMultiplexOutput (String information) {
-        // This will be placed in the outbox from any algorithm that produces it
-        // add this to a special set.
-        // IF we reach this data, then go to the bound "packet" guy and place it?
-        toServerMultiplexing.add(information);
+    public void addExternalMultiplexOutput (AlgorithmSpecs.Information information) {
+        toServerMultiplexing.add(information.name);
     }
 
-    public void addMultiplexRoute (AlgorithmSpecs.Information information, Algorithm algorithm) {
+    public void addMultiplexRoute (String infoname, Algorithm algorithm) {
         // This will be routed from other languages to this input
         // Actually, even if it is internal I think we can use this.
-        if (!dataMultiplexing.containsKey(information.name))
-            dataMultiplexing.put(information.name, new HashSet<String>());
-        dataMultiplexing.get(information.name).add(algorithm.getClass().getName());
-        lastDataUpdate.get(algorithm.getClass().getName()).put(information.name, 0L);
+        if (!dataMultiplexing.containsKey(infoname))
+            dataMultiplexing.put(infoname, new HashSet<String>());
+        dataMultiplexing.get(infoname).add(algorithm.getClass().getName());
+        lastDataUpdate.get(algorithm.getClass().getName()).put(infoname, 0L);
 
-        if (information.lowLevelSensor != -1) {
-            // Get the mapping from information to device/sensor that the hal speaks
-            rawSensorsToStart.add(information.devSensor);
-        }
+
     }
 
     /**
@@ -157,8 +151,14 @@ public class CLService extends Service implements CLDataProvider {
 
 
         for (Algorithm alg : algorithmInputWiring.keySet())
-            for (AlgorithmSpecs.Information info : algorithmInputWiring.get(alg))
-                addMultiplexRoute(info, alg);
+            for (AlgorithmSpecs.Information info : algorithmInputWiring.get(alg)) {
+                addMultiplexRoute(info.name, alg);
+                if (info.lowLevelSensor != -1)
+                    // Get the mapping from information to device/sensor that the hal speaks
+                    rawSensorsToStart.add(info.devSensor);
+
+            }
+
 
         for (DevSen devSen : rawSensorsToStart)
             hal.turnOnSensor(devSen.device, devSen.sensor);
@@ -170,21 +170,39 @@ public class CLService extends Service implements CLDataProvider {
     }
 
     protected void initializeRouting () {
+        // For all requirements (extract INFO from ALGO)
+        // Get the function WITHIN that algorithm which produces that
+        // Get all REQINFO for THAT function
+        // Add a wiring to go from that REQINFO to this ALGO
+
+
         // For all requirements
         for (AlgorithmInformation algorithmInformation : strategyRequirements) {
+
             // Get the function which produces that
-            for (Algorithm algorithm : algorithmInputWiring.keySet())
-                for (AlgorithmSpecs.AppFunction function : algorithm.algorithmFunctions)
-                    // Make sure that this algorithm gets all the INPUT to that function
-                    // Just make sure it's wired. Nothing fancy.
-                    if (function.outputInformation.equals(algorithmInformation.information)) {
-                        if (!algorithmInputWiring.containsKey(algorithmInformation.algorithm))
-                            algorithmInputWiring
-                                    .put(algorithmInformation.algorithm, new HashSet<AlgorithmSpecs.Information>());
-                        algorithmInputWiring.get(algorithmInformation.algorithm)
-                                            .addAll(function.inputInformation);
-                        break;
-                    }
+            AlgorithmSpecs.AppFunction producingFunction = null;
+
+            for (AlgorithmSpecs.AppFunction func : algorithmInformation.algorithm.algorithmFunctions)
+                if (func.outputInformation.name.equals(algorithmInformation.information.name)) {
+                    producingFunction = func;
+                    break;
+                }
+
+
+            // Feed all required info for this function into this algorithm
+            if (producingFunction == null)
+                Log.e(TAG, "Function routing failed for one input function");
+            else {
+                if (!algorithmInputWiring.containsKey(algorithmInformation.algorithm))
+                    algorithmInputWiring.put(algorithmInformation.algorithm,
+                                             new HashSet<AlgorithmSpecs.Information>());
+                algorithmInputWiring.get(algorithmInformation.algorithm)
+                                    .addAll(producingFunction.inputInformation);
+            }
+
+            if (algorithmInformation.information.shouldSave) {
+                addExternalMultiplexOutput(algorithmInformation.information);
+            }
         }
     }
 
@@ -203,19 +221,7 @@ public class CLService extends Service implements CLDataProvider {
      * colors.
      */
     public synchronized void newData (DataMarshal.DataObject dataObject) {
-        final Boolean dumpMode = prefs.getBoolean(Dump_Data_Mode_Key, false);
         long currTime = System.currentTimeMillis();
-
-        if (dumpMode) {
-            dataDumpStorage.add(dataObject);
-            if (currTime > dataDumpLastBroadcastTime + dataDumpBroadcastEvery) {
-                Intent intent = new Intent(DUMP_COLLECTED_STATUS);
-                intent.putExtra(DUMP_BYTES, dataDumpStorage.size());
-                sendBroadcast(intent);
-                dataDumpLastBroadcastTime = currTime;
-            }
-            return;
-        }
 
         if (dataObject == null) return;
         if (dataMultiplexing == null) return;
@@ -224,23 +230,23 @@ public class CLService extends Service implements CLDataProvider {
             TriggerSession.SessionState.PAUSED.getValue()) return;
 
         // String multiplexKey = dataObject.device + ":" + dataObject.sensor;
-        String multiplexKey = dataObject.information;
         Intent statusIntent;
+        String infoname = dataObject.information;
 
-        if (dataMultiplexing != null && dataMultiplexing.containsKey(multiplexKey)) {
-            Set<String> classNames = dataMultiplexing.get(multiplexKey);
+        if (toServerMultiplexing.contains(infoname))
+            linkServerGateway.addNewData(dataObject);
+
+        if (dataMultiplexing != null && dataMultiplexing.containsKey(infoname)) {
+            Set<String> classNames = dataMultiplexing.get(infoname);
             for (String appClassName : classNames) {
                 App app = runningApps.get(appClassName);
                 if (app == null) continue;
 
                 // Throttle the data rate for each sensor
-                if (currTime > lastDataUpdate.get(appClassName).get(multiplexKey) +
+                if (currTime > lastDataUpdate.get(appClassName).get(infoname) +
                                DATA_UPDATE_INTERVAL_IN_MS) {
                     app.newData(dataObject);
-                    if (toServerMultiplexing.contains(dataObject.information))
-                        linkServerGateway.addNewData(dataObject);
-
-                    lastDataUpdate.get(appClassName).put(multiplexKey, currTime);
+                    lastDataUpdate.get(appClassName).put(infoname, currTime);
                 }
 
                 // Update the notification
@@ -252,7 +258,7 @@ public class CLService extends Service implements CLDataProvider {
                 }
 
                 // Only broadcast state if it's changed since last time
-                if ((lastStateUpdate.get(appClassName) != dataObject.dataType)) {
+                if (lastStateUpdate.get(appClassName) != dataObject.dataType) {
                     statusIntent = new Intent();
                     statusIntent.setAction(Constants.INTENT_APP_STATE_UPDATE);
                     statusIntent.putExtra("appClassName", appClassName);
@@ -421,6 +427,7 @@ public class CLService extends Service implements CLDataProvider {
 
                 initializeRouting();
                 bringAppsToLife();
+                linkServerGateway.scheduleUploads();
 
 
                 Log.v(TAG, "Finished startup sequence. We are multiplexing these keys: ");
