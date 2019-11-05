@@ -65,18 +65,20 @@ public class CLService extends Service implements CLDataProvider {
     final String TAG = "CarLab Service";
     final long UPDATE_NOTIFICATION_INTERVAL = 5000;
     final long dataDumpBroadcastEvery = 500L;
+    final long STATE_UPDATE_EVERY = 100L;
     final IBinder mBinder = new LocalBinder();
     public long startTimestamp;
     protected Map<Algorithm, Set<AlgorithmSpecs.Information>> algorithmInputWiring =
             new HashMap<>();
     protected Map<String, Set<String>> dataMultiplexing;
     protected Map<String, Map<String, Long>> lastDataUpdate = new HashMap<>();
-    protected Map<String, DataMarshal.MessageType> lastStateUpdate = new HashMap<>();
+    protected Map<String, Long> lastStateUpdate = new HashMap<>();
     protected Set<DevSen> rawSensorsToStart = new HashSet<>();
     protected Set<AlgorithmInformation> strategyRequirements = new HashSet<>();
     protected Set<String> toServerMultiplexing = new HashSet<>();
     boolean currentlyStarting = false;
     long dataDumpLastBroadcastTime = 0L;
+    protected Set<AlgorithmSpecs.AppFunction> loadedFuntions;
     List<DataMarshal.DataObject> dataDumpStorage;
     HardwareAbstractionLayer hal;
     long lastNotificationUpdate = 0;
@@ -112,7 +114,7 @@ public class CLService extends Service implements CLDataProvider {
         // Add a wiring to go from that REQINFO to this ALGO
 
         loadRequirements();
-
+        loadedFuntions = new HashSet<>();
         // For all requirements
         for (AlgorithmInformation algorithmInformation : strategyRequirements) {
 
@@ -130,6 +132,7 @@ public class CLService extends Service implements CLDataProvider {
             if (producingFunction == null)
                 Log.e(TAG, "Function routing failed for one input function");
             else {
+                loadedFuntions.add(producingFunction);
                 if (!algorithmInputWiring.containsKey(algorithmInformation.algorithm))
                     algorithmInputWiring.put(algorithmInformation.algorithm,
                                              new HashSet<AlgorithmSpecs.Information>());
@@ -143,8 +146,8 @@ public class CLService extends Service implements CLDataProvider {
         }
     }
 
-    public Set<AlgorithmInformation> getStrategy () {
-        return strategyRequirements;
+    public Set<AlgorithmSpecs.AppFunction> getLoadedFunctions () {
+        return loadedFuntions;
     }
 
     public static void turnOffCarLab (Context c) {
@@ -182,7 +185,6 @@ public class CLService extends Service implements CLDataProvider {
                         algo.getConstructor(CLDataProvider.class, Context.class);
                 Algorithm appInstance = (Algorithm) constructor.newInstance(this, this);
                 runningApps.put(classname, appInstance);
-                lastStateUpdate.put(classname, null);
                 lastDataUpdate.put(classname, new HashMap<String, Long>());
             } catch (Exception e) {
                 Log.e(TAG, "Error creating alive app: " + e + algo.getCanonicalName());
@@ -241,6 +243,21 @@ public class CLService extends Service implements CLDataProvider {
         if (toServerMultiplexing.contains(infoname))
             linkServerGateway.addNewData(dataObject);
 
+
+        // Only broadcast state if it's changed since last time
+        if (!lastStateUpdate.containsKey(infoname))
+            lastStateUpdate.put(infoname, 0L);
+
+        if (currTime > lastStateUpdate.get(infoname) + STATE_UPDATE_EVERY) {
+            statusIntent = new Intent();
+            statusIntent.setAction(Constants.INTENT_APP_STATE_UPDATE);
+            statusIntent.putExtra("information", infoname);
+            statusIntent.putExtra("value", dataObject.value);
+            CLService.this.sendBroadcast(statusIntent);
+            lastStateUpdate.put(infoname, currTime);
+        }
+
+
         if (dataMultiplexing != null && dataMultiplexing.containsKey(infoname)) {
             Set<String> classNames = dataMultiplexing.get(infoname);
             for (String appClassName : classNames) {
@@ -260,16 +277,6 @@ public class CLService extends Service implements CLDataProvider {
                     NotificationsHelper.setNotificationForeground(this,
                                                                   NotificationsHelper.Notifications.COLLECTING_DATA);
                     lastNotificationUpdate = currTime;
-                }
-
-                // Only broadcast state if it's changed since last time
-                if (lastStateUpdate.get(appClassName) != dataObject.dataType) {
-                    statusIntent = new Intent();
-                    statusIntent.setAction(Constants.INTENT_APP_STATE_UPDATE);
-                    statusIntent.putExtra("appClassName", appClassName);
-                    statusIntent.putExtra("appState", dataObject.dataType);
-                    CLService.this.sendBroadcast(statusIntent);
-                    lastStateUpdate.put(appClassName, dataObject.dataType);
                 }
             }
         } else {

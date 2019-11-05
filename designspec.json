@@ -1,4 +1,3 @@
-
 {
     "information": [
         "road", 
@@ -8,16 +7,9 @@
 
     "devices": [
         "phone",
-        "obd"
+        // "obd"
         // "openxc",
     ],
 
     "restricted": [] // e.g. "location"
 }
-
-
-
-
-
-
-

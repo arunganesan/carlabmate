@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.CompoundButton;
 import android.widget.GridView;
 import android.widget.TextView;
@@ -19,17 +18,13 @@ import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import edu.umich.carlab.CLService;
 import edu.umich.carlab.Constants;
-import edu.umich.carlab.DataMarshal;
-import edu.umich.carlab.io.AppLoader;
 import edu.umich.carlab.loadable.AlgorithmSpecs;
-import edu.umich.carlab.loadable.App;
 import edu.umich.carlabui.AppsAdapter;
 
 import static edu.umich.carlab.Constants.CARLAB_STATUS;
@@ -41,31 +36,46 @@ import static edu.umich.carlabui.AppsAdapter.AppState.ACTIVE;
 
 public class MainActivity extends AppCompatActivity {
     public final static String TAG = "MainActivity";
-    CLService carlabService;
-    TextView carlabStatusText, gatewayStatusText;
     GridView algorithmsGridView;
+    Map<String, Integer> appModelIndexMap;
     List<AppsAdapter.AppModel> appModels;
     AppsAdapter appsAdapter;
-    Map<String, Integer> appModelIndexMap;
+    CLService carlabService;
+    TextView carlabStatusText, gatewayStatusText;
     BroadcastReceiver clStatusChanged = new BroadcastReceiver() {
         @Override
         public void onReceive (Context context, Intent intent) {
             carlabStatusText.setText(intent.getStringExtra(_STATUS_MESSAGE));
         }
     };
-
     BroadcastReceiver gatewayStatusChanged = new BroadcastReceiver() {
         @Override
         public void onReceive (Context context, Intent intent) {
             gatewayStatusText.setText(intent.getStringExtra(_STATUS_MESSAGE));
         }
     };
-
-
+    Map<String, List<Integer>> infoFunctionIndexMapping;
     boolean initializedGrid = false;
     boolean mBound = false;
     SharedPreferences prefs;
     ToggleButton toggleButton;
+    private BroadcastReceiver appStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive (Context context, Intent intent) {
+            //activeApps = prefs.getStringSet(Constants.ACTIVE_APPS_KEY, new HashSet<String>());
+
+            String infoname = intent.getStringExtra("information");
+
+            if (infoFunctionIndexMapping == null) return;
+            if (infoFunctionIndexMapping.containsKey(infoname)) {
+                for (int appIndex : infoFunctionIndexMapping.get(infoname)) {
+                    appModels.get(appIndex).state = AppsAdapter.AppState.DATA;
+                }
+            }
+
+            appsAdapter.notifyDataSetChanged();
+        }
+    };
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected (ComponentName className, IBinder service) {
@@ -73,8 +83,7 @@ public class MainActivity extends AppCompatActivity {
             carlabService = binder.getService();
             mBound = true;
 
-            if (!initializedGrid)
-                initializeGrid();
+            if (!initializedGrid) initializeGrid();
         }
 
         @Override
@@ -84,39 +93,31 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    public void initializeGrid(){
-
+    public void initializeGrid () {
         appModels = new ArrayList<>();
         appModelIndexMap = new HashMap<>();
+        infoFunctionIndexMapping = new HashMap<>();
 
-        // If CarLab is running, we can create live middleware links
-        // Otherwise, we will just use the static app loader
-        // List<App> allApps = AppLoader.getInstance().instantiateApps(null, null);
+        Set<AlgorithmSpecs.AppFunction> functions = carlabService.getLoadedFunctions();
 
+        for (AlgorithmSpecs.AppFunction func : functions) {
+            // "%s\nInput: %s\nOutput: %s", algorithm.getName(),
+            //         func.outputInformation.name,
+            //         String.join(", ", inputInfoNames)
 
-        Set<AlgorithmSpecs.AlgorithmInformation> strategy = carlabService.getStrategy();
-        Set<String> uniqueAppNames = new HashSet<>();
-        Set<App> uniqueApps = new HashSet<>();
-        for (AlgorithmSpecs.AlgorithmInformation alginfo : strategy) {
-            if (!uniqueAppNames.contains(alginfo.algorithm.getName())) {
-                uniqueAppNames.add(alginfo.algorithm.getName());
-                uniqueApps.add(alginfo.algorithm);
-            }
-        }
+            String displayName = func.outputInformation.name;
 
-        for (App app : uniqueApps) {
             AppsAdapter.AppState appState = ACTIVE;
-            appModels.add(new AppsAdapter.AppModel(
-                    app.getName(),
-                    app.getClass().getCanonicalName(),
-                    appState));
+            appModels.add(new AppsAdapter.AppModel(displayName, func.inputInformation, appState));
         }
 
         // This index is useful later
-        for (int i = 0; i < appModels.size(); i++) {
-            String classname = appModels.get(i).className;
-            appModelIndexMap.put(classname, i);
-        }
+        for (int i = 0; i < appModels.size(); i++)
+            for (AlgorithmSpecs.Information info : appModels.get(i).inputInformation) {
+                if (!infoFunctionIndexMapping.containsKey(info.name))
+                    infoFunctionIndexMapping.put(info.name, new ArrayList<Integer>());
+                infoFunctionIndexMapping.get(info.name).add(i);
+            }
 
         appsAdapter = new AppsAdapter(this, appModels);
         algorithmsGridView.setAdapter(appsAdapter);
@@ -130,7 +131,6 @@ public class MainActivity extends AppCompatActivity {
         wireUI();
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefs.edit().putInt(Constants.Session_State_Key, 1).apply();
-        // Delete all files from locally for now.
     }
 
     @Override
@@ -156,7 +156,8 @@ public class MainActivity extends AppCompatActivity {
     void registerReceivers () {
         registerReceiver(clStatusChanged, new IntentFilter(CARLAB_STATUS));
         registerReceiver(gatewayStatusChanged, new IntentFilter(GATEWAY_STATUS));
-        registerReceiver(appStateReceiver, new IntentFilter(edu.umich.carlab.Constants.INTENT_APP_STATE_UPDATE));
+        registerReceiver(appStateReceiver,
+                         new IntentFilter(edu.umich.carlab.Constants.INTENT_APP_STATE_UPDATE));
 
     }
 
@@ -183,37 +184,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
-
-
-    private BroadcastReceiver appStateReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            //activeApps = prefs.getStringSet(Constants.ACTIVE_APPS_KEY, new HashSet<String>());
-
-            String appClassName = intent.getStringExtra("appClassName");
-            DataMarshal.MessageType appState = (DataMarshal.MessageType) intent.getSerializableExtra("appState");
-
-            // This means we haven't set up this app yet
-            if (appModelIndexMap == null) return;
-            if (!appModelIndexMap.containsKey(appClassName))
-                return;
-
-            int appIndex = appModelIndexMap.get(appClassName);
-
-            switch (appState) {
-                case ERROR:
-                    appModels.get(appIndex).state = AppsAdapter.AppState.ERROR;
-                    break;
-                case DATA:
-                    appModels.get(appIndex).state = AppsAdapter.AppState.DATA;
-                    break;
-                case STATUS:
-                    appModels.get(appIndex).state = AppsAdapter.AppState.PROCESSING;
-            }
-
-            appsAdapter.notifyDataSetChanged();
-        }
-    };
 }
 
 
