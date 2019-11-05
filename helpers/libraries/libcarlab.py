@@ -65,3 +65,32 @@ class libcarlab ():
                     ofile = open(self.save_filename, 'wb')
                     pickle.dump(existingData, ofile)
                     ofile.close()
+
+class AlgorithmFunction:
+    def __init__ (self, outputinfo, inputinfo):
+        self.outputinfo = outputinfo
+        self.inputinfo = inputinfo
+        
+
+class Algorithm:
+    def __init__ (self):
+        self.functions = []
+
+    def addNewData(self, data):
+        return 0
+
+class Information:
+    def __init__ (self, name, datatype):
+        self.name = name
+        self.datatype = datatype
+
+# Information statically created. 
+class WorldAlignedAccel (Information):
+    def __init__ (self):
+        self.name = 'world-aligned-accel'
+        self.datatype = [0.0]*3
+
+class Fall (Information):
+    def __init__ (self):
+        self.name = 'fall'
+        self.datatype = True
