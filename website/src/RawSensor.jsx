@@ -1,15 +1,15 @@
 import React from "react";
 import { Node, Socket, Control } from "rete-react-render-plugin";
 
-export class MyNode extends Node {
+export class RawSensor extends Node {
   render() {
     const { node, bindSocket, bindControl } = this.props;
     const { outputs, controls, inputs, selected } = this.state;
 
     return (
-      <div className={`node ${selected}`} style={{ background: "grey" }}>
+      <div className={`node ${selected}`} style={{ background: "orange" }}>
         <div className="title">
-          {"<<"} {node.name} {">>"}
+          {node.name}
         </div>
         {/* Outputs */}
         {outputs.map(output => (
@@ -23,15 +23,7 @@ export class MyNode extends Node {
             />
           </div>
         ))}
-        {/* Controls */}
-        {controls.map(control => (
-          <Control
-            className="control"
-            key={control.key}
-            control={control}
-            innerRef={bindControl}
-          />
-        ))}
+        
         {/* Inputs */}
         {inputs.map(input => (
           <div className="input" key={input.key}>

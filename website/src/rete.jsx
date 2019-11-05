@@ -3,119 +3,74 @@ import Rete from "rete";
 import ReactRenderPlugin from "rete-react-render-plugin";
 import ConnectionPlugin from "rete-connection-plugin";
 import AreaPlugin from "rete-area-plugin";
-import { MyNode } from "./MyNode";
+import { RawSensor } from "./RawSensor";
 
 var numSocket = new Rete.Socket("Number value");
 
-class NumControl extends Rete.Control {
-  static component = ({ value, onChange }) => (
-    <input
-      type="number"
-      value={value}
-      ref={ref => {
-        ref && ref.addEventListener("pointerdown", e => e.stopPropagation());
-      }}
-      onChange={e => onChange(+e.target.value)}
-    />
-  );
 
-  constructor(emitter, key, node, readonly = false) {
-    super(key);
-    this.emitter = emitter;
-    this.key = key;
-    this.component = NumControl.component;
-
-    const initial = node.data[key] || 0;
-
-    node.data[key] = initial;
-    this.props = {
-      readonly,
-      value: initial,
-      onChange: v => {
-        this.setValue(v);
-        this.emitter.trigger("process");
-      }
-    };
-  }
-
-  setValue(val) {
-    this.props.value = val;
-    this.putData(this.key, val);
-    this.update();
-  }
-}
-
-
-class SteeringComponent extends Rete.Component {
+class ProduceAlignedGyro extends Rete.Component {
   constructor() {
-    super("WatchFonSteering");
+    super("Produce Aligned Gyro");
   }
 
   builder(node) {
-    var out1 = new Rete.Output("num", "Number", numSocket);
-    var ctrl = new NumControl(this.editor, "num", node);
-
-    return node.addControl(ctrl).addOutput(out1);
-  }
-
-  worker(node, inputs, outputs) {
-    outputs["num"] = node.data.num;
-  }
-}
-
-class NumComponent extends Rete.Component {
-  constructor() {
-    super("Number");
-  }
-
-  builder(node) {
-    var out1 = new Rete.Output("num", "Number", numSocket);
-    var ctrl = new NumControl(this.editor, "num", node);
-
-    return node.addControl(ctrl).addOutput(out1);
-  }
-
-  worker(node, inputs, outputs) {
-    outputs["num"] = node.data.num;
-  }
-}
-
-class AddComponent extends Rete.Component {
-  constructor() {
-    super("Add");
-    this.data.component = MyNode; // optional
-  }
-
-  builder(node) {
-    var inp1 = new Rete.Input("num1", "Number", numSocket);
-    var inp2 = new Rete.Input("num2", "Number2", numSocket);
-    var out = new Rete.Output("num", "Number", numSocket);
-
-    inp1.addControl(new NumControl(this.editor, "num1", node));
-    inp2.addControl(new NumControl(this.editor, "num2", node));
-
     return node
-      .addInput(inp1)
-      .addInput(inp2)
-      .addControl(new NumControl(this.editor, "preview", node, true))
-      .addOutput(out);
+      .addInput(new Rete.Input("rotation", "rotation", numSocket))
+      .addInput(new Rete.Input("gyro", "gyro", numSocket))
+      .addOutput(new Rete.Output("aligned-gyro", "aligned-gyro", numSocket));
+  }
+}
+
+class ProduceAlignedAccel extends Rete.Component {
+  constructor() {
+    super("Produce Aligned Accel");
   }
 
-  worker(node, inputs, outputs) {
-    var n1 = inputs["num1"].length ? inputs["num1"][0] : node.data.num1;
-    var n2 = inputs["num2"].length ? inputs["num2"][0] : node.data.num2;
-    var sum = n1 + n2;
+  builder(node) {
+    return node
+      .addInput(new Rete.Input("rotation", "rotation", numSocket))
+      .addInput(new Rete.Input("accel", "accel", numSocket))
+      .addOutput(new Rete.Output("aligned-accel", "aligned-accel", numSocket));
+  }
+}
 
-    this.editor.nodes
-      .find(n => n.id == node.id)
-      .controls.get("preview")
-      .setValue(sum);
-    outputs["num"] = sum;
+
+class ProduceRotation extends Rete.Component {
+  constructor() {
+    super("Produce Rotation");
+  }
+
+  builder(node) {
+    return node
+      .addInput(new Rete.Input("magnet", "magnet", numSocket))
+      .addInput(new Rete.Input("gravity", "gravity", numSocket))
+      .addOutput(new Rete.Output("rotation", "rotation", numSocket));
+  }
+}
+
+
+class RawSensors extends Rete.Component {
+  constructor() {
+    super("Raw Sensors");
+    // this.data.component = RawSensor;
+  }
+
+  builder(node) {
+    return node
+      .addOutput(new Rete.Output("gyro", "gyro", numSocket))
+      .addOutput(new Rete.Output("accel", "accel", numSocket))
+      .addOutput(new Rete.Output("gravity", "gravity", numSocket))
+      .addOutput(new Rete.Output("magnet", "magnet", numSocket))
   }
 }
 
 export async function createEditor(container) {
-  var components = [new NumComponent(), new AddComponent()];
+  var components = [
+    new ProduceAlignedAccel(),
+    new ProduceAlignedGyro(),
+    new ProduceRotation(),
+    new RawSensors()
+  ];
 
   var editor = new Rete.NodeEditor("demo@0.1.0", container);
   editor.use(ConnectionPlugin);
@@ -128,20 +83,27 @@ export async function createEditor(container) {
     engine.register(c);
   });
 
-  var n1 = await components[0].createNode({ num: 2 });
-  var n2 = await components[0].createNode({ num: 3 });
-  var add = await components[1].createNode();
+  let prodAccel = await components[0].createNode();
+  let prodGyro = await components[1].createNode();
+  let prodRotation = await components[2].createNode();
+  let rawSensors = await components[3].createNode();
 
-  n1.position = [80, 200];
-  n2.position = [80, 400];
-  add.position = [500, 240];
+  prodAccel.position = [700, 0];
+  prodGyro.position = [700, 300];
+  prodRotation.position = [350, 150];
+  rawSensors.position = [0, 150];
 
-  editor.addNode(n1);
-  editor.addNode(n2);
-  editor.addNode(add);
+  editor.addNode(prodAccel);
+  editor.addNode(prodGyro);
+  editor.addNode(prodRotation);
+  editor.addNode(rawSensors);
 
-  editor.connect(n1.outputs.get("num"), add.inputs.get("num1"));
-  editor.connect(n2.outputs.get("num"), add.inputs.get("num2"));
+  editor.connect(rawSensors.outputs.get("gravity"), prodRotation.inputs.get("gravity"));
+  editor.connect(rawSensors.outputs.get("magnet"), prodRotation.inputs.get("magnet"));
+  editor.connect(rawSensors.outputs.get("accel"), prodAccel.inputs.get("accel"));
+  editor.connect(rawSensors.outputs.get("gyro"), prodGyro.inputs.get("gyro"));
+  editor.connect(prodRotation.outputs.get("rotation"), prodGyro.inputs.get("rotation"));
+  editor.connect(prodRotation.outputs.get("rotation"), prodAccel.inputs.get("rotation"));
 
   editor.on(
     "process nodecreated noderemoved connectioncreated connectionremoved",

@@ -5,7 +5,7 @@
 }
 
 .App {
-  background-color: #82CAFF;
+  /* background-color: #82CAFF; */
 }
 
 .App-body {
@@ -132,7 +132,7 @@
   width: 100%;
   align-content: center;
   justify-content: center;
-  background-color: #82CAFF;
+  /* background-color: #82CAFF; */
   min-height: 100vh;
 }
 
