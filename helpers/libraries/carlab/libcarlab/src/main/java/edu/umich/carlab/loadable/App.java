@@ -153,6 +153,9 @@ public abstract class App implements IApp {
 
 
     public void outputData(String information, Serializable values) {
+        if (values == null)
+            return;
+
         DataMarshal.DataObject d = new DataMarshal.DataObject();
         d.time = System.currentTimeMillis();
         d.information = information;

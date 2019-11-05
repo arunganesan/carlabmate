@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Gradle: de.blox:graphview:0.5.0@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/5ec3cc6dac3e6f3d791065bb19ca14f3/graphview-0.5.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/5ec3cc6dac3e6f3d791065bb19ca14f3/graphview-0.5.0/res" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/de.blox/graphview/0.5.0/578a2e89877ab2038f93a75601d742d0da3918a8/graphview-0.5.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/de.blox/graphview/0.5.0/df040744c97e5d1ac4a96801b111f086080ef964/graphview-0.5.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -12,7 +12,8 @@ LAST_TEXTED_TIME = 'LAST TEXTED TIME'
 HOME_WORK = 'home work location'
 CURRENT_LOC = 'current location'
 output_info = ["mood"]
-required_info = ['location', 'home-work']
+# required_info = ['location', 'home-work', 'world-aligned-accel']
+required_info = ['world-aligned-accel']
 carlab = None
 
 def main(userid, test=False):
@@ -33,28 +34,36 @@ def main(userid, test=False):
     for name, info in carlab.check_new_info().items():
         print('Got new data: ', name, info)
         
-        if name == 'home-work':
-            storage[HOME_WORK] = json.loads(info)
-        
-        if name == 'location':
-            storage[CURRENT_LOC] = json.loads(info)
-        
-        # take action if needed
-        if storage[HOME_WORK] != None and storage[CURRENT_LOC] != None:
-            # Check if they are close to each other
-            if haversine.haversine(
-                (storage[HOME_WORK]['latitude'], storage[HOME_WORK]['longitude']),
-                (storage[CURRENT_LOC]['latitude'], storage[CURRENT_LOC]['longitude'])
-            ) < 0.1:
-                print("Close enough - reay to text")
-                ltt = storage[LAST_TEXTED_TIME]
 
-                # XXX only text IF we haven't asked already today or if we didn't get a response
-                if time.time() > ltt:
-                    # output info if needed
-                    " send text! "
-                    carlab.output_new_info(output_info[0], 'happy')
-                    storage[LAST_TEXTED_TIME] = time.time()
+        if name == 'world-aligned-accel':
+            datra = json.loads(info)
+            print(datra)
+            send_text("Are you ok?")
+
+    
+
+        # if name == 'home-work':
+        #     storage[HOME_WORK] = json.loads(info)
+        
+        # if name == 'location':
+        #     storage[CURRENT_LOC] = json.loads(info)
+        
+        # # take action if needed
+        # if storage[HOME_WORK] != None and storage[CURRENT_LOC] != None:
+        #     # Check if they are close to each other
+        #     if haversine.haversine(
+        #         (storage[HOME_WORK]['latitude'], storage[HOME_WORK]['longitude']),
+        #         (storage[CURRENT_LOC]['latitude'], storage[CURRENT_LOC]['longitude'])
+        #     ) < 0.1:
+        #         print("Close enough - reay to text")
+        #         ltt = storage[LAST_TEXTED_TIME]
+
+        #         # XXX only text IF we haven't asked already today or if we didn't get a response
+        #         if time.time() > ltt:
+        #             # output info if needed
+        #             " send text! "
+        #             carlab.output_new_info(output_info[0], 'happy')
+        #             storage[LAST_TEXTED_TIME] = time.time()
 
     # go back to sleep
     ofile = open(LOCALFILE, 'wb')
@@ -72,27 +81,28 @@ if __name__ == '__main__':
     
     main(args.userid, test=args.test)
 
-    # from twilio.rest import Client
-    # import os
+def send_text(message="How was your drive? Enter 1 - 7 (1 being the worst)"):
+    from twilio.rest import Client
+    import os
 
     # # Your Account Sid and Auth Token from twilio.com/console
-    # account_sid = os.environ['TWILIO_ACCOUNT_SID']
-    # auth_token = os.environ['TWILIO_AUTH_TOKEN']
+    account_sid = os.environ['TWILIO_ACCOUNT_SID']
+    auth_token = os.environ['TWILIO_AUTH_TOKEN']
 
-    # client = Client(account_sid, auth_token)
+    client = Client(account_sid, auth_token)
 
-    # # message = client.messages \
-    # #                 .create(
-    # #                     body="How was your day? Enter 1 - 7 (1 being the worst)",
-    # #                     from_='+17344363993',
-    # #                     to='+17343584745'
-    # #                 )
+    message = client.messages \
+                    .create(
+                        body=message,
+                        from_='+17344363993',
+                        to='+17343584745'
+                    )
 
-    # # message = client.messages.create(
-    # #                           body='Hello there!',
-    # #                           from_='+17344363993',
-    # #                           media_url=['https://demo.twilio.com/owl.png'],
-    # #                           to='+17343584745'
-    # #                       )
+    # message = client.messages.create(
+    #                           body='Hello there!',
+    #                           from_='+17344363993',
+    #                           media_url=['https://demo.twilio.com/owl.png'],
+    #                           to='+17343584745'
+                        #   )
     
-    # print(message.sid)
+    print(message.sid)

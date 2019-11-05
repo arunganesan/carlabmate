@@ -1,0 +1,5 @@
+include ':watchfone', ':sandbox', ':libcarlab', ':carlabui'
+rootProject.name='WatchFone'
+
+project(':libcarlab').projectDir = new File(settingsDir, '../../helpers/libraries/carlab/libcarlab')
+project(':carlabui').projectDir = new File(settingsDir, '../../helpers/libraries/carlab/carlabui')

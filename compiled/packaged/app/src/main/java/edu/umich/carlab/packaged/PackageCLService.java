@@ -9,30 +9,9 @@ import edu.umich.carlab.Constants;
 import edu.umich.carlab.loadable.Algorithm;
 import edu.umich.carlab.loadable.AlgorithmSpecs;
 import edu.umich.carlab.loadable.AlgorithmSpecs.AlgorithmInformation;
+import edu.umich.watchfone.WatchFone;
 
 public class PackageCLService extends edu.umich.carlab.CLService {
-    @Override
-    public void loadRequirements() {
-      /*
-        [
-            // Says we want to use THIS algorithm to get THIS information
-            { "algorithm": "aligned-imu", "information": "world-aligned-gyro", "save": true },
-            { "algorithm": "aligned-imu", "information": "world-aligned-accel", "save": true },
-            { "algorithm": "aligned-imu", "information": "rotation" },
-        ]
-         */
-        Algorithm alignedIMU = new AlignedIMU(null, null);
-        strategyRequirements.add(new AlgorithmInformation(alignedIMU,
-                                                          new AlgorithmSpecs.InfoWorldAlignedGyro(
-                                                                  true)));
-        strategyRequirements.add(new AlgorithmInformation(alignedIMU,
-                                                          new AlgorithmSpecs.InfoWorldAlignedAccel(
-                                                                  true)));
-        strategyRequirements
-                .add(new AlgorithmInformation(alignedIMU, new AlgorithmSpecs.InfoRotation(false)));
-
-    }
-
     public static void turnOffCarLab (Context context) {
         Intent intent = new Intent(context, PackageCLService.class);
         intent.setAction(Constants.MASTER_SWITCH_OFF);
@@ -50,6 +29,40 @@ public class PackageCLService extends edu.umich.carlab.CLService {
         } else {
             context.startService(intent);
         }
+    }
+
+    @Override
+    public void loadRequirements () {
+        Algorithm alignedIMU = new AlignedIMU(null, null);
+        strategyRequirements.add(new AlgorithmInformation(alignedIMU,
+                                                          new AlgorithmSpecs.InfoWorldAlignedGyro(
+                                                                  true)));
+        strategyRequirements.add(new AlgorithmInformation(alignedIMU,
+                                                          new AlgorithmSpecs.InfoWorldAlignedAccel(
+                                                                  true)));
+        strategyRequirements
+                .add(new AlgorithmInformation(alignedIMU, new AlgorithmSpecs.InfoRotation(false)));
+
+
+        Algorithm watchfone = new WatchFone(null, null);
+        strategyRequirements
+                .add(new AlgorithmInformation(watchfone, new AlgorithmSpecs.InfoCarGear(false)));
+
+        strategyRequirements
+                .add(new AlgorithmInformation(watchfone, new AlgorithmSpecs.InfoCarRPM(false)));
+
+        strategyRequirements
+                .add(new AlgorithmInformation(watchfone, new AlgorithmSpecs.InfoCarFuel(false)));
+
+        strategyRequirements.add(new AlgorithmInformation(watchfone,
+                                                          new AlgorithmSpecs.InfoCarOdometer(
+                                                                  false)));
+        strategyRequirements
+                .add(new AlgorithmInformation(watchfone, new AlgorithmSpecs.InfoCarSpeed(false)));
+
+        strategyRequirements.add(new AlgorithmInformation(watchfone,
+                                                          new AlgorithmSpecs.InfoCarSteering(
+                                                                  false)));
     }
 
 }

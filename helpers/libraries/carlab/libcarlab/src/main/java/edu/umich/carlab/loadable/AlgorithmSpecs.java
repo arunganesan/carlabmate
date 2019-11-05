@@ -86,6 +86,58 @@ public class AlgorithmSpecs {
         }
     }
 
+
+
+
+    public static class InfoGPS extends Information {
+        public InfoGPS (boolean save) {
+            super("gps", 0F);
+            shouldSave = save;
+        }
+    }
+
+
+
+    public static class InfoCarSpeed extends Information {
+        public InfoCarSpeed (boolean save) {
+            super("car-speed", 0F);
+            shouldSave = save;
+        }
+    }
+
+    public static class InfoCarSteering extends Information {
+        public InfoCarSteering (boolean save) {
+            super("car-steering", 0F);
+            shouldSave = save;
+        }
+    }
+    public static class InfoCarFuel extends Information {
+        public InfoCarFuel (boolean save) {
+            super("car-fuel", 0F);
+            shouldSave = save;
+        }
+    }
+    public static class InfoCarGear extends Information {
+        public InfoCarGear (boolean save) {
+            super("car-gear", 0F);
+            shouldSave = save;
+        }
+    }
+    public static class InfoCarOdometer extends Information {
+        public InfoCarOdometer (boolean save) {
+            super("car-odometer", 0F);
+            shouldSave = save;
+        }
+    }
+    public static class InfoCarRPM extends Information {
+        public InfoCarRPM (boolean save) {
+            super("car-rpm", 0F);
+            shouldSave = save;
+        }
+    }
+
+
+
     public static class Information {
         public Serializable dataType;
         public DevSen devSensor;

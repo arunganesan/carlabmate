@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * A class to make sure we create the JSON string the proper way
@@ -74,7 +75,9 @@ public class DataMarshal {
             try {
                 jsonObject.put("time", time);
                 jsonObject.put("information", information);
-                jsonObject.put("value", value.toString());
+
+                String valString = Arrays.toString((Float[])value);
+                jsonObject.put("value", valString);
                 jsonObject.put("dataType", dataType.toString());
             } catch (JSONException jse) {
                 return null;
