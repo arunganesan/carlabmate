@@ -1,0 +1,23 @@
+
+{
+    "information": [
+        "road", 
+        "fuel", 
+        "driving"
+    ],
+
+    "devices": [
+        "phone",
+        "obd"
+        // "openxc",
+    ],
+
+    "restricted": [] // e.g. "location"
+}
+
+
+
+
+
+
+
