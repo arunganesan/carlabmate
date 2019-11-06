@@ -2,51 +2,32 @@ package edu.umich.watchfone;
 
 import android.content.Context;
 
-import java.util.ArrayList;
-
 import edu.umich.carlab.CLDataProvider;
 import edu.umich.carlab.DataMarshal;
+import edu.umich.carlab.Registry;
 import edu.umich.carlab.loadable.Algorithm;
-import edu.umich.carlab.loadable.AlgorithmSpecs;
 import edu.umich.carlab.sensors.PhoneSensors;
 
 public abstract class WatchFoneBase extends Algorithm {
+    public static Function produceCarFuel =
+            new Function("produceCar", Registry.CarFuel, Registry.CarOdometer);
+    public static Function produceCarGear =
+            new Function("produceCarGear", Registry.CarGear, Registry.CarSpeed);
+    public static Function produceCarOdometer =
+            new Function("produceCarOdometer", Registry.CarOdometer, Registry.GPS);
+    public static Function produceCarRPM =
+            new Function("produceCarRPM", Registry.CarRPM, Registry.CarSpeed, Registry.CarGear);
+    public static Function produceCarSpeed =
+            new Function("produceCarSpeed", Registry.CarSpeed, Registry.WorldAlignedAccel,
+                         Registry.GPS);
+    public static Function produceCarSteering =
+            new Function("produceCarSteering", Registry.CarSteering, Registry.CarSpeed,
+                         Registry.WorldAlignedGyro);
     private Float[] lastMagnet, lastGravity, lastGyro, lastAccel, lastRotation;
 
     public WatchFoneBase (CLDataProvider cl, Context context) {
         super(cl, context);
-
         name = "watchfone";
-
-        algorithmFunctions = new ArrayList<>();
-        algorithmFunctions
-                .add(new AlgorithmSpecs.AppFunction(new AlgorithmSpecs.InfoCarSpeed(false),
-                                                    new AlgorithmSpecs.InfoWorldAlignedAccel(false),
-                                                    new AlgorithmSpecs.InfoGPS(false)));
-
-
-        algorithmFunctions
-                .add(new AlgorithmSpecs.AppFunction(new AlgorithmSpecs.InfoCarSteering(false),
-                                                    new AlgorithmSpecs.InfoCarSpeed(false),
-                                                    new AlgorithmSpecs.InfoWorldAlignedGyro(false)));
-
-        algorithmFunctions
-                .add(new AlgorithmSpecs.AppFunction(new AlgorithmSpecs.InfoCarFuel(false),
-                                                    new AlgorithmSpecs.InfoCarOdometer(false)));
-
-        algorithmFunctions
-                .add(new AlgorithmSpecs.AppFunction(new AlgorithmSpecs.InfoCarOdometer(false),
-                                                    new AlgorithmSpecs.InfoGPS(false)));
-
-        algorithmFunctions
-                .add(new AlgorithmSpecs.AppFunction(new AlgorithmSpecs.InfoCarRPM(false),
-                                                    new AlgorithmSpecs.InfoCarSpeed(false),
-                                                    new AlgorithmSpecs.InfoCarGear(false)));
-
-
-        algorithmFunctions
-                .add(new AlgorithmSpecs.AppFunction(new AlgorithmSpecs.InfoCarGear(false),
-                                                    new AlgorithmSpecs.InfoCarSpeed(false)));
     }
 
     @Override
@@ -88,10 +69,15 @@ public abstract class WatchFoneBase extends Algorithm {
         // }
     }
 
-    public abstract Float produceCarSpeed (Float[] aligned_accel, Float[] gps);
-    public abstract Float produceCarSteering (Float[] aligned_gyro, Float car_speed);
     public abstract Float produceCarFuel (Float[] car_odometer);
+
     public abstract Float produceCarGear (Float car_speed);
+
     public abstract Float produceCarOdometer (Float[] gps);
-    public abstract Float produceCarRPM (Float [] car_gear, Float[] car_speed);
+
+    public abstract Float produceCarRPM (Float[] car_gear, Float[] car_speed);
+
+    public abstract Float produceCarSpeed (Float[] aligned_accel, Float[] gps);
+
+    public abstract Float produceCarSteering (Float[] aligned_gyro, Float car_speed);
 }

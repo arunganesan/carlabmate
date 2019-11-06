@@ -24,7 +24,7 @@ import java.util.Set;
 
 import edu.umich.carlab.CLService;
 import edu.umich.carlab.Constants;
-import edu.umich.carlab.loadable.AlgorithmSpecs;
+import edu.umich.carlab.Registry;
 import edu.umich.carlabui.AppsAdapter;
 
 import static edu.umich.carlab.Constants.CARLAB_STATUS;
@@ -98,9 +98,9 @@ public class MainActivity extends AppCompatActivity {
         appModelIndexMap = new HashMap<>();
         infoFunctionIndexMapping = new HashMap<>();
 
-        Set<AlgorithmSpecs.AppFunction> functions = carlabService.getLoadedFunctions();
+        Set<Registry.AppFunction> functions = carlabService.getLoadedFunctions();
 
-        for (AlgorithmSpecs.AppFunction func : functions) {
+        for (Registry.AppFunction func : functions) {
             // "%s\nInput: %s\nOutput: %s", algorithm.getName(),
             //         func.outputInformation.name,
             //         String.join(", ", inputInfoNames)
@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
 
         // This index is useful later
         for (int i = 0; i < appModels.size(); i++)
-            for (AlgorithmSpecs.Information info : appModels.get(i).inputInformation) {
+            for (Registry.Information info : appModels.get(i).inputInformation) {
                 if (!infoFunctionIndexMapping.containsKey(info.name))
                     infoFunctionIndexMapping.put(info.name, new ArrayList<Integer>());
                 infoFunctionIndexMapping.get(info.name).add(i);

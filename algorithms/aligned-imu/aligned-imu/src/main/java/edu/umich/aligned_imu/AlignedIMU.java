@@ -7,7 +7,6 @@ import edu.umich.carlab.CLDataProvider;
 public class AlignedIMU extends AlignedIMUBase {
     public AlignedIMU (CLDataProvider cl, Context context) {
         super(cl, context);
-        name = "world-aligned-imu";
     }
 
     @Override

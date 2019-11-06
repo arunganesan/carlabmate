@@ -17,7 +17,7 @@ import java.util.Map;
 import edu.umich.carlab.CLDataProvider;
 import edu.umich.carlab.DataMarshal;
 import edu.umich.carlab.loadable.Algorithm;
-import edu.umich.carlab.loadable.AlgorithmSpecs;
+import edu.umich.carlab.Registry;
 
 public class LocalAlgorithmsActivity extends AppCompatActivity {
     protected DataReceiver dataReceiver = new DataReceiver();
@@ -25,14 +25,14 @@ public class LocalAlgorithmsActivity extends AppCompatActivity {
 
     protected void createModuleButtons (Algorithm... loadedAlgorithms) {
         for (final Algorithm algorithm : loadedAlgorithms) {
-            for (final AlgorithmSpecs.AppFunction func : algorithm.algorithmFunctions) {
+            for (final Registry.AppFunction func : algorithm.algorithmFunctions) {
                 LayoutInflater inflater = getLayoutInflater();
                 Button button =
                         (Button) inflater.inflate(R.layout.sandbox_algorithm, moduleLayout, false);
 
 
                 List<String> inputInfoNames = new ArrayList<>();
-                for (AlgorithmSpecs.Information info : func.inputInformation) {
+                for (Registry.Information info : func.inputInformation) {
                     inputInfoNames.add(info.name);
                 }
 

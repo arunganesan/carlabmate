@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 import edu.umich.carlab.DataMarshal;
-import edu.umich.carlab.loadable.AlgorithmSpecs;
+import edu.umich.carlab.Registry;
 
 public class AlgorithmSandboxActivity extends AppCompatActivity {
     final int SEL_FAKE = 2;
@@ -56,7 +56,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
     View.OnClickListener dialogTraceMode = new View.OnClickListener() {
         @Override
         public void onClick (final View v) {
-            final AlgorithmSpecs.Information information = (AlgorithmSpecs.Information) v.getTag();
+            final Registry.Information information = (Registry.Information) v.getTag();
             File dumpsDir = DataDumpWriter.GetDumpsDir(AlgorithmSandboxActivity.this);
             Comparator<File> sortByLastModified = new Comparator<File>() {
                 @Override
@@ -97,7 +97,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
             dialog.show();
         }
     };
-    Map<AlgorithmSpecs.Information, List<RangeInfo>> fakeValuesRange = new HashMap<>();
+    Map<Registry.Information, List<RangeInfo>> fakeValuesRange = new HashMap<>();
     TextView.OnEditorActionListener doneChangeRange = new TextView.OnEditorActionListener() {
         @Override
         public boolean onEditorAction (TextView target, int actionId, KeyEvent event) {
@@ -124,7 +124,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
     View.OnClickListener dialogFakeMode = new View.OnClickListener() {
         @Override
         public void onClick (final View v) {
-            AlgorithmSpecs.Information information = (AlgorithmSpecs.Information) v.getTag();
+            Registry.Information information = (Registry.Information) v.getTag();
             final float[] obj = (float[]) information.dataType;
 
             LinearLayout ll = new LinearLayout(AlgorithmSandboxActivity.this);
@@ -169,7 +169,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
             dialog.show();
         }
     };
-    Map<AlgorithmSpecs.Information, Serializable[]> fixedValues = new HashMap<>();
+    Map<Registry.Information, Serializable[]> fixedValues = new HashMap<>();
 
     // Show the dialog box to select trace file
 
@@ -239,7 +239,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
     View.OnClickListener dialogFixedMode = new View.OnClickListener() {
         @Override
         public void onClick (final View v) {
-            AlgorithmSpecs.Information information = (AlgorithmSpecs.Information) v.getTag();
+            Registry.Information information = (Registry.Information) v.getTag();
             final float[] obj = (float[]) information.dataType;
             LinearLayout ll = new LinearLayout(AlgorithmSandboxActivity.this);
             ll.setOrientation(LinearLayout.VERTICAL);
@@ -277,10 +277,10 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
         }
     };
     LinearLayout inputCardList, outputCardList;
-    Map<AlgorithmSpecs.Information, DataFeedMode> inputDataModes = new HashMap<>();
+    Map<Registry.Information, DataFeedMode> inputDataModes = new HashMap<>();
     Shadow inputShadow, outputShadow;
     FrameLayout inputShadowContentFrameLayout, outputShadowContentFrameLayout;
-    Map<AlgorithmSpecs.Information, TextView> outputValueMap = new HashMap<>();
+    Map<Registry.Information, TextView> outputValueMap = new HashMap<>();
     long runPeriod = 100;
     ToggleButton saveToggleButton;
     Handler scheduledHandler;
@@ -290,7 +290,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
             int numArgs = StaticObjects.selectedAppFunction.inputInformation.size();
 
             for (int i = 0; i < numArgs; i++) {
-                AlgorithmSpecs.Information inputInfo =
+                Registry.Information inputInfo =
                         StaticObjects.selectedAppFunction.inputInformation.get(i);
                 DataMarshal.DataObject inputData = null;
                 if (inputDataModes.get(inputInfo) == DataFeedMode.FAKE ||
@@ -311,7 +311,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
                 }
             }
 
-            AlgorithmSpecs.Information outputInfoName =
+            Registry.Information outputInfoName =
                     StaticObjects.selectedAppFunction.outputInformation;
             Map<String, DataMarshal.DataObject> receivedData =
                     StaticObjects.dataReceiver.latestData;
@@ -367,7 +367,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
                                                      outputShadowContentFrameLayout);
                 scheduledHandler.postDelayed(callAlgorithm, runPeriod);
 
-                for (Map.Entry<AlgorithmSpecs.Information, DataFeedMode> entry : inputDataModes.entrySet()) {
+                for (Map.Entry<Registry.Information, DataFeedMode> entry : inputDataModes.entrySet()) {
                     if (entry.getValue() == DataFeedMode.SENSOR) {
                         int sensorType = entry.getKey().lowLevelSensor;
                         if (sensorType != -1) {
@@ -383,7 +383,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
                 inputShadow.destroyVisualization();
                 scheduledHandler.removeCallbacks(callAlgorithm);
 
-                for (Map.Entry<AlgorithmSpecs.Information, DataFeedMode> entry : inputDataModes.entrySet()) {
+                for (Map.Entry<Registry.Information, DataFeedMode> entry : inputDataModes.entrySet()) {
                     if (entry.getValue() == DataFeedMode.SENSOR) {
                         int sensorType = entry.getKey().lowLevelSensor;
                         if (sensorType != -1) {
@@ -401,7 +401,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
                 @Override
                 public void onCheckedChanged (CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) {
-                        AlgorithmSpecs.Information outputInfo = StaticObjects.selectedAppFunction.outputInformation;
+                        Registry.Information outputInfo = StaticObjects.selectedAppFunction.outputInformation;
                         dataDumpWriter.startNewFile(outputInfo.name);
                         dataDumpEnalbed = true;
                     } else {
@@ -419,7 +419,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
 
         LayoutInflater inflater = getLayoutInflater();
 
-        for (AlgorithmSpecs.Information inputInfo : StaticObjects.selectedAppFunction.inputInformation) {
+        for (Registry.Information inputInfo : StaticObjects.selectedAppFunction.inputInformation) {
             final LinearLayout inputLinear = (LinearLayout) inflater
                     .inflate(R.layout.sandbox_input_configuration, inputCardList, false);
 
@@ -456,7 +456,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
         inputShadowContentFrameLayout = findViewById(R.id.inputShadowWrapper);
         outputShadowContentFrameLayout = findViewById(R.id.outputShadowWrapper);
 
-        AlgorithmSpecs.Information outputInfo = StaticObjects.selectedAppFunction.outputInformation;
+        Registry.Information outputInfo = StaticObjects.selectedAppFunction.outputInformation;
         outputNameTv.setText(outputInfo.name);
         outputValueMap.put(outputInfo, outputValueTv);
         outputCardList.addView(outputLinear);
@@ -473,7 +473,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
         String buttonText = "";
         DataFeedMode dataFeedMode = DataFeedMode.FAKE;
         View.OnClickListener dialogCallback = null;
-        AlgorithmSpecs.Information info = (AlgorithmSpecs.Information) inputLinear.getTag();
+        Registry.Information info = (Registry.Information) inputLinear.getTag();
 
         switch (selectionId) {
             case SEL_FAKE:
@@ -520,7 +520,7 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
     }
 
     void initializeValueRanges () {
-        for (AlgorithmSpecs.Information information : StaticObjects.selectedAppFunction.inputInformation) {
+        for (Registry.Information information : StaticObjects.selectedAppFunction.inputInformation) {
             final float[] obj = (float[]) information.dataType;
             fakeValuesRange.put(information, new ArrayList<RangeInfo>());
             fixedValues.put(information, new Float[obj.length]);
@@ -570,10 +570,10 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
 
     public class FakeRangeSpecific {
         public int index;
-        public AlgorithmSpecs.Information information;
+        public Registry.Information information;
         public RangeEndpoint minOrMax;
 
-        public FakeRangeSpecific (AlgorithmSpecs.Information information, int index,
+        public FakeRangeSpecific (Registry.Information information, int index,
                                   RangeEndpoint minOrMax) {
             this.information = information;
             this.index = index;

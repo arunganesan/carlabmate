@@ -7,13 +7,36 @@ import java.util.ArrayList;
 import edu.umich.carlab.CLDataProvider;
 import edu.umich.carlab.DataMarshal;
 import edu.umich.carlab.loadable.Algorithm;
-import edu.umich.carlab.loadable.AlgorithmSpecs;
+import edu.umich.carlab.Registry;
 import edu.umich.carlab.sensors.PhoneSensors;
 
 public abstract class AlignedIMUBase extends Algorithm {
     final String ALIGNED_ACCEL = "world-aligned-accel";
     final String ALIGNED_GYRO = "world-aligned-gyro";
     final String ROTATION = "rotation";
+
+    public static Function ProduceRotation = new Function(
+            "produceRotation",
+            AlignedIMU.class,
+            Registry.Rotation,
+            Registry.Gravity, Registry.Magnetometer
+    );
+
+
+    public static Function ProduceAlignedGyro = new Function(
+            "produceWorldAlignedGyro",
+            AlignedIMU.class,
+            Registry.WorldAlignedGyro,
+            Registry.Gyro, Registry.Rotation
+    );
+
+
+    public static Function ProduceAlignedAccel = new Function(
+            "produceWorldAlignedAccel",
+            AlignedIMU.class,
+            Registry.WorldAlignedAccel,
+            Registry.Accel, Registry.Rotation
+    );
 
     /*[{
         "module": "aligned-imu",
@@ -35,28 +58,7 @@ public abstract class AlignedIMUBase extends Algorithm {
 
     public AlignedIMUBase (CLDataProvider cl, Context context) {
         super(cl, context);
-
         name = "world_aligned_imu";
-        subscribe(PhoneSensors.DEVICE, PhoneSensors.GRAVITY);
-        subscribe(PhoneSensors.DEVICE, PhoneSensors.MAGNET);
-        subscribe(PhoneSensors.DEVICE, PhoneSensors.GYRO);
-        subscribe(PhoneSensors.DEVICE, PhoneSensors.ACCEL);
-
-        algorithmFunctions = new ArrayList<>();
-        algorithmFunctions
-                .add(new AlgorithmSpecs.AppFunction(new AlgorithmSpecs.InfoRotation(false),
-                                                    new AlgorithmSpecs.InfoMagnetometer(false),
-                                                    new AlgorithmSpecs.InfoGravity(false)));
-
-        algorithmFunctions
-                .add(new AlgorithmSpecs.AppFunction(new AlgorithmSpecs.InfoWorldAlignedGyro(false),
-                                                    new AlgorithmSpecs.InfoGyro(false),
-                                                    new AlgorithmSpecs.InfoRotation(false)));
-
-        algorithmFunctions
-                .add(new AlgorithmSpecs.AppFunction(new AlgorithmSpecs.InfoWorldAlignedAccel(false),
-                                                    new AlgorithmSpecs.InfoAccel(false),
-                                                    new AlgorithmSpecs.InfoRotation(false)));
     }
 
     @Override
@@ -89,6 +91,9 @@ public abstract class AlignedIMUBase extends Algorithm {
         Need to go from the JSON description of the IO of this algorithm to the following functions
          */
 
+        /*
+        TODO Need to only call the function IF it is statically loaded in this invocation
+         */
         if (sensor.equals(PhoneSensors.MAGNET) || sensor.equals(PhoneSensors.GRAVITY)) {
             if (lastGravity != null && lastMagnet != null)
                 outputData(ROTATION, produceRotation(lastMagnet, lastGravity));

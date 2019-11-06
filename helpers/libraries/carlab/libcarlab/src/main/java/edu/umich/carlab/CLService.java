@@ -23,8 +23,6 @@ import java.util.Set;
 import edu.umich.carlab.hal.HardwareAbstractionLayer;
 import edu.umich.carlab.io.DataDumpWriter;
 import edu.umich.carlab.loadable.Algorithm;
-import edu.umich.carlab.loadable.AlgorithmSpecs;
-import edu.umich.carlab.loadable.AlgorithmSpecs.AlgorithmInformation;
 import edu.umich.carlab.loadable.App;
 import edu.umich.carlab.net.LinkServerGateway;
 import edu.umich.carlab.utils.DevSen;
@@ -62,23 +60,23 @@ public class CLService extends Service implements CLDataProvider {
 
     static boolean runningDataCollection = false;
     final long DATA_UPDATE_INTERVAL_IN_MS = 0; // 100;
+    final long STATE_UPDATE_EVERY = 100L;
     final String TAG = "CarLab Service";
     final long UPDATE_NOTIFICATION_INTERVAL = 5000;
     final long dataDumpBroadcastEvery = 500L;
-    final long STATE_UPDATE_EVERY = 100L;
     final IBinder mBinder = new LocalBinder();
     public long startTimestamp;
-    protected Map<Algorithm, Set<AlgorithmSpecs.Information>> algorithmInputWiring =
+    protected Map<Class<? extends Algorithm>, Set<Registry.Information>> algorithmInputWiring =
             new HashMap<>();
     protected Map<String, Set<String>> dataMultiplexing;
     protected Map<String, Map<String, Long>> lastDataUpdate = new HashMap<>();
     protected Map<String, Long> lastStateUpdate = new HashMap<>();
     protected Set<DevSen> rawSensorsToStart = new HashSet<>();
-    protected Set<AlgorithmInformation> strategyRequirements = new HashSet<>();
+    protected Strategy strategy;
+
     protected Set<String> toServerMultiplexing = new HashSet<>();
     boolean currentlyStarting = false;
     long dataDumpLastBroadcastTime = 0L;
-    protected Set<AlgorithmSpecs.AppFunction> loadedFuntions;
     List<DataMarshal.DataObject> dataDumpStorage;
     HardwareAbstractionLayer hal;
     long lastNotificationUpdate = 0;
@@ -103,51 +101,19 @@ public class CLService extends Service implements CLDataProvider {
         }
     };
 
-    protected void loadRequirements() {
-
-    }
-
     public CLService () {
-        // For all requirements (extract INFO from ALGO)
-        // Get the function WITHIN that algorithm which produces that
-        // Get all REQINFO for THAT function
-        // Add a wiring to go from that REQINFO to this ALGO
+        // TODO make sure strategy is set by this point
 
-        loadRequirements();
-        loadedFuntions = new HashSet<>();
-        // For all requirements
-        for (AlgorithmInformation algorithmInformation : strategyRequirements) {
-
-            // Get the function which produces that
-            AlgorithmSpecs.AppFunction producingFunction = null;
-
-            for (AlgorithmSpecs.AppFunction func : algorithmInformation.algorithm.algorithmFunctions)
-                if (func.outputInformation.name.equals(algorithmInformation.information.name)) {
-                    producingFunction = func;
-                    break;
-                }
-
-
-            // Feed all required info for this function into this algorithm
-            if (producingFunction == null)
-                Log.e(TAG, "Function routing failed for one input function");
-            else {
-                loadedFuntions.add(producingFunction);
-                if (!algorithmInputWiring.containsKey(algorithmInformation.algorithm))
-                    algorithmInputWiring.put(algorithmInformation.algorithm,
-                                             new HashSet<AlgorithmSpecs.Information>());
-                algorithmInputWiring.get(algorithmInformation.algorithm)
-                                    .addAll(producingFunction.inputInformation);
-            }
-
-            if (algorithmInformation.information.shouldSave) {
-                addExternalMultiplexOutput(algorithmInformation.information);
-            }
+        for (Algorithm.Function function : strategy.loadedFunctions) {
+            // Send all input to this algorithm
+            if (!algorithmInputWiring.containsKey(function.belongsTo))
+                algorithmInputWiring.put(function.belongsTo, new HashSet<Registry.Information>());
+            algorithmInputWiring.get(function.belongsTo).addAll(function.inputInformation);
         }
-    }
 
-    public Set<AlgorithmSpecs.AppFunction> getLoadedFunctions () {
-        return loadedFuntions;
+        for (Registry.Information info : strategy.saveInformation)
+            addExternalMultiplexOutput(info);
+
     }
 
     public static void turnOffCarLab (Context c) {
@@ -158,17 +124,17 @@ public class CLService extends Service implements CLDataProvider {
 
     }
 
-    public void addExternalMultiplexOutput (AlgorithmSpecs.Information information) {
+    public void addExternalMultiplexOutput (Registry.Information information) {
         toServerMultiplexing.add(information.name);
     }
 
-    public void addMultiplexRoute (String infoname, Algorithm algorithm) {
+    public void addMultiplexRoute (String infoname, Class<? extends Algorithm> algclass) {
         // This will be routed from other languages to this input
         // Actually, even if it is internal I think we can use this.
         if (!dataMultiplexing.containsKey(infoname))
             dataMultiplexing.put(infoname, new HashSet<String>());
-        dataMultiplexing.get(infoname).add(algorithm.getClass().getName());
-        lastDataUpdate.get(algorithm.getClass().getName()).put(infoname, 0L);
+        dataMultiplexing.get(infoname).add(algclass.getName());
+        lastDataUpdate.get(algclass.getName()).put(infoname, 0L);
 
 
     }
@@ -177,8 +143,7 @@ public class CLService extends Service implements CLDataProvider {
      * Brings all apps to life using their class name
      */
     private void bringAppsToLife () {
-        for (Algorithm alg : algorithmInputWiring.keySet()) {
-            Class<?> algo = alg.getClass();
+        for (Class<? extends Algorithm> algo : algorithmInputWiring.keySet()) {
             String classname = algo.getName();
             try {
                 Constructor<?> constructor =
@@ -192,15 +157,13 @@ public class CLService extends Service implements CLDataProvider {
         }
 
 
-        for (Algorithm alg : algorithmInputWiring.keySet())
-            for (AlgorithmSpecs.Information info : algorithmInputWiring.get(alg)) {
+        for (Class<? extends Algorithm> alg : algorithmInputWiring.keySet())
+            for (Registry.Information info : algorithmInputWiring.get(alg)) {
                 addMultiplexRoute(info.name, alg);
                 if (info.lowLevelSensor != -1)
                     // Get the mapping from information to device/sensor that the hal speaks
                     rawSensorsToStart.add(info.devSensor);
-
             }
-
 
         for (DevSen devSen : rawSensorsToStart)
             hal.turnOnSensor(devSen.device, devSen.sensor);
@@ -211,10 +174,16 @@ public class CLService extends Service implements CLDataProvider {
         }
     }
 
-
+    public List<Algorithm.Function> getLoadedFunctions () {
+        return strategy.loadedFunctions;
+    }
 
     public boolean isCarLabRunning () {
         return runningDataCollection;
+    }
+
+    protected void loadRequirements () {
+
     }
 
     /**
@@ -240,13 +209,11 @@ public class CLService extends Service implements CLDataProvider {
         Intent statusIntent;
         String infoname = dataObject.information;
 
-        if (toServerMultiplexing.contains(infoname))
-            linkServerGateway.addNewData(dataObject);
+        if (toServerMultiplexing.contains(infoname)) linkServerGateway.addNewData(dataObject);
 
 
         // Only broadcast state if it's changed since last time
-        if (!lastStateUpdate.containsKey(infoname))
-            lastStateUpdate.put(infoname, 0L);
+        if (!lastStateUpdate.containsKey(infoname)) lastStateUpdate.put(infoname, 0L);
 
         if (currTime > lastStateUpdate.get(infoname) + STATE_UPDATE_EVERY) {
             statusIntent = new Intent();
@@ -265,8 +232,8 @@ public class CLService extends Service implements CLDataProvider {
                 if (app == null) continue;
 
                 // Throttle the data rate for each sensor
-                if (currTime > lastDataUpdate.get(appClassName).get(infoname) +
-                               DATA_UPDATE_INTERVAL_IN_MS) {
+                if (currTime >
+                    lastDataUpdate.get(appClassName).get(infoname) + DATA_UPDATE_INTERVAL_IN_MS) {
                     app.newData(dataObject);
                     lastDataUpdate.get(appClassName).put(infoname, currTime);
                 }

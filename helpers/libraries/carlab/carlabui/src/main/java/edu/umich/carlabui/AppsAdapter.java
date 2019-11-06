@@ -11,9 +11,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import edu.umich.carlab.CLService;
-import edu.umich.carlab.loadable.AlgorithmSpecs;
-import edu.umich.carlab.utils.Utilities;
+import edu.umich.carlab.Registry;
 
 // https://www.raywenderlich.com/127544/android-gridview-getting-started
 public class AppsAdapter extends BaseAdapter {
@@ -23,9 +21,9 @@ public class AppsAdapter extends BaseAdapter {
 
     static public class AppModel {
         public String name;
-        public List<AlgorithmSpecs.Information> inputInformation;
+        public List<Registry.Information> inputInformation;
         public AppState state;
-        public AppModel(String name, List<AlgorithmSpecs.Information> ii, AppState state) {
+        public AppModel(String name, List<Registry.Information> ii, AppState state) {
             inputInformation = ii;
             this.name = name;
             this.state = state;
