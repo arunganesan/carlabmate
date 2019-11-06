@@ -10,18 +10,18 @@ import edu.umich.carlab.sensors.PhoneSensors;
 
 public abstract class WatchFoneBase extends Algorithm {
     public static Function produceCarFuel =
-            new Function("produceCar", Registry.CarFuel, Registry.CarOdometer);
+            new Function("produceCar", WatchFone.class, Registry.CarFuel, Registry.CarOdometer);
     public static Function produceCarGear =
-            new Function("produceCarGear", Registry.CarGear, Registry.CarSpeed);
+            new Function("produceCarGear", WatchFone.class, Registry.CarGear, Registry.CarSpeed);
     public static Function produceCarOdometer =
-            new Function("produceCarOdometer", Registry.CarOdometer, Registry.GPS);
+            new Function("produceCarOdometer", WatchFone.class, Registry.CarOdometer, Registry.GPS);
     public static Function produceCarRPM =
-            new Function("produceCarRPM", Registry.CarRPM, Registry.CarSpeed, Registry.CarGear);
+            new Function("produceCarRPM", WatchFone.class, Registry.CarRPM, Registry.CarSpeed, Registry.CarGear);
     public static Function produceCarSpeed =
-            new Function("produceCarSpeed", Registry.CarSpeed, Registry.WorldAlignedAccel,
+            new Function("produceCarSpeed", WatchFone.class, Registry.CarSpeed, Registry.WorldAlignedAccel,
                          Registry.GPS);
     public static Function produceCarSteering =
-            new Function("produceCarSteering", Registry.CarSteering, Registry.CarSpeed,
+            new Function("produceCarSteering", WatchFone.class, Registry.CarSteering, Registry.CarSpeed,
                          Registry.WorldAlignedGyro);
     private Float[] lastMagnet, lastGravity, lastGyro, lastAccel, lastRotation;
 

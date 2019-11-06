@@ -14,9 +14,11 @@ import edu.umich.carlab.loadable.Algorithm;
 import edu.umich.watchfone.WatchFone;
 
 public class PackageCLService extends edu.umich.carlab.CLService {
-    public PackageCLService () {
+    @Override
+    protected void loadRequirements () {
         strategy = new PackageStrategy();
     }
+
     public static void turnOffCarLab (Context context) {
         Intent intent = new Intent(context, PackageCLService.class);
         intent.setAction(Constants.MASTER_SWITCH_OFF);

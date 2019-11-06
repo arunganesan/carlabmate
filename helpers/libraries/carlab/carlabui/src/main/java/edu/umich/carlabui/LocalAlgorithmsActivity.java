@@ -23,37 +23,38 @@ public class LocalAlgorithmsActivity extends AppCompatActivity {
     protected DataReceiver dataReceiver = new DataReceiver();
     LinearLayout moduleLayout;
 
-    protected void createModuleButtons (Algorithm... loadedAlgorithms) {
-        for (final Algorithm algorithm : loadedAlgorithms) {
-            for (final Registry.AppFunction func : algorithm.algorithmFunctions) {
-                LayoutInflater inflater = getLayoutInflater();
-                Button button =
-                        (Button) inflater.inflate(R.layout.sandbox_algorithm, moduleLayout, false);
-
-
-                List<String> inputInfoNames = new ArrayList<>();
-                for (Registry.Information info : func.inputInformation) {
-                    inputInfoNames.add(info.name);
-                }
-
-
-                button.setText(String.format("%s\nInput: %s\nOutput: %s", algorithm.getName(),
-                                             func.outputInformation.name,
-                                             String.join(", ", inputInfoNames)));
-
-                button.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick (View v) {
-                        StaticObjects.selectedAlgorithm = algorithm;
-                        StaticObjects.selectedAppFunction = func;
-                        startActivity(new Intent(LocalAlgorithmsActivity.this,
-                                                 AlgorithmSandboxActivity.class));
-                    }
-                });
-                moduleLayout.addView(button);
-            }
-        }
-    }
+    // TODO this needs to change to "addAppFunction" call instead. That will load JUST the hardcoded list of functions.
+    // protected void createModuleButtons (Algorithm... loadedAlgorithms) {
+    //     for (final Algorithm algorithm : loadedAlgorithms) {
+    //         for (final Registry.AppFunction func : algorithm.algorithmFunctions) {
+    //             LayoutInflater inflater = getLayoutInflater();
+    //             Button button =
+    //                     (Button) inflater.inflate(R.layout.sandbox_algorithm, moduleLayout, false);
+    //
+    //
+    //             List<String> inputInfoNames = new ArrayList<>();
+    //             for (Registry.Information info : func.inputInformation) {
+    //                 inputInfoNames.add(info.name);
+    //             }
+    //
+    //
+    //             button.setText(String.format("%s\nInput: %s\nOutput: %s", algorithm.getName(),
+    //                                          func.outputInformation.name,
+    //                                          String.join(", ", inputInfoNames)));
+    //
+    //             button.setOnClickListener(new View.OnClickListener() {
+    //                 @Override
+    //                 public void onClick (View v) {
+    //                     StaticObjects.selectedAlgorithm = algorithm;
+    //                     StaticObjects.selectedAppFunction = func;
+    //                     startActivity(new Intent(LocalAlgorithmsActivity.this,
+    //                                              AlgorithmSandboxActivity.class));
+    //                 }
+    //             });
+    //             moduleLayout.addView(button);
+    //         }
+    //     }
+    // }
 
     @Override
     protected void onCreate (Bundle savedInstanceState) {

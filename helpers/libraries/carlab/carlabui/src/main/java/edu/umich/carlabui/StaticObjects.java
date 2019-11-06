@@ -6,5 +6,5 @@ import edu.umich.carlab.Registry;
 public class StaticObjects {
     public static LocalAlgorithmsActivity.DataReceiver dataReceiver = null;
     public static Algorithm selectedAlgorithm = null;
-    public static Registry.AppFunction selectedAppFunction = null;
+    public static Algorithm.Function selectedAppFunction = null;
 }

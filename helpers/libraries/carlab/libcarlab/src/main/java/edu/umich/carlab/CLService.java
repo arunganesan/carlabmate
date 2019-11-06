@@ -102,7 +102,7 @@ public class CLService extends Service implements CLDataProvider {
     };
 
     public CLService () {
-        // TODO make sure strategy is set by this point
+        loadRequirements();
 
         for (Algorithm.Function function : strategy.loadedFunctions) {
             // Send all input to this algorithm

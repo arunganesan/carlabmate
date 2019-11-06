@@ -25,6 +25,7 @@ import java.util.Set;
 import edu.umich.carlab.CLService;
 import edu.umich.carlab.Constants;
 import edu.umich.carlab.Registry;
+import edu.umich.carlab.loadable.Algorithm;
 import edu.umich.carlabui.AppsAdapter;
 
 import static edu.umich.carlab.Constants.CARLAB_STATUS;
@@ -98,17 +99,11 @@ public class MainActivity extends AppCompatActivity {
         appModelIndexMap = new HashMap<>();
         infoFunctionIndexMapping = new HashMap<>();
 
-        Set<Registry.AppFunction> functions = carlabService.getLoadedFunctions();
+        List<Algorithm.Function> functions = carlabService.getLoadedFunctions();
 
-        for (Registry.AppFunction func : functions) {
-            // "%s\nInput: %s\nOutput: %s", algorithm.getName(),
-            //         func.outputInformation.name,
-            //         String.join(", ", inputInfoNames)
-
-            String displayName = func.outputInformation.name;
-
+        for (Algorithm.Function func : functions) {
             AppsAdapter.AppState appState = ACTIVE;
-            appModels.add(new AppsAdapter.AppModel(displayName, func.inputInformation, appState));
+            appModels.add(new AppsAdapter.AppModel(func.name, func.inputInformation, appState));
         }
 
         // This index is useful later
