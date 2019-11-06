@@ -3,8 +3,52 @@ import os
 import pickle
 import requests
 import time
+from typing import List, Union
 
-class libcarlab ():
+class AlgorithmFunction:
+    def __init__ (self, 
+        name: str, 
+        belongsto: Algorithm, 
+        outputinfo: Information, 
+        inputinfo: List[Algorithm]):
+
+        self.name = name
+        self.belongsto = belongsto
+        self.outputinfo = outputinfo
+        self.inputinfo = inputinfo
+        
+
+class Algorithm:
+    def __init__ (self):
+        self.functions = []
+
+    def add_new_data(self, data_marshal) -> List[Union[DataMarshal, None]]:
+        # check the information of the data
+        return None
+    
+    def output_data(self, data_marshal):
+        if data_marshal.value is None:
+            return
+
+        # otherwise output this data.
+        # using CL library
+        # to output means to save it locally, and then periodically uploading it
+
+class Information:
+    def __init__ (self, name, datatype):
+        self.name = name
+        self.datatype = datatype
+# Registry
+Fall = Information('fall', True)
+WorldAlignedAccel = Information('world-aligned-accel', [0.0]*3)
+
+
+class DataMarshal:
+    def __init__ (self, info: string, value):
+        self.info = info
+        self.value = value
+
+class LinkGatewayService:
     def __init__ (self, userid, required_info, output_info, save_filename, test=False):
         self.last_check_time = calendar.timegm(time.gmtime()) - 10000
         self.userid = userid
