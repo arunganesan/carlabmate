@@ -153,8 +153,8 @@ public class LinkServerGateway extends Service {
                     File saveFile = getNewFile(info);
 
                     FileOutputStream fos = new FileOutputStream(saveFile);
-                    GZIPOutputStream gos = new GZIPOutputStream(fos);
-                    OutputStreamWriter osw = new OutputStreamWriter(gos);
+                    // GZIPOutputStream gos = new GZIPOutputStream(fos);
+                    OutputStreamWriter osw = new OutputStreamWriter(fos);
                     BufferedWriter buf = new BufferedWriter(osw);
 
                     for (DataMarshal.DataObject dataObject : dataHolder.get(info)) {

@@ -12,10 +12,11 @@ public class PackageStrategy extends Strategy {
         loadedAlgorithms = Arrays.asList(AlignedIMU.class, WatchFone.class);
 
         loadedFunctions = Arrays.asList(AlignedIMU.ProduceRotation, AlignedIMU.ProduceAlignedGyro,
-                                        AlignedIMU.ProduceAlignedAccel, WatchFone.produceCarFuel,
-                                        WatchFone.produceCarSpeed, WatchFone.produceCarSteering,
-                                        WatchFone.produceCarGear, WatchFone.produceCarOdometer,
-                                        WatchFone.produceCarRPM);
+                                        AlignedIMU.ProduceAlignedAccel);
+        // WatchFone.produceCarFuel,
+        //                                 WatchFone.produceCarSpeed, WatchFone.produceCarSteering,
+        //                                 WatchFone.produceCarGear, WatchFone.produceCarOdometer,
+        //                                 WatchFone.produceCarRPM);
 
         saveInformation = Arrays.asList(Registry.WorldAlignedGyro, Registry.WorldAlignedAccel);
     }
