@@ -12,11 +12,11 @@ export class Libcarlab {
     this.pushUrl = (info) => `${this.baseurl}upload?information=${info}&person=${this.userid}`
 
     this.uploadTimer = false;
-    this.uploadEvery = 30*1000; // 30 seconds
+    this.uploadEvery = 1000; // 30 seconds
     this.storageHandler = storageHandler
   }
   
-  checkNewInfo (callback) {
+  async checkNewInfo (callback) {
     // Get new data
     // check with local storage first to only get relevant data
     for (let info of this.requiredInfo) 
@@ -29,7 +29,6 @@ export class Libcarlab {
 
   outputNewInfo (info, message) {
     console.log('Sending to ', this.pushUrl(info), 'value', info, message);
-    
     if (!this.localStorage.hasOwnProperty(info))
       this.localStorage[info] = []
     this.localStorage[info].push(message)
@@ -67,7 +66,8 @@ export class Libcarlab {
           body: JSON.stringify({'message': allOutput[info] })})
           .then(res => {
             // Success
-            await this.storageHandler.clearData(info);
+            // await this.storageHandler.clearData(info);
+            this.storageHandler.clearData(info);
           })
       }
     }

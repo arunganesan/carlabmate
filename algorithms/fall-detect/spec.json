@@ -3,6 +3,7 @@
     "classname": "FallDetect",
     "functions": [
         { 
+            "name": "produce_fall",
             "output": "fall",
             "input": ["accel"]
         }

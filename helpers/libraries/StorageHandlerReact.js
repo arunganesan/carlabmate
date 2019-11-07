@@ -1,4 +1,4 @@
-export class StorageHandlerReact {
+export class StorageHandler {
     constructor (requiredInfo) {
         this.requiredInfo = requiredInfo;
     }
