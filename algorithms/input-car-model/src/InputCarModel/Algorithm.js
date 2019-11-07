@@ -3,7 +3,7 @@ import { Button, Container, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.css";
 // import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 
-import { Libcarlab } from "../Libcarlab";
+import { Libcarlab, DataMarshal } from "../LibcarlabReact";
 import { StorageHandler } from "../StorageHandlerReact";
 
 const style = {
@@ -110,9 +110,13 @@ class InputCarModelBase extends React.Component {
   }
 
   submitData() {
-    this.libcarlab.outputNewInfo("car-model", this.state.message, res => {
-      console.log("Response msessage ", res);
-    });
+    this.libcarlab.outputNewInfo(
+      new DataMarshal(
+        "car-model",
+        this.state.message), 
+      res => {
+        console.log("Response msessage ", res);
+      });
   }
 
   componentWillUnmount() {
@@ -129,24 +133,20 @@ export default class InputCarModel extends InputCarModelBase {
     return (
       <Container>
         <Form.Label style={style.input}>Select your car model</Form.Label>
-        
-        <Form.Control 
-            // style={style.input}
-            aria-label="large"
-            aria-describedby="inputGroup-sizing-lg"
-            value={this.state.message}
-            onChange={evt =>
-            this.setState({
-                message: evt.target.value
-            })
-            }
-            as="select">
-            
-            {
-                carmodels.map(elt => <option key={elt}>{elt}</option>)
-            }
+
+        <Form.Control
+          // style={style.input}
+          aria-label="large"
+          aria-describedby="inputGroup-sizing-lg"
+          value={this.state.message}
+          onChange={evt => this.setState({ message: evt.target.value })}
+          as="select"
+        >
+          {carmodels.map(elt => (
+            <option key={elt}>{elt}</option>
+          ))}
         </Form.Control>
-        
+
         <Button
           onClick={() => this.submitData()}
           style={style.button}
