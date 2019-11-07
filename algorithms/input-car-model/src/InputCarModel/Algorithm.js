@@ -4,7 +4,6 @@ import "bootstrap/dist/css/bootstrap.css";
 // import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 
 import { Libcarlab, DataMarshal } from "../LibcarlabReact";
-import { StorageHandler } from "../StorageHandlerReact";
 
 const style = {
   input: {
@@ -96,14 +95,11 @@ class InputCarModelBase extends React.Component {
 
     this.libcarlab = new Libcarlab(
       this.state.userid,
-      this.state.required_info,
-      this.state.test,
-      new StorageHandler(this.state.outputSensors)
+      this.state.required_info
     );
   }
 
   componentDidMount() {
-    this.libcarlab.scheduleUploads();
     this.libcarlab.checkNewInfo((info, data) => {
       console.log("Got info ", info, "with data", data);
     });
