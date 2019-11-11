@@ -25,8 +25,10 @@ It is responsible for just a few things:
 alg = fall_detect.algorithm.FallDetect()
 
 loaded_functions: List[AlgorithmFunction] = [
-    alg.produce_fall_function
+    alg.produce_fall_function,
+    alg.check_user_is_ok_function,
 ]
+
 
 to_save_information: List[Information] = [
     Fall

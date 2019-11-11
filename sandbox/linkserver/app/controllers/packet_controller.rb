@@ -93,7 +93,28 @@ class PacketController < ApplicationController
         })
     end
 
+    def latest
+        # Must be get
+        # Must contain params about info and person and last date
+        
+        if !request.get? or !params.has_key? :information or !params.has_key? :person
+            head :invalid
+            return
+        end
 
+        information = Information.find_by(name: params[:information])
+        if information.blank? or information.nil?
+            render :json => []
+            return
+        end
+
+        last_info = Packet.where('person_id = :person_id AND information_id = :information_id', {
+            person_id: params[:person],
+            information_id: information.id,
+        }).order('received DESC').first
+        
+        render :json => last_info
+    end
 
 
 

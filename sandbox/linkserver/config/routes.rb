@@ -5,4 +5,5 @@ Rails.application.routes.draw do
   post 'packet/upload'
   get 'packet/list'
   get 'packet/listall'
+  get 'packet/latest'
 end

@@ -5,7 +5,14 @@
         { 
             "name": "produce_fall",
             "output": "fall",
-            "input": ["accel"]
+            "input": ["world-aligned-accel"],
+            "requires": ["ask_user_input"]
+        },
+
+        { 
+            "name": "check_user_is_ok",
+            "output": "fall-severity",
+            "input": ["text"]
         }
     ]
 }]

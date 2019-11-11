@@ -61,9 +61,12 @@ class AlgorithmFunction:
         
 
 # Registry
-Fall = Information('fall', True)
-WorldAlignedAccel = Information('world-aligned-accel', [0.0]*3)
-CarModel = Information('car-model', True)
+class Registry:
+    Fall = Information('fall', True)
+    WorldAlignedAccel = Information('world-aligned-accel', [0.0]*3)
+    CarModel = Information('car-model', True)
+    FallSeverity = Information('fall-severity', int)
+    Text = Information('text', str)
 
 class LinkGatewayService:
     def __init__ (self, userid, required_info: List[Information], output_info: List[Information], save_filename, test=False):
