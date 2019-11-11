@@ -4,4 +4,5 @@ Rails.application.routes.draw do
   get 'dev/all'
   post 'packet/upload'
   get 'packet/list'
+  get 'packet/listall'
 end

@@ -82,10 +82,10 @@ def main():
     while True:
         cprint('Running', 'green')
         for info, value in gateway.check_new_info().items():
-            cprint('\tReceived {} => {}'.format(
-                info.name, 
-                len(value)
-            ))
+            # cprint('\tReceived {} => {}'.format(
+            #     info.name, 
+            #     len(value)
+            # ))
             storage[info] = value
 
         for info, values in storage.items():

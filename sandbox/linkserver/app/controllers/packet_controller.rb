@@ -13,12 +13,14 @@ class PacketController < ApplicationController
         # Must contain data
         puts "Got upload. Params are: ", params[:message]
         if !request.post? or !params.has_key? :information or !params.has_key? :person
+            puts 'Invalid post params'
             head :invalid
             return
         end
 
         # must have message or file
         if !params.has_key? :file and !params.has_key? :message
+            puts 'Dont have message'
             head :invalid
             return
         end
@@ -105,8 +107,9 @@ class PacketController < ApplicationController
         end
 
         information = Information.find_by(name: params[:information])
-        if information.blank?
+        if information.blank? or information.nil?
             render :json => []
+            return
         end
 
         render :json => Packet.where('received > :sincetime AND person_id = :person_id AND information_id = :information_id', {

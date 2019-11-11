@@ -2,7 +2,7 @@ import React from "react";
 import { Button, Container, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.css";
 
-import { Libcarlab, DataMarshal } from "../LibcarlabReact";
+import { Libcarlab, DataMarshal, Registry } from "../LibcarlabReact";
 
 const style = {
   input: {
@@ -86,7 +86,7 @@ class InputCarModelBase extends React.Component {
 
     this.state = {
       message: "",
-      userid: props.userid === undefined ? 0 : props.userid,
+      userid: props.userid === undefined ? 21 : props.userid,
       test: props.test === undefined ? false : props.test,
       required_info: [],
       outputSensors: ["car-model"]
@@ -105,9 +105,10 @@ class InputCarModelBase extends React.Component {
   }
 
   submitData() {
+    console.log('Sending ', this.state.message);
     this.libcarlab.outputNewInfo(
       new DataMarshal(
-        "car-model",
+        Registry.CarModel,
         this.state.message), 
       res => {
         console.log("Response msessage ", res);

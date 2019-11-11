@@ -16,7 +16,7 @@ class FallDetectBase (Algorithm):
     def add_new_data(self, info, value) -> List[Union[DataMarshal, None]]:
         return_values = []
 
-        print('Received information:  ', info, value)
+        cprint('\tReceived information: {} = {}'.format(info.name, value), 'magenta')
 
         if info == WorldAlignedAccel:
             return_values.append(self.produce_fall(value))
@@ -47,6 +47,7 @@ class FallDetect (FallDetectBase):
         # ]
 
         for entry in world_aligned_accel:
+            print(entry)
             filename = entry['file']
             if not os.path.exists(filename):
                 continue

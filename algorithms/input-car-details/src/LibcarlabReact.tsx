@@ -10,22 +10,22 @@ class Information {
 
 export class DataMarshal {
   info: Information;
-  value: any;
+  message: any;
 
   constructor(info: Information, value: any) {
     this.info = info;
-    this.value = value;
+    this.message = value;
   }
 
   toJson() {
     return JSON.stringify({
       info: this.info,
-      value: this.value
+      message: this.message
     });
   }
 }
 
-class Registry {
+export class Registry {
   static WorldAlignedAccel = new Information("world-aligned-accel", 0);
   static WorldAlignedGyro = new Information("world-aligned-gyro", 0);
   static CarModel = new Information("car-model", "");
@@ -64,7 +64,8 @@ export class Libcarlab {
   }
 
   outputNewInfo(dm: DataMarshal) {
-      // XXX this should fail
+    // XXX this should fail
+    console.log('Push url is: ', this.pushUrl(dm.info.name))
     fetch(this.pushUrl(dm.info.name), {
       method: "post",
       mode: "cors",
