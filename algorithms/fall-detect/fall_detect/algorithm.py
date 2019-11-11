@@ -10,13 +10,17 @@ class FallDetectBase (Algorithm):
                     "produce_fall",
                     FallDetect,
                     Fall, 
-                    [WorldAlignedAccel])
+                    [WorldAlignedAccel, CarModel])
             
      
     def add_new_data(self, info, value) -> List[Union[DataMarshal, None]]:
         return_values = []
+
+        print('Received information:  ', info, value)
+
         if info == WorldAlignedAccel:
             return_values.append(self.produce_fall(value))
+            
         return return_values
 
     def produce_fall (self, world_aligned_accel):

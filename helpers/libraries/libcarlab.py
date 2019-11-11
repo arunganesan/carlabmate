@@ -63,6 +63,7 @@ class AlgorithmFunction:
 # Registry
 Fall = Information('fall', True)
 WorldAlignedAccel = Information('world-aligned-accel', [0.0]*3)
+CarModel = Information('car-model', True)
 
 class LinkGatewayService:
     def __init__ (self, userid, required_info: List[Information], output_info: List[Information], save_filename, test=False):
@@ -71,7 +72,7 @@ class LinkGatewayService:
         self.test = test
         self.required_info = required_info
         self.output_info = output_info
-        self.baseurl = 'http://localhost:3000/packet/'
+        self.baseurl = 'http://localhost:1234/packet/'
         self.fetch_url = '{base}list?information={info}&person={person}&sincetime={time}'
         self.push_url = '{base}upload?information={info}&person={person}'
         self.save_filename = save_filename

@@ -1,7 +1,6 @@
 import React from "react";
 import { Button, Container, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.css";
-// import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 
 import { Libcarlab, DataMarshal } from "../LibcarlabReact";
 

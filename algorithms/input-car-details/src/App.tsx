@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import Algorithm from './InputCarModel/Algorithm'
 
-function App() {
+const App: React.FC = () => {
   return <Algorithm /> 
 }
 
