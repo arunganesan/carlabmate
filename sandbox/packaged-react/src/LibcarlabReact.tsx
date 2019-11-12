@@ -29,6 +29,7 @@ export class Registry {
   static WorldAlignedAccel = new Information("world-aligned-accel", 0);
   static WorldAlignedGyro = new Information("world-aligned-gyro", 0);
   static CarModel = new Information("car-model", "");
+  static PhoneNumber = new Information('phone-number', '');
 }
 
 export class Libcarlab {

@@ -1,6 +1,7 @@
 import React from "react";
 import "./App.css";
 import InputCarModel from "./InputCarModel/Algorithm";
+import InputPhoneNumber from './InputPhoneNumber/Algorithm';
 import { Nav, NavItem, Navbar, Button } from "react-bootstrap";
 import { Modal, Container, Row, Form, Col } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.css";
@@ -173,7 +174,8 @@ class App extends React.Component<{}, AppState> {
         </Row>
 
         {this.state.session != null && [
-          <InputCarModel libcarlab={this.carlab} />
+          <InputCarModel libcarlab={this.carlab} />,
+          <InputPhoneNumber libcarlab={this.carlab} />
         ]}
       </Container>
     );

@@ -86,7 +86,6 @@ class InputCarModelBase extends React.Component {
 
     this.state = {
       message: "",
-      userid: props.userid === undefined ? 21 : props.userid,
       test: props.test === undefined ? false : props.test,
       required_info: [],
       outputSensors: ["car-model"]
