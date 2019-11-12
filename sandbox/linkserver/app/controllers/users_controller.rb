@@ -2,6 +2,8 @@ class UsersController < ApplicationController
     require 'time'
     require 'digest'
     require 'fileutils'
+    require 'SecureRandom'
+
     skip_before_action :verify_authenticity_token
 
     PUBLIC = Rails.root.join('public')
@@ -10,8 +12,20 @@ class UsersController < ApplicationController
     def login
         # if authenticated, return a unique string for this user
         # we can use this to create a sessions ID... that is stored on the client for all future communications.... we look up session ID in database... before .... that is done in linking server anyway so it works fine
+        if !params.has_key? :username or !params.has_key? :password
+            head :invalid
+            return
+        end
 
+        username = params[:username]
+        password = params[:password]
+        user = User.find_by(username: username, password: password)
+        if user.blank?
+            head :unauthorized
+            return 
+        end
 
+        render :json => user.session
     end
 
     def createuser
@@ -33,6 +47,7 @@ class UsersController < ApplicationController
             user = User.new
             user.username = username
             user.password = password
+            user.session = SecureRandom.hex
             user.save
             
             @return_message = "Success"
