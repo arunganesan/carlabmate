@@ -25,7 +25,9 @@ class UsersController < ApplicationController
             return 
         end
 
-        render :json => user.session
+        render :json => {
+            'session': user.session
+        }
     end
 
     def createuser

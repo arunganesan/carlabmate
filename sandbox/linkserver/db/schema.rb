@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_11_12_132559) do
+ActiveRecord::Schema.define(version: 2019_09_06_114809) do
 
   create_table "information", force: :cascade do |t|
     t.string "name"
@@ -20,22 +20,16 @@ ActiveRecord::Schema.define(version: 2019_11_12_132559) do
     t.string "file"
     t.string "message"
     t.datetime "received"
-    t.integer "person_id"
+    t.integer "user_id"
     t.integer "information_id"
     t.index ["information_id"], name: "index_packets_on_information_id"
-    t.index ["person_id"], name: "index_packets_on_person_id"
-  end
-
-  create_table "people", force: :cascade do |t|
-    t.string "name"
+    t.index ["user_id"], name: "index_packets_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
     t.string "username"
     t.string "password"
     t.string "session"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
   end
 
 end

@@ -34,14 +34,13 @@ to_save_information: List[Information] = [
     Fall
 ]
 
-LOCALFILE = 'local.db'
-USERID = 21
-
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--source', choices=['fixed', 'random'])
+    parser.add_argument('--session', default='dd2a4372516dab38535282070785853f')
     args = parser.parse_args()
+    
+    LOCALFILE = '{}.db'.format(args.session)
 
     running_algorithms: List[Algorithm] = []
     for func in loaded_functions:
@@ -68,7 +67,7 @@ def main():
         required_info += func.inputinfo
 
     gateway = LinkGatewayService(
-        USERID,
+        args.session,
         required_info,
         [],
         LOCALFILE,

@@ -7,6 +7,7 @@ class TextingController < ApplicationController
     PUBLIC = Rails.root.join('public')
 
     @@phone_port_mapping = {}
+    @@phone_session_mapping = {}
 
     def schedule_text
         account_sid = ENV['TWILIO_ACCOUNT_SID']
@@ -14,7 +15,7 @@ class TextingController < ApplicationController
     
         @client = Twilio::REST::Client.new(account_sid, auth_token)
 
-        if !params.has_key? :number or !params.has_key? :serverport or !params.has_key? :message
+        if !params.has_key? :number or !params.has_key? :serverport or !params.has_key? :message or !params.has_key? :session
             head :invalid
             return
         end
@@ -26,7 +27,10 @@ class TextingController < ApplicationController
             to: params[:number]
         )
         
-        @@phone_port_mapping[params[:number]] = params[:serverport]    
+        # we should save this in the DB instead of class variable
+
+        @@phone_port_mapping[params[:number]] = params[:serverport]
+        phone_session_mapping[params[:numner]] = params[:session]
         render :json => {}
    end
 
@@ -37,22 +41,19 @@ class TextingController < ApplicationController
         message = params[:Body]
         from_number = params[:From]
         from_number.sub! '+', ''
-        port_mapping = @@phone_port_mapping[from_number]
+        port = @@phone_port_mapping[from_number]
+        session = @@phone_session_mapping[from_number]
+
 
         # route it to the proper channels
         # look up the response name.
 
-        puts message
-        puts from_number
-        puts "PORT IS", port_mapping
-        puts @@phone_port_mapping
 
 
         # make open uri call to the linking server
-        #Linkserver:1234/packet/upload?person=???&information=TEXT&message=VALUE        
-        uri = URI.parse("http://localhost:#{port_mapping}/packet/upload")
+        uri = URI.parse("http://localhost:#{port}/packet/upload")
         response = Net::HTTP.post_form(uri, {
-            "person" => "21", 
+            "session" => session, 
             "message" => message,
             "information" => "text"
         })

@@ -61,6 +61,7 @@ class FallDetect (FallDetectBase):
                         self.already_texted = True
         return None
 
+SESSION = 'dd2a4372516dab38535282070785853f'
 
 def send_text(message="How was your drive? Enter 1 - 7 (1 being the worst)"):
     import requests, urllib.parse
@@ -70,5 +71,6 @@ def send_text(message="How was your drive? Enter 1 - 7 (1 being the worst)"):
         { 
             'number': '17343584745',
             'message': urllib.parse.quote(message),
+            'session': SESSION,
             'serverport': 1234
         })

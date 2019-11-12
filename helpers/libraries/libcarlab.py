@@ -69,15 +69,15 @@ class Registry:
     Text = Information('text', str)
 
 class LinkGatewayService:
-    def __init__ (self, userid, required_info: List[Information], output_info: List[Information], save_filename, test=False):
+    def __init__ (self, session, required_info: List[Information], output_info: List[Information], save_filename, test=False):
         self.last_check_time = calendar.timegm(time.gmtime()) - 10000
-        self.userid = userid
+        self.session = session
         self.test = test
         self.required_info = required_info
         self.output_info = output_info
-        self.baseurl = 'http://localhost:1234/packet/'
-        self.fetch_url = '{base}list?information={info}&person={person}&sincetime={time}'
-        self.push_url = '{base}upload?information={info}&person={person}'
+        self.baseurl = 'http://localhost:1234/'
+        self.fetch_url = '{base}list?information={info}&session={session}&sincetime={time}'
+        self.push_url = '{base}add?information={info}&session={session}'
         self.save_filename = save_filename
 
         if not os.path.exists(save_filename):
@@ -93,7 +93,7 @@ class LinkGatewayService:
             url = self.fetch_url.format(
                 base=self.baseurl,
                 info=info.name,
-                person=self.userid,
+                session=self.session,
                 time=self.last_check_time,
             )
             
@@ -120,7 +120,7 @@ class LinkGatewayService:
                 result = requests.post(self.push_url.format(
                     base=self.baseurl,
                     info=info.name,
-                    person=self.userid,
+                    session=self.session,
                 ), { 'message': existingData[info] })
             
                 if result.status_code == 200:
