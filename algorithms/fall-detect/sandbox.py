@@ -20,7 +20,6 @@ def main():
     for function in clz.algorithm_functions:
         print(function)
     
-    
     # have user choose which function
     # TODO
     # and send random data to function

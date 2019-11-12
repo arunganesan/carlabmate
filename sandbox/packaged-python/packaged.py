@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-from libcarlab import AlgorithmFunction, Algorithm, Information, LinkGatewayService, Fall
+from libcarlab import AlgorithmFunction, Algorithm, Information, LinkGatewayService, Registry
 from termcolor import cprint
 
 import argparse
@@ -11,7 +11,7 @@ import os
 import pickle
 
 """
-This is the wrapper script 
+This is the wrapper script
 
 It is responsible for just a few things:
 
@@ -21,7 +21,6 @@ It is responsible for just a few things:
 """
 
 # per algorithm stuff
-
 alg = fall_detect.algorithm.FallDetect()
 
 loaded_functions: List[AlgorithmFunction] = [
@@ -31,9 +30,8 @@ loaded_functions: List[AlgorithmFunction] = [
 
 
 to_save_information: List[Information] = [
-    Fall
+    Registry.Fall
 ]
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -58,27 +56,41 @@ def main():
         for info in func.inputinfo:
             multiplex_routing.setdefault(info, [])
             multiplex_routing[info].append(alg)
+        
+        for info in func.refersinfo:
+            multiplex_routing.setdefault(info, [])
+            multiplex_routing[info].append(alg)
 
     # Loop through
     # infonames = [info.name for alg in running_algorithms]
     # this is all the required info
     required_info: List[Information] = []
+    state_refers_info: List[Information] = []
     for func in loaded_functions:
         required_info += func.inputinfo
+        requires_info += func.refersinfo
+        state_refers_info += func.refersinfo
 
+    # XXX the output sensors from here
+    # which ones to output are specified in the spec
     gateway = LinkGatewayService(
         args.session,
         required_info,
+        state_refers_info,
         [],
         LOCALFILE,
         False,
     )
+
 
     storage = {}
     if os.path.exists(LOCALFILE):
         storage = pickle.load(open(LOCALFILE, 'rb'))
     for info in required_info:
         storage.setdefault(info, None)
+
+    for info, value in gateway.initialize_state():
+        storage[info] = value
 
     while True:
         cprint('Running', 'green')

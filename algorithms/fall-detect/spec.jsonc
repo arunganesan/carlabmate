@@ -6,7 +6,8 @@
             "name": "produce_fall",
             "output": "fall",
             "input": ["world-aligned-accel"],
-            "requires": ["ask_user_input"]
+            "refers": ["phone-number"]
+            // "requires": ["ask_user_input"]
         },
 
         { 
