@@ -13,7 +13,7 @@ import {
 
 type AppState = {
   message: string;
-  session: string;
+  session: string | null;
   showLoginForm: boolean;
   test: boolean;
   required_info: Information[];
@@ -53,23 +53,28 @@ class App extends React.Component<{}, AppState> {
     // Login page. That's the main thing TBH
   }
 
-  tryLoggingIn(){
+  tryLoggingIn() {
     let loginurl = `http://localhost:1234/login?username=${this.state.username}&password=${this.state.password}`;
     fetch(loginurl, {
-      method: 'post',
-      mode: 'cors',
-      cache: 'no-cache',
-      headers: {'content-type': 'application/json'}})
-    .then(res => res.json())
-    .then(data => {
-      window.localStorage.setItem('localSession', JSON.stringify( data['session']));
-      this.setState({
-        session: data['session'],
-        showLoginForm: false
+      method: "post",
+      mode: "cors",
+      cache: "no-cache",
+      headers: { "content-type": "application/json" }
+    })
+      .then(res => res.json())
+      .then(data => {
+        window.localStorage.setItem(
+          "localSession",
+          JSON.stringify(data["session"])
+        );
+        this.setState({
+          session: data["session"],
+          showLoginForm: false
+        });
       })
-    }).catch(function() {
-      console.log("error");
-    });
+      .catch(function() {
+        console.log("error");
+      });
   }
 
   generateLoginForm() {
@@ -123,14 +128,50 @@ class App extends React.Component<{}, AppState> {
     );
   }
 
+  showLoginInfo() {
+    if (this.state.session == null) {
+      return (
+        <Button
+          onClick={() =>
+            this.setState({
+              showLoginForm: true
+            })
+          }
+        >
+          Log in
+        </Button>
+      );
+    } else {
+      return (
+        <>
+          Logged in as {this.state.username}
+          <Button
+            onClick={() =>
+              this.setState({
+                session: null
+              })
+            }
+          >
+            Log out
+          </Button>
+        </>
+      );
+    }
+  }
+
   render() {
-    return <>
-        { this.state.showLoginForm && this.generateLoginForm() }
-        <InputCarModel
-          libcarlab={this.carlab}
-         />
-    </>;
-    
+    return (
+      <Container>
+        {this.state.showLoginForm && this.generateLoginForm()}
+        <Row>
+          <Col>{this.showLoginInfo()}</Col>
+        </Row>
+
+        {this.state.session != null && [
+          <InputCarModel libcarlab={this.carlab} />
+        ]}
+      </Container>
+    );
   }
 }
 

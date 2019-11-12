@@ -33,13 +33,13 @@ export class Registry {
 
 export class Libcarlab {
   lastCheckTime: number;
-  session: string;
+  session: string | null;
   requiredInfo: Information[];
   baseUrl: string;
   pushUrl: (arg: string) => string;
   fetchUrl: (arg: string) => string;
 
-  constructor(session: string, requiredInfo: Information[]) {
+  constructor(session: string | null, requiredInfo: Information[]) {
     this.lastCheckTime = Math.round(new Date().getTime() / 1000);
     this.session = session;
     this.requiredInfo = requiredInfo;

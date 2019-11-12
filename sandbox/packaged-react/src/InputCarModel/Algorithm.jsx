@@ -113,7 +113,7 @@ class InputCarModelBase extends React.Component {
   }
 
   componentWillUnmount() {
-    this.libcarlab.unscheduleUploads();
+    // this.libcarlab.unscheduleUploads();
   }
 
   render() {
