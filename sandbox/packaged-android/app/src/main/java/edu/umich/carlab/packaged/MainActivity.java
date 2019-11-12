@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.GridView;
 import android.widget.TextView;
@@ -31,6 +33,7 @@ import edu.umich.carlabui.AppsAdapter;
 import static edu.umich.carlab.Constants.CARLAB_STATUS;
 import static edu.umich.carlab.Constants.GATEWAY_STATUS;
 import static edu.umich.carlab.Constants.ManualChoiceKey;
+import static edu.umich.carlab.Constants.SESSION;
 import static edu.umich.carlab.Constants._STATUS_MESSAGE;
 import static edu.umich.carlabui.AppsAdapter.AppState.ACTIVE;
 
@@ -134,8 +137,18 @@ public class MainActivity extends AppCompatActivity {
         bindService(new Intent(this, PackageCLService.class), mConnection,
                     Context.BIND_AUTO_CREATE);
 
+        checkLogin();
         registerReceivers();
     }
+
+    void checkLogin() {
+        if (prefs.getString(SESSION, null) == null) {
+            Intent loginIntent = new Intent(this, Login.class);
+            startActivityForResult(loginIntent, 2);
+        }
+    }
+
+
 
     @Override
     public void onStop () {
@@ -175,6 +188,17 @@ public class MainActivity extends AppCompatActivity {
                 Intent i = new Intent(CARLAB_STATUS);
                 i.putExtra(_STATUS_MESSAGE, "Starting");
                 sendBroadcast(i);
+            }
+        });
+
+
+        Button logoutButton = findViewById(R.id.logoutButton);
+        logoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick (View v) {
+                prefs.edit().putString(Constants.SESSION, null).apply();
+                Intent loginIntent = new Intent(MainActivity.this, Login.class);
+                startActivityForResult(loginIntent, 2);
             }
         });
 

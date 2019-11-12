@@ -34,15 +34,19 @@ class App extends React.Component<{}, AppState> {
 
     let sessionLocal = null;
     if (sessionString != null) sessionLocal = JSON.parse(sessionString);
-
+    else 
+      sessionLocal = {
+        'session': null,
+        'username': ''
+      }
     this.state = {
       message: "",
       test: props.test === undefined ? false : props.test,
       required_info: [],
       outputSensors: ["car-model"],
-      showLoginForm: sessionLocal == null,
-      session: sessionLocal,
-      username: "",
+      showLoginForm: sessionLocal['session'] == null,
+      session: sessionLocal['session'],
+      username: sessionLocal['username'],
       password: ""
     };
 
@@ -65,10 +69,11 @@ class App extends React.Component<{}, AppState> {
       .then(data => {
         window.localStorage.setItem(
           "localSession",
-          JSON.stringify(data["session"])
+          JSON.stringify(data)
         );
         this.setState({
-          session: data["session"],
+          session: data['session'],
+          username: data['username'],
           showLoginForm: false
         });
       })

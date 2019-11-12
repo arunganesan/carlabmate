@@ -26,6 +26,7 @@ class UsersController < ApplicationController
         end
 
         render :json => {
+            'username': username,
             'session': user.session
         }
     end

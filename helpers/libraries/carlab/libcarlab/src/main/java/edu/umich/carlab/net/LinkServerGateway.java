@@ -36,6 +36,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 
+import edu.umich.carlab.Constants;
 import edu.umich.carlab.DataMarshal;
 import edu.umich.carlab.io.MultipartUtility;
 import edu.umich.carlab.utils.Utilities;
@@ -58,7 +59,7 @@ public class LinkServerGateway extends Service {
     SharedPreferences prefs;
     final String FILE_INFO_MAPPING = "saved file info mapping";
 
-    final String UPLOAD_URL = "http://35.3.120.242:3000/packet/upload?information=%s&person=21";
+    final String UPLOAD_URL = "http://35.3.71.19:3000/packet/upload?information=%s&session=%s";
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -220,7 +221,8 @@ public class LinkServerGateway extends Service {
                             continue;
 
 
-                        URL url = new URL(String.format(UPLOAD_URL, info));
+                        String session = prefs.getString(Constants.SESSION, null);
+                        URL url = new URL(String.format(UPLOAD_URL, info, session));
                         MultipartUtility mpu = new MultipartUtility(url);
                         mpu.addFilePart("file", new File(filename));
                         returnCode = mpu.finishCode();

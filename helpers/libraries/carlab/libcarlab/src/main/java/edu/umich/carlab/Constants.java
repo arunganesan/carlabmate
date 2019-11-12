@@ -12,7 +12,7 @@ public class Constants {
 
     public static final int TAG_CODE_PERMISSION_LOCATION = 777;
 
-
+    public static final String SESSION = "session id";
     public final static int GPS_INTERVAL = 500;
 
     // Sample OXC at 10 Hz.

@@ -25,9 +25,13 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:usesCleartextTraffic="true"
-        android:theme="@style/AppTheme">
-        <activity android:name="edu.umich.carlab.packaged.MainActivity">
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
+        <activity
+            android:name=".Login"
+            android:label="@string/title_activity_login"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -35,13 +39,12 @@
             </intent-filter>
         </activity>
 
-
         <service
-            android:name="edu.umich.carlab.packaged.PackageCLService"
+            android:name=".PackageCLService"
             android:enabled="true"
             android:exported="false" />
 
-        <receiver android:name="edu.umich.carlab.packaged.PackageTriggerSession" />
+        <receiver android:name=".PackageTriggerSession" />
     </application>
 
 </manifest>
