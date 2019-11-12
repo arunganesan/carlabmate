@@ -1,12 +1,24 @@
-import React from 'react';
-import './App.css';
-import Algorithm from './InputCarModel/Algorithm'
+import React from "react";
+import "./App.css";
+import Algorithm from "./InputCarModel/Algorithm";
 
-import { Libcarlab, DataMarshal, Registry } from "./LibcarlabReact";
+import { Libcarlab, Information, DataMarshal, Registry } from "./LibcarlabReact";
+
+type AppState = {
+  message: string,
+  userid: string,
+  test: boolean,
+  required_info: Information[],
+  outputSensors: string[]
+}
 
 
-class App extends React.Component {
-  constructor(props) {
+class App extends React.Component<{}, AppState> {
+  carlab: Libcarlab;
+
+  constructor(props: any) {
+    super(props);
+
     this.state = {
       message: "",
       userid: props.userid === undefined ? 21 : props.userid,
@@ -14,10 +26,15 @@ class App extends React.Component {
       required_info: [],
       outputSensors: ["car-model"]
     };
+
+    this.carlab = new Libcarlab(
+      this.state.userid,
+      this.state.required_info,
+    )
   }
 
   render() {
-    return <Algorithm /> 
+    return <Algorithm />;
   }
 }
 
@@ -27,7 +44,6 @@ class App extends React.Component {
 //     this.state.required_info
 //   );
 
-  
 // }
 
 export default App;

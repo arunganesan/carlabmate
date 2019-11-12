@@ -1,4 +1,4 @@
-class Information {
+export class Information {
   name: string;
   dtype: any;
 

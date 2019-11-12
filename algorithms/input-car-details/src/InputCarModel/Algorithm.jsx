@@ -92,10 +92,7 @@ class InputCarModelBase extends React.Component {
       outputSensors: ["car-model"]
     };
 
-    this.libcarlab = new Libcarlab(
-      this.state.userid,
-      this.state.required_info
-    );
+    this.libcarlab = props.libcarlab;
   }
 
   componentDidMount() {
