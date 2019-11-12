@@ -33,14 +33,14 @@ class UsersController < ApplicationController
 
         if request.post?
             if !params.has_key? :username or !params.has_key? :password
-                @return_message = "Invalid form input"
+                @return_message = "<font color='red'>Invalid form input</font>"
                 return
             end
             username = params[:username]
             password = params[:password]
             user = User.find_by(username: username)
             if !user.blank?
-                @return_message = "User already exists"
+                @return_message = "<font color='red'>User already exists</font>"
                 return
             end
 
@@ -50,7 +50,7 @@ class UsersController < ApplicationController
             user.session = SecureRandom.hex
             user.save
             
-            @return_message = "Success"
+            @return_message = "<font color='green'>Success</font>"
         else
             # make the log in page.
         end

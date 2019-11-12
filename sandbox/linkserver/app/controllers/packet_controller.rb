@@ -12,7 +12,7 @@ class PacketController < ApplicationController
         # Must contain params about information + person
         # Must contain data
         puts "Got upload. Params are: ", params[:message]
-        if !request.post? or !params.has_key? :information or !params.has_key? :person
+        if !request.post? or !params.has_key? :information or !params.has_key? :session
             puts 'Invalid post params'
             head :invalid
             return
@@ -25,9 +25,9 @@ class PacketController < ApplicationController
             return
         end
         
-        person = Person.find_by(id: params[:person])
+        user = User.find_by(session: params[:session])
         
-        if person.blank?
+        if user.blank?
             head :invalid
             return
         end
@@ -40,10 +40,10 @@ class PacketController < ApplicationController
 
         packet = Packet.new
         packet.received = Time.now
-        packet.person = person
+        packet.user = user
         packet.information = information
         
-        dest_dir = "#{PUBLIC.to_s}/#{params[:person]}/#{params[:information]}"
+        dest_dir = "#{PUBLIC.to_s}/#{user.username}/#{params[:information]}"
         FileUtils.mkdir_p dest_dir
         save_filename = "#{dest_dir}/#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}.json"
         
@@ -72,7 +72,7 @@ class PacketController < ApplicationController
 
         render :json => {
             'information': Information.all,
-            'people': Person.all,
+            'users': User.all,
             'packets': Packet.all            
         }
     end
@@ -80,50 +80,60 @@ class PacketController < ApplicationController
 
 
     def listall
-        # Must be get
-        # Must contain params about info and person and last date
-        
-        if !request.get? or !params.has_key? :person
+        if !request.get? or !params.has_key? :session
             head :invalid
             return
         end
 
-        render :json => Packet.where('person_id = :person_id', {
-            person_id: params[:person],
-        })
+        user = User.find_by(session: params[:session])
+        if user.blank?
+            head :invalid
+            return
+        end
+
+        render :json => Packet.where(user: user)
     end
+
 
     def latest
         # Must be get
         # Must contain params about info and person and last date
         
-        if !request.get? or !params.has_key? :information or !params.has_key? :person
+        if !request.get? or !params.has_key? :information or !params.has_key? :session
+            puts 'Invalid post params'
+            head :invalid
+            return
+        end
+        
+        user = User.find_by(session: params[:session])
+        
+        if user.blank?
             head :invalid
             return
         end
 
         information = Information.find_by(name: params[:information])
-        if information.blank? or information.nil?
-            render :json => []
-            return
+        if information.blank?
+            information = Information.create(name: params[:information])
         end
-
-        last_info = Packet.where('person_id = :person_id AND information_id = :information_id', {
-            person_id: params[:person],
-            information_id: information.id,
-        }).order('received DESC').first
-        
+        last_info = Packet.where(user: user, information: information).order('received DESC').first
         render :json => last_info
     end
     
     def list 
         # Must be get
         # Must contain params about info and person and last date
-        if !request.get? or !params.has_key? :information or !params.has_key? :person or !params.has_key? :sincetime
+        if !request.get? or !params.has_key? :information or !params.has_key? :session or !params.has_key? :sincetime
             head :invalid
             return
         end
 
+        user = User.find_by(session: params[:session])
+        if user.blank?
+            head :invalid
+            return
+        end
+        
         information = Information.find_by(name: params[:information])
         if information.blank? or information.nil?
             render :json => []
@@ -135,6 +145,5 @@ class PacketController < ApplicationController
                 person_id: params[:person],
                 information_id: information.id,
             })
-            
     end
 end

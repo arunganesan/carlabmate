@@ -7,6 +7,9 @@ Rails.application.routes.draw do
   get 'packet/listall'
   get 'packet/latest'
 
+  post 'add', to: 'packet#upload'
+  get 'list', to: 'packet#list'
+  get 'latest', to: 'packet#latest'
 
   get 'login', to: 'users#login'
   post 'login', to: 'users#login'
