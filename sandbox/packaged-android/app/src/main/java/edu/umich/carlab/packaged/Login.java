@@ -1,25 +1,14 @@
 package edu.umich.carlab.packaged;
 
 
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import edu.umich.carlab.Constants;
-import edu.umich.carlab.utils.Utilities;
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.util.Log;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -32,21 +21,20 @@ import org.json.JSONObject;
 import edu.umich.carlab.Constants;
 import edu.umich.carlab.utils.Utilities;
 
-
-
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
 
 // http://localhost:3000/login?username=arunganesan&password=super
 
 public class Login extends AppCompatActivity {
-
-
+    final String LOGINURL = "http://35.3.71.19:3000/login?username=%s&password=%s";
+    Button loginButton;
     Response.ErrorListener loginRequestError = new Response.ErrorListener() {
         @Override
         public void onErrorResponse (VolleyError error) {
             Toast.makeText(Login.this, "Login failed", Toast.LENGTH_SHORT).show();
         }
     };
+    SharedPreferences prefs;
     Response.Listener<String> gotLoginSession = new Response.Listener<String>() {
         @Override
         public void onResponse (String responseLogin) {
@@ -59,9 +47,6 @@ public class Login extends AppCompatActivity {
             }
         }
     };
-    final String LOGINURL = "http://35.3.71.19:3000/login?username=%s&password=%s";
-    SharedPreferences prefs;
-    Button loginButton;
     EditText usernameText, passwordText;
 
     @Override
@@ -87,9 +72,9 @@ public class Login extends AppCompatActivity {
                 } else {
                     RequestQueue queue = Volley.newRequestQueue(Login.this);
                     StringRequest myReq = new StringRequest(Request.Method.GET,
-                                                            String.format(LOGINURL, username, password),
-                                                            gotLoginSession,
-                                                            loginRequestError);
+                                                            String.format(LOGINURL, username,
+                                                                          password),
+                                                            gotLoginSession, loginRequestError);
                     queue.add(myReq);
                 }
             }
