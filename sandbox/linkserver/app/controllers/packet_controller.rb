@@ -115,10 +115,7 @@ class PacketController < ApplicationController
         
         render :json => last_info
     end
-
-
-
-
+    
     def list 
         # Must be get
         # Must contain params about info and person and last date
