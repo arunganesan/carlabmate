@@ -1,4 +1,4 @@
-class Information {
+export class Information {
   name: string;
   dtype: any;
 
@@ -10,45 +10,46 @@ class Information {
 
 export class DataMarshal {
   info: Information;
-  value: any;
+  message: any;
 
   constructor(info: Information, value: any) {
     this.info = info;
-    this.value = value;
+    this.message = value;
   }
 
   toJson() {
     return JSON.stringify({
       info: this.info,
-      value: this.value
+      message: this.message
     });
   }
 }
 
-class Registry {
+export class Registry {
   static WorldAlignedAccel = new Information("world-aligned-accel", 0);
   static WorldAlignedGyro = new Information("world-aligned-gyro", 0);
   static CarModel = new Information("car-model", "");
+  static PhoneNumber = new Information('phone-number', '');
 }
 
 export class Libcarlab {
   lastCheckTime: number;
-  userid: string;
+  session: string | null;
   requiredInfo: Information[];
   baseUrl: string;
   pushUrl: (arg: string) => string;
   fetchUrl: (arg: string) => string;
 
-  constructor(userid: string, requiredInfo: Information[]) {
+  constructor(session: string | null, requiredInfo: Information[]) {
     this.lastCheckTime = Math.round(new Date().getTime() / 1000);
-    this.userid = userid;
+    this.session = session;
     this.requiredInfo = requiredInfo;
 
     this.baseUrl = "http://localhost:1234/packet/";
     this.fetchUrl = info =>
-      `${this.baseUrl}list?information=${info}&person=${this.userid}&sincetime=${this.lastCheckTime}`;
+      `${this.baseUrl}list?information=${info}&session=${this.session}&sincetime=${this.lastCheckTime}`;
     this.pushUrl = info =>
-      `${this.baseUrl}upload?information=${info}&person=${this.userid}`;
+      `${this.baseUrl}upload?information=${info}&session=${this.session}`;
   }
 
 
@@ -64,7 +65,8 @@ export class Libcarlab {
   }
 
   outputNewInfo(dm: DataMarshal) {
-      // XXX this should fail
+    // XXX this should fail
+    console.log('Push url is: ', this.pushUrl(dm.info.name))
     fetch(this.pushUrl(dm.info.name), {
       method: "post",
       mode: "cors",

@@ -10,7 +10,7 @@ import {
   Information,
   DataMarshal,
   Registry
-} from "./LibcarlabReact";
+} from "./Libcarlab";
 
 type AppState = {
   message: string;
