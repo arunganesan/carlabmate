@@ -1,6 +1,0 @@
-{
-    "name": "How was your day?",
-    "description": "Once the user returns home at the end of the day, we text and ask them about their day.",
-    "requires": ["location", "home-work"],
-    "implements": ["mood"]
-}

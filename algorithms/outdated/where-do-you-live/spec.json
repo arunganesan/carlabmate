@@ -1,6 +1,0 @@
-{
-    "name": "Where do you live?",
-    "description": "The user manually picks their home and work location.",
-    "requires": [],
-    "implements": ["home-work"]
-}

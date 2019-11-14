@@ -1,6 +1,0 @@
-{
-    "name": "Phone IMU",
-    "description": "Reads raw phone IMU",
-    "requires": [],
-    "implements": ["imu"]
-}
