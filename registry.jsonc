@@ -10,11 +10,16 @@
 
     // IMU transformations
     "vehicle-pointing-rotation": {"type": "float[9]" },
+    "world-pointing-rotation": {"type": "float[9]" },
     "vehicle-aligned-accel": {"type": "float[3]" },
+    "world-aligned-accel": {"type": "float[3]" },
+    "world-aligned-gyro": {"type": "float[3]" },
     "gravity-aligned-gyro": {"type": "float[3]" },
     
     "gear-model-file": {"type": "string" },
     "car-model": {"type": "string" }, // Car model might also be an enum
+
+    "phone-number": {"type": "string"},
 
     // Ubi related
     "sighting": {"type": "float,location", "description": "time, lat, lng"}, // whoa, wait, this can include other data types.........

@@ -2,7 +2,7 @@ import React from "react";
 import { Button, Container, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.css";
 
-import { Libcarlab, DataMarshal, Registry } from "../LibcarlabReact";
+import { Libcarlab, DataMarshal, Registry } from "../Libcarlab";
 
 const style = {
   input: {

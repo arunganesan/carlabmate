@@ -4,6 +4,9 @@ import InputCarModel from "./InputCarModel/Algorithm";
 import InputPhoneNumber from './InputPhoneNumber/Algorithm';
 import { Nav, NavItem, Navbar, Button } from "react-bootstrap";
 import { Modal, Container, Row, Form, Col } from "react-bootstrap";
+
+import ExampleComponent from 'user-input';
+
 import "bootstrap/dist/css/bootstrap.css";
 import {
   Libcarlab,
@@ -175,7 +178,8 @@ class App extends React.Component<{}, AppState> {
 
         {this.state.session != null && [
           <InputCarModel libcarlab={this.carlab} />,
-          <InputPhoneNumber libcarlab={this.carlab} />
+          <InputPhoneNumber libcarlab={this.carlab} />,
+          <ExampleComponent text="Test" />
         ]}
       </Container>
     );

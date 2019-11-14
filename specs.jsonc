@@ -1,20 +1,148 @@
 {
     "aligned-imu" : {
-        "classname": "AlignedIMU",
-        "functions": [
-            { 
-                "name": "produceRotation",
-                "output": "rotation", 
+        "platform": "android",
+        "functions": { 
+            "produceRotation": {
+                "output": "worldPointingRotation", 
                 "input": ["gravity", "magnetometer"] 
-            },{ 
-                "name": "produceAlignedGyro",
+            },
+
+            "produceAlignedGyro": {
                 "output": "world-aligned-gyro", 
                 "input": ["gyro", "rotation"] 
-            },{ 
-                "name": "produceAlignedAccel",
+            },
+
+            "produceAlignedAccel": {
                 "output": "world-aligned-accel", 
                 "input": ["accel", "rotation"] 
+            },
+
+            "produceVehicleAlignedAccel": {
+                "input": ["vehicle-pointing-rotation", "accel"],
+                "output": "vehicle-aligned-accel"
+            },
+
+            "produceVehiclePointingRotation": {
+                "input": ["magnetometer", "gps", "gravity"],
+                "output": "vehicle-pointing-rotation"
+            },
+
+            "produceGravityAlignedGyro": {
+                "input": ["gravity", "gyro"],
+                "output": ["gravity-aligned-gyro"]
             }
-        ]
+        }
+    },
+
+
+
+    "map-match": {
+        "platform": "python",
+        "functions": {
+            "mapmatch": {
+                "input": ["location"],
+                "output": "map-mached-location"
+            }
+        }
+    },
+
+    "user-in    put": {
+        "platform": "react",
+        "functions": {
+            "acceptFuelLevel": { "output": "car-fuel" },
+            "acceptPhoneNumber": {"output": "phone-number"},
+
+            // For now literally just use the car models for which we already have models
+            "acceptCarModel": { "output": "car-model" }
+
+        }
+    },
+
+
+    "obd-devices": {
+        "platform": "android",
+        "functions": { 
+            "readFuelLevel": { "output": "car-fuel" }
+        }
+    },
+
+
+    "text-input": {
+        "platform": "python",
+        "functions": {
+            "accept_fuel_level": { "output": "car-fuel" }
+        }
+    },
+
+
+    "watchfone": {
+        "platform": "android",
+        "functions": {
+            "estimateSpeed": {
+                "input": ["vehicle-aligned-accel", "gps"],
+                "output": "car-speed"
+            },
+
+            "estimateGear": {
+                "uses": ["gear-model-file"],
+                "input": ["car-speed"],
+                "output": "car-gear"
+            },
+
+            "estimateSteering": {
+                "input": ["car-speed", "gravity-aligned-gyro"],
+                "output": "car-steering"
+            }
+        }
+    },
+
+
+    // If this only USES the car model, then when is it called?
+    // When we load it up, we'll call it and try to initialize with the car model
+    // If that fails, we will call it when the car model is set
+    // I.e., "uses" relationships also invoke the function. Just not as input. 
+    "tensorflow-models": {
+        "platform": "python",
+        "functions": {
+            "get_gear_model_file": {
+                "uses": ["car-model"],
+                "output": ["gear-model-file"]
+            }
+        }
+    },
+
+    "obstacle-warning-react": {
+        "platform": "react",
+        "functions": {
+            "acceptSightingReport": {
+                "input": ["location"],
+                "output": "sighting"
+            },
+
+            "showWarning": {
+                "uses": ["sightings-map"]
+            }
+        }
+    },
+
+    "obstacle-warning-python": {
+        "platform": "python",
+        "functions": {
+            "update_sightings": {
+                "input": ["sighting"],
+                "output": "sightings-map"
+            }
+        }
+    },
+
+    // Low level passthrough algorithms so other modalities can read Android sensors
+    "android-passthroughs": {
+        "platform": "android",
+        "functions": {
+            "getLocation": {
+                "input": ["gps"],
+                "output": "location"
+            }
+        }
     }
 }
