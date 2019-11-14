@@ -1,26 +1,29 @@
-[
+{
+    "map-matched-location": {"type": "string,float", "description": "Road name, percentage into road"},
+    "location": {"type": "float[2]", "description": "latitude, longitude"},
 
-    { "name": "fall", "type": "bool" },
+    // Watchfone-related
+    "car-speed": {"type": "float"},
+    "car-gear": {"type": "int"}, // Actually gear is enum
+    "car-fuel": {"type": "float"},
+    "car-steering": {"type": "float"},
 
-    { "name": "rotation", "type": "float[9]"},
-    { "output": "world-aligned-gyro", "type": "float[3]" },
-    { "output": "world-aligned-accel", "type": "float[3]" },
-    { "name": "mood", "type": "text", "description": "User's mood"},
- 
-    { "name": "accel", "type": "float[3]"},
-    { "name": "magnetometer", "type": "float[3]"},
-    { "name": "gyro", "type": "float[3]"},
-    { "name": "gravity", "type": "float[3]"},
-    { "name": "location", "type": "float[3]", "description": "latitude, longitude, estimated speed"},
+    // IMU transformations
+    "vehicle-pointing-rotation": {"type": "float[9]" },
+    "vehicle-aligned-accel": {"type": "float[3]" },
+    "gravity-aligned-gyro": {"type": "float[3]" },
+    
+    "gear-model-file": {"type": "string" },
+    "car-model": {"type": "string" }, // Car model might also be an enum
 
-    { "name": "map-matched-location", "type": "text,text,float", "description": "Road name, road type, distance into road"},
-
-    { "name": "car-speed", "type": "float"},
-    { "name": "car-odometer", "type": "float"},
-    { "name": "car-fuel", "type": "float"},
-    { "name": "car-rpm", "type": "float"},
-    { "name": "car-steering", "type": "float"},
-    { "name": "car-gear", "type": "int"},
-
-    { "name": "car-model", "type": "text"}
-]
+    // Ubi related
+    "sighting": {"type": "float,location", "description": "time, lat, lng"}, // whoa, wait, this can include other data types.........
+    "sightings-map": {"type": "sighting[]" }, // list of sightings. Indeterminate length of array
+    
+    // Raw sensors
+    "gps": {"type": "float[3]"},
+    "accel": {"type": "float[3]"},
+    "magnetometer": {"type": "float[3]"},
+    "gyro": {"type": "float[3]"},
+    "gravity": {"type": "float[3]"}
+}

@@ -1,0 +1,20 @@
+{
+    "aligned-imu" : {
+        "classname": "AlignedIMU",
+        "functions": [
+            { 
+                "name": "produceRotation",
+                "output": "rotation", 
+                "input": ["gravity", "magnetometer"] 
+            },{ 
+                "name": "produceAlignedGyro",
+                "output": "world-aligned-gyro", 
+                "input": ["gyro", "rotation"] 
+            },{ 
+                "name": "produceAlignedAccel",
+                "output": "world-aligned-accel", 
+                "input": ["accel", "rotation"] 
+            }
+        ]
+    }
+}
