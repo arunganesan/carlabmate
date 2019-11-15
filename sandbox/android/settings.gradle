@@ -1,7 +1,7 @@
 include ':app', ':aligned-imu', ':libcarlab', ':carlabui', ':watchfone'
 rootProject.name='Packaged'
 
-project(':libcarlab').projectDir = new File(settingsDir, '../../helpers/libraries/carlab/libcarlab')
-project(':carlabui').projectDir = new File(settingsDir, '../../helpers/libraries/carlab/carlabui')
+project(':libcarlab').projectDir = new File(settingsDir, '../../libraries/android-carlab/libcarlab')
+project(':carlabui').projectDir = new File(settingsDir, '../../libraries/android-carlab/carlabui')
 project(':aligned-imu').projectDir = new File(settingsDir, '../../algorithms/aligned-imu/aligned-imu')
 project(':watchfone').projectDir = new File(settingsDir, '../../algorithms/watchfon/watchfone')

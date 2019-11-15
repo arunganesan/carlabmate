@@ -1,0 +1,2 @@
+include ':libcarlab', ':carlabui', ':aligned-imu',  ':vehicle-estimate', ':obd-devices', ':android-passthroughs'
+rootProject.name='AndroidAlgorithms'

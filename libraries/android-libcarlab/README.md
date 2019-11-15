@@ -1,2 +1,0 @@
-# carlab
-CarLab core libraries

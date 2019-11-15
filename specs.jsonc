@@ -46,7 +46,7 @@
         }
     },
 
-    "user-in    put": {
+    "user-input": {
         "platform": "react",
         "functions": {
             "acceptFuelLevel": { "output": "car-fuel" },
@@ -75,7 +75,7 @@
     },
 
 
-    "watchfone": {
+    "vehicle-estimate": {
         "platform": "android",
         "functions": {
             "estimateSpeed": {
