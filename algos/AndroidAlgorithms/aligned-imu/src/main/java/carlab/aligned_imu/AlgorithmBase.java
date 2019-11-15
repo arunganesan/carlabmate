@@ -1,8 +1,11 @@
 package carlab.aligned_imu;
 
 import android.content.Context;
+import android.renderscript.Float3;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import edu.umich.carlab.CLDataProvider;
 import edu.umich.carlab.DataMarshal;
@@ -10,32 +13,63 @@ import edu.umich.carlab.loadable.Algorithm;
 import edu.umich.carlab.Registry;
 import edu.umich.carlab.sensors.PhoneSensors;
 
-public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm {
-    final String ALIGNED_ACCEL = "world-aligned-accel";
-    final String ALIGNED_GYRO = "world-aligned-gyro";
-    final String ROTATION = "rotation";
+import static edu.umich.carlab.Registry.WorldAlignedGyro;
+import static edu.umich.carlab.Registry.WorldPointingRotation;
 
-    public static Function ProduceRotation = new Function(
-            "produceRotation",
+public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm {
+    public abstract Float[] produceWorldPointingRotation (Float3 gravity, Float3 magnet);
+    public abstract Float3 produceWorldAlignedGyro (Float3 gyro, Float[] rm);
+    public abstract Float3 produceWorldAlignedAccel (Float3 accel, Float[] rm);
+    public abstract Float[] produceVehiclePointingRotation (Float3 magnet, Float3 gps, Float3 gravity);
+    public abstract Float3 produceVehicleAlignedAccel(Float3 accel, Float[] rm);
+    public abstract Float produceGravityAlignedGyro(Float3 gravity, Float3 gyro);
+
+
+
+    public static Function produceWorldPointingRotation = new Function(
+            "produceWorldPointingRotation",
             Algorithm.class,
-            Registry.Rotation,
+            WorldPointingRotation,
             Registry.Gravity, Registry.Magnetometer
     );
 
 
-    public static Function ProduceAlignedGyro = new Function(
+    public static Function produceWorldAlignedGyro = new Function(
             "produceWorldAlignedGyro",
             Algorithm.class,
             Registry.WorldAlignedGyro,
-            Registry.Gyro, Registry.Rotation
+            Registry.Gyro, WorldPointingRotation
     );
 
 
-    public static Function ProduceAlignedAccel = new Function(
+    public static Function produceWorldAlignedAccel = new Function(
             "produceWorldAlignedAccel",
             Algorithm.class,
             Registry.WorldAlignedAccel,
-            Registry.Accel, Registry.Rotation
+            Registry.Accel, WorldPointingRotation
+    );
+
+    public static Function produceVehiclePointingRotation = new Function(
+            "produceVehiclePointingRotation",
+            Algorithm.class,
+            Registry.VehiclePointingRotation,
+            Registry.Magnetometer, Registry.GPS, Registry.Gravity
+    );
+
+
+    public static Function produceVehicleAlignedAccel = new Function(
+            "produceVehicleAlignedAccel",
+            Algorithm.class,
+            Registry.VehicleAlignedAccel,
+            Registry.Accel, Registry.VehiclePointingRotation
+    );
+
+
+    public static Function produceGravityAlignedGyro = new Function(
+            "produceWorldAlignedAccel",
+            Algorithm.class,
+            Registry.GravityAlignedGyro,
+            Registry.Gravity, Registry.Gyro
     );
 
 
@@ -43,7 +77,7 @@ public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm 
 
     public AlgorithmBase (CLDataProvider cl, Context context) {
         super(cl, context);
-        name = "world_aligned_imu";
+        name = "aligned-imu";
     }
 
     @Override
@@ -66,9 +100,9 @@ public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm 
             case PhoneSensors.ACCEL:
                 lastAccel = (Float[]) dObject.value;
                 break;
-            case ROTATION:
-                lastRotation = (Float[]) dObject.value;
-                break;
+            // case ROTATION:
+            //     lastRotation = (Float[]) dObject.value;
+            //     break;
         }
 
 
@@ -79,21 +113,24 @@ public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm 
         /*
         TODO Need to only call the function IF it is statically loaded in this invocation
          */
-        if (sensor.equals(PhoneSensors.MAGNET) || sensor.equals(PhoneSensors.GRAVITY)) {
-            if (lastGravity != null && lastMagnet != null)
-                outputData(ROTATION, produceRotation(lastMagnet, lastGravity));
-        } else if (sensor.equals(PhoneSensors.GYRO) || sensor.equals(ROTATION)) {
-            if (lastRotation != null && lastGyro != null)
-                outputData(ALIGNED_GYRO, produceAlignedGyro(lastGyro, lastRotation));
-        } else if (sensor.equals(PhoneSensors.ACCEL) || sensor.equals(ROTATION)) {
-            if (lastAccel != null && lastRotation != null)
-                outputData(ALIGNED_ACCEL, produceAlignedAccel(lastAccel, lastRotation));
-        }
+
+        // TODO "sensor" is just a string. That's because DataObject passes a string around. It might be nice to pass Information objects around, like eveyrone else.
+
+        Map<Registry.Information, Object> latestValues = new HashMap<>();
+
+
+        // if (sensor.equals(PhoneSensors.MAGNET) || sensor.equals(PhoneSensors.GRAVITY)) {
+        //     if (lastGravity != null && lastMagnet != null)
+        //         outputData(
+        //                 WorldPointingRotation.name,
+        //                 produceWorldPointingRotation(lastMagnet, lastGravity));
+        // } else if (sensor.equals(Registry.Gyro) || sensor.equals(WorldPointingRotation)) {
+        //     if (lastRotation != null && lastGyro != null)
+        //         outputData(WorldAlignedGyro.name, produceWorldAlignedGyro(lastGyro, lastRotation));
+        // } else if (sensor.equals(PhoneSensors.ACCEL) || sensor.equals(WorldPointingRotation)) {
+        //     if (lastAccel != null && lastRotation != null)
+        //         outputData(ALIGNED_ACCEL, produceAlignedAccel(lastAccel, lastRotation));
+        // }
     }
 
-    public abstract Float[] produceAlignedAccel (Float[] accel, Float[] rm);
-
-    public abstract Float[] produceAlignedGyro (Float[] gyro, Float[] rm);
-
-    public abstract Float[] produceRotation (Float[] m, Float[] g);
 }

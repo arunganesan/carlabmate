@@ -14,7 +14,7 @@
     "vehicle-aligned-accel": {"type": "float[3]" },
     "world-aligned-accel": {"type": "float[3]" },
     "world-aligned-gyro": {"type": "float[3]" },
-    "gravity-aligned-gyro": {"type": "float[3]" },
+    "gravity-aligned-gyro": {"type": "float" },
     
     "gear-model-file": {"type": "string" },
     "car-model": {"type": "string" }, // Car model might also be an enum
@@ -26,9 +26,10 @@
     "sightings-map": {"type": "sighting[]" }, // list of sightings. Indeterminate length of array
     
     // Raw sensors
-    "gps": {"type": "float[3]"},
-    "accel": {"type": "float[3]"},
-    "magnetometer": {"type": "float[3]"},
-    "gyro": {"type": "float[3]"},
-    "gravity": {"type": "float[3]"}
+    "gps": {"type": "float[3]", "sensor": true},
+    "accel": {"type": "float[3]", "sensor": true},
+    "magnetometer": {"type": "float[3]", "sensor": true},
+    "gyro": {"type": "float[3]", "sensor": true},
+    "gravity": {"type": "float[3]", "sensor": true},
+    "obd-fuel": {"type": "float", "sensor": true},
 }

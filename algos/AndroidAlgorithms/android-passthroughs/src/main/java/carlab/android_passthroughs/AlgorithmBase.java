@@ -1,6 +1,8 @@
 package carlab.android_passthroughs;
 
 import android.content.Context;
+import android.renderscript.Float2;
+import android.renderscript.Float3;
 
 import edu.umich.carlab.CLDataProvider;
 import edu.umich.carlab.DataMarshal;
@@ -8,20 +10,17 @@ import edu.umich.carlab.Registry;
 import edu.umich.carlab.loadable.Algorithm;
 
 public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm {
-    public static Function ReadFuelLevel = new Function(
+    public static Function getLocation = new Function(
             "getLocation",
             Algorithm.class,
-
-            Registry.GPS,
-
-            // XXX What should be input for this?
-            Registry.Gravity, Registry.Magnetometer
+            Registry.Location,
+            Registry.GPS
     );
 
 
     public AlgorithmBase (CLDataProvider cl, Context context) {
         super(cl, context);
-        name = "android_passthrough";
+        name = "android-passthrough";
     }
 
     @Override
@@ -45,6 +44,6 @@ public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm 
         // Actually call values
     }
 
-    public abstract Float getLocation ();
+    public abstract Float2 getLocation (Float3 gps);
 
 }

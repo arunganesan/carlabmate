@@ -50,11 +50,13 @@ public class DataMarshal {
     public static class DataObject implements Serializable {
         public long time;
         public String information;
+        // public Registry.Information information;
         public Serializable value;
         public MessageType dataType;
 
         public DataObject() { }
 
+        // public DataObject (Registry.Information information, Serializable value) {
         public DataObject (String information, Serializable value) {
             time = System.currentTimeMillis();
             this.information = information;
@@ -74,8 +76,9 @@ public class DataMarshal {
             JSONObject jsonObject = new JSONObject();
             try {
                 jsonObject.put("time", time);
+                // jsonObject.put("information", information.name);
+                // Object obj = information.dataType.cast(value);
                 jsonObject.put("information", information);
-
                 String valString = Arrays.toString((Float[])value);
                 jsonObject.put("value", valString);
                 jsonObject.put("dataType", dataType.toString());

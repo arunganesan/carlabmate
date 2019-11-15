@@ -2,34 +2,34 @@
     "aligned-imu" : {
         "platform": "android",
         "functions": { 
-            "produceRotation": {
+            "produceWorldPointingRotation": {
                 "output": "worldPointingRotation", 
                 "input": ["gravity", "magnetometer"] 
             },
 
-            "produceAlignedGyro": {
+            "produceWorldAlignedGyro": {
                 "output": "world-aligned-gyro", 
                 "input": ["gyro", "rotation"] 
             },
 
-            "produceAlignedAccel": {
+            "produceWorldAlignedAccel": {
                 "output": "world-aligned-accel", 
                 "input": ["accel", "rotation"] 
             },
 
             "produceVehicleAlignedAccel": {
-                "input": ["vehicle-pointing-rotation", "accel"],
-                "output": "vehicle-aligned-accel"
+                "output": "vehicle-aligned-accel",
+                "input": ["accel", "vehicle-pointing-rotation"]
             },
 
             "produceVehiclePointingRotation": {
-                "input": ["magnetometer", "gps", "gravity"],
-                "output": "vehicle-pointing-rotation"
+                "output": "vehicle-pointing-rotation",
+                "input": ["magnetometer", "gps", "gravity"]
             },
 
             "produceGravityAlignedGyro": {
-                "input": ["gravity", "gyro"],
-                "output": ["gravity-aligned-gyro"]
+                "output": "gravity-aligned-gyro",
+                "input": ["gravity", "gyro"]
             }
         }
     },
@@ -62,7 +62,7 @@
     "obd-devices": {
         "platform": "android",
         "functions": { 
-            "readFuelLevel": { "output": "car-fuel" }
+            "readFuelLevel": { "output": "car-fuel", "input": "obd-fuel" }
         }
     },
 

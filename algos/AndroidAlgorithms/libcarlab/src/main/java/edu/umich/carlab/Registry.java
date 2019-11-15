@@ -1,56 +1,66 @@
 package edu.umich.carlab;
 
 import android.hardware.Sensor;
-
-import java.io.Serializable;
+import android.renderscript.Float2;
+import android.renderscript.Float3;
 
 import edu.umich.carlab.sensors.PhoneSensors;
 import edu.umich.carlab.utils.DevSen;
 
 public class Registry {
     public static Information Accel =
-            new Information("accel", new float[3], Sensor.TYPE_ACCELEROMETER,
+            new Information("accel", Float3.class, Sensor.TYPE_ACCELEROMETER,
                             Sensor.STRING_TYPE_ACCELEROMETER,
                             new DevSen(PhoneSensors.DEVICE, PhoneSensors.ACCEL));
-    public static Information CarFuel = new Information("car-fuel", 0F);
-    public static Information CarGear = new Information("car-fuel", 0F);
-    public static Information CarOdometer = new Information("car-fuel", 0F);
-    public static Information CarRPM = new Information("car-fuel", 0F);
-    public static Information CarSpeed = new Information("car-fuel", 0F);
-    public static Information CarSteering = new Information("car-fuel", 0F);
+    public static Information CarFuel = new Information("car-fuel", Float.class);
+    public static Information CarGear = new Information("car-gear", Float.class);
+    public static Information CarModel = new Information("car-model", String.class);
+    public static Information CarSpeed = new Information("car-speed", Float.class);
+    public static Information CarSteering = new Information("car-steering", Float.class);
+    public static Information GPS = new Information("gps", Float.class, 1, null,
+                                                    new DevSen(PhoneSensors.DEVICE,
+                                                               PhoneSensors.GPS));
+    public static Information GearModelFile = new Information("gear-model-file", String.class);
     public static Information Gravity =
-            new Information("gravity", new float[3], Sensor.TYPE_GRAVITY,
+            new Information("gravity", Float3.class, Sensor.TYPE_GRAVITY,
                             Sensor.STRING_TYPE_GRAVITY,
                             new DevSen(PhoneSensors.DEVICE, PhoneSensors.GRAVITY));
-    public static Information Gyro = new Information("gyro", new float[3], Sensor.TYPE_GYROSCOPE,
+    public static Information GravityAlignedGyro =
+            new Information("gravity-aligned-gyro", Float.class);
+    public static Information Gyro = new Information("gyro", Float3.class, Sensor.TYPE_GYROSCOPE,
                                                      Sensor.STRING_TYPE_GYROSCOPE,
                                                      new DevSen(PhoneSensors.DEVICE,
                                                                 PhoneSensors.GYRO));
+    // "map-matched-location": {"type": "string,float", "description": "Road name, percentage into road"},
+    public static Information Location = new Information("location", Float2.class);
     public static Information Magnetometer =
-            new Information("magnetometer", new float[3], Sensor.TYPE_MAGNETIC_FIELD,
+            new Information("magnetometer", Float3.class, Sensor.TYPE_MAGNETIC_FIELD,
                             Sensor.STRING_TYPE_MAGNETIC_FIELD,
                             new DevSen(PhoneSensors.DEVICE, PhoneSensors.MAGNET));
-    public static Information Rotation = new Information("rotation", new float[9]);
-    public static Information WorldAlignedGyro =
-            new Information("world-aligned-gyro", new float[3]);
+    public static Information PhoneNumber = new Information("phone-numner", String.class);
+    public static Information VehicleAlignedAccel =
+            new Information("vehicle-aligned-accel", Float3.class);
+    public static Information VehiclePointingRotation =
+            new Information("vehicle-pointing-rotation", Float[].class);
     public static Information WorldAlignedAccel =
-            new Information("world-aligned-accel", new float[3]);
-
-    // TODO what is the raw sensor here?
-    public static Information GPS = new Information("gps", 0F);
+            new Information("world-aligned-accel", Float3.class);
+    public static Information WorldAlignedGyro =
+            new Information("world-aligned-gyro", Float3.class);
+    public static Information WorldPointingRotation =
+            new Information("world-pointing-rotation", Float[].class);
 
     public static class Information {
-        public Serializable dataType;
+        public Class<?> dataType;
         public DevSen devSensor;
         public int lowLevelSensor;
         public String lowLevelSensorName;
         public String name;
 
-        public Information (String n, Serializable dt) {
+        public Information (String n, Class<?> dt) {
             this(n, dt, -1, null, null);
         }
 
-        public Information (String n, Serializable dt, int lls, String llsn, DevSen ds) {
+        public Information (String n, Class<?> dt, int lls, String llsn, DevSen ds) {
             name = n;
             dataType = dt;
             lowLevelSensor = lls;
@@ -60,9 +70,8 @@ public class Registry {
 
         @Override
         public boolean equals (Object other) {
-            if (!other.getClass().equals(Information.class))
-                return false;
-            return ((Information)other).name.equals(name);
+            if (!other.getClass().equals(Information.class)) return false;
+            return ((Information) other).name.equals(name);
         }
     }
 }
