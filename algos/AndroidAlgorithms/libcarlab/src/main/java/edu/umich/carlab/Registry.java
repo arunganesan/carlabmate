@@ -4,6 +4,8 @@ import android.hardware.Sensor;
 import android.renderscript.Float2;
 import android.renderscript.Float3;
 
+import java.util.Arrays;
+
 import edu.umich.carlab.sensors.PhoneSensors;
 import edu.umich.carlab.utils.DevSen;
 
@@ -73,5 +75,33 @@ public class Registry {
             if (!other.getClass().equals(Information.class)) return false;
             return ((Information) other).name.equals(name);
         }
+    }
+
+
+    public static String FormatString (DataMarshal.DataObject dataObject) {
+        Information information = dataObject.information;
+        Object value = dataObject.value;
+        String valString = "";
+
+        if (information.dataType.equals(Float3.class)) {
+            Float3 obj = (Float3)value;
+            valString = Arrays.toString(new Float[] {
+                    obj.x, obj.y, obj.z
+            });
+        }else if (information.dataType.equals(Float2.class)) {
+            Float2 obj = (Float2)value;
+            valString = Arrays.toString(new Float[] {
+                    obj.x, obj.y
+            });
+        }
+        else if (information.dataType.equals(Float.class)) {
+            valString = "" + value;
+        } else if (information.dataType.equals(String.class)) {
+            valString = (String)value;
+        } else if (information.dataType.equals(Float[].class)) {
+            valString = Arrays.toString((Float[]) value);
+        }
+
+        return valString;
     }
 }

@@ -1,6 +1,7 @@
 package edu.umich.carlab;
 
 import android.os.Message;
+import android.renderscript.Float3;
 import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,7 +22,7 @@ public class DataMarshal {
     }
 
 
-    public void broadcastData(long timestamp, String information, Serializable value, MessageType dataType) {
+    public void broadcastData(long timestamp, Registry.Information information, Serializable value, MessageType dataType) {
         DataObject d = new DataObject();
         d.time = timestamp;
         d.information = information;
@@ -31,13 +32,13 @@ public class DataMarshal {
     }
 
     // Overloaded helper function
-    public void broadcastData(String information, Serializable value, MessageType dataType) {
+    public void broadcastData(Registry.Information information, Serializable value, MessageType dataType) {
         //Double seconds = (new Double(System.currentTimeMillis())) / 1e+3;
         long seconds = System.currentTimeMillis();
         broadcastData(seconds, information, value, dataType);
     }
 
-    public void broadcastData(String information, Serializable value) {
+    public void broadcastData(Registry.Information information, Serializable value) {
         //Double seconds = (new Double(System.currentTimeMillis())) / 1e+3;
         long seconds = System.currentTimeMillis();
         broadcastData(seconds, information, value, MessageType.DATA);
@@ -49,15 +50,15 @@ public class DataMarshal {
 
     public static class DataObject implements Serializable {
         public long time;
-        public String information;
-        // public Registry.Information information;
-        public Serializable value;
+        // public String information;
+        public Registry.Information information;
+        public Object value;
         public MessageType dataType;
 
         public DataObject() { }
 
-        // public DataObject (Registry.Information information, Serializable value) {
-        public DataObject (String information, Serializable value) {
+        public DataObject (Registry.Information information, Object value) {
+            // public DataObject (String information, Serializable value) {
             time = System.currentTimeMillis();
             this.information = information;
             this.value = value;
@@ -76,11 +77,8 @@ public class DataMarshal {
             JSONObject jsonObject = new JSONObject();
             try {
                 jsonObject.put("time", time);
-                // jsonObject.put("information", information.name);
-                // Object obj = information.dataType.cast(value);
-                jsonObject.put("information", information);
-                String valString = Arrays.toString((Float[])value);
-                jsonObject.put("value", valString);
+                jsonObject.put("information", information.name);
+                jsonObject.put("value", Registry.FormatString(this));
                 jsonObject.put("dataType", dataType.toString());
             } catch (JSONException jse) {
                 return null;

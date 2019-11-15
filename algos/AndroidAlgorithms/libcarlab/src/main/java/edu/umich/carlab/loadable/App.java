@@ -22,6 +22,7 @@ import java.util.Map;
 import edu.umich.carlab.CLDataProvider;
 import edu.umich.carlab.Constants;
 import edu.umich.carlab.DataMarshal;
+import edu.umich.carlab.Registry;
 import edu.umich.carlab.hal.HardwareAbstractionLayer;
 
 public abstract class App implements IApp {
@@ -46,8 +47,8 @@ public abstract class App implements IApp {
 
     Long startTime;
     // Latest DataObject storage
-    Map<String, DataMarshal.DataObject> latestData = new HashMap<>();
-    Map<String, Long> latestDataTime = new HashMap<>();
+    Map<Registry.Information, DataMarshal.DataObject> latestData = new HashMap<>();
+    Map<Registry.Information, Long> latestDataTime = new HashMap<>();
     Map<String, // Information
         Map<Long, // Seconds bucket
                 List<DataSample>>> historicalData = new HashMap<>();
@@ -99,7 +100,7 @@ public abstract class App implements IApp {
     @Override
     public void newData(DataMarshal.DataObject dObject) {
         if (!isValidData(dObject)) return;
-        String information = dObject.information;
+        Registry.Information information = dObject.information;
         latestData.put(information, dObject);
         latestDataTime.put(information, System.currentTimeMillis());
     }
@@ -152,7 +153,7 @@ public abstract class App implements IApp {
     }
 
 
-    public void outputData(String information, Serializable values) {
+    public void outputData(Registry.Information information, Object values) {
         if (values == null)
             return;
 
@@ -168,8 +169,8 @@ public abstract class App implements IApp {
 
     public DataMarshal.DataObject outputData(
             DataMarshal.DataObject dObject,
-            String info,
-            Serializable value) {
+            Registry.Information info,
+            Object value) {
         DataMarshal.DataObject secondaryDataObject = dObject.clone();
         secondaryDataObject.information = info;
         secondaryDataObject.value = value;

@@ -11,10 +11,7 @@ import edu.umich.carlab.CLDataProvider;
 import edu.umich.carlab.DataMarshal;
 import edu.umich.carlab.loadable.Algorithm;
 import edu.umich.carlab.Registry;
-import edu.umich.carlab.sensors.PhoneSensors;
 
-import static edu.umich.carlab.Registry.WorldAlignedGyro;
-import static edu.umich.carlab.Registry.WorldPointingRotation;
 
 public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm {
     public abstract Float[] produceWorldPointingRotation (Float3 gravity, Float3 magnet);
@@ -29,7 +26,7 @@ public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm 
     public static Function produceWorldPointingRotation = new Function(
             "produceWorldPointingRotation",
             Algorithm.class,
-            WorldPointingRotation,
+            Registry.WorldPointingRotation,
             Registry.Gravity, Registry.Magnetometer
     );
 
@@ -38,7 +35,7 @@ public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm 
             "produceWorldAlignedGyro",
             Algorithm.class,
             Registry.WorldAlignedGyro,
-            Registry.Gyro, WorldPointingRotation
+            Registry.Gyro, Registry.WorldPointingRotation
     );
 
 
@@ -46,7 +43,7 @@ public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm 
             "produceWorldAlignedAccel",
             Algorithm.class,
             Registry.WorldAlignedAccel,
-            Registry.Accel, WorldPointingRotation
+            Registry.Accel, Registry.WorldPointingRotation
     );
 
     public static Function produceVehiclePointingRotation = new Function(
@@ -72,53 +69,56 @@ public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm 
             Registry.Gravity, Registry.Gyro
     );
 
-
-    private Float[] lastMagnet, lastGravity, lastGyro, lastAccel, lastRotation;
-
     public AlgorithmBase (CLDataProvider cl, Context context) {
         super(cl, context);
         name = "aligned-imu";
     }
 
+
     @Override
     public void newData (DataMarshal.DataObject dObject) {
         super.newData(dObject);
-        String sensor = dObject.information;
+        Registry.Information information = dObject.information;
         if (dObject.dataType != DataMarshal.MessageType.DATA) return;
         if (dObject.value == null) return;
 
-        switch (sensor) {
-            case PhoneSensors.GRAVITY:
-                lastGravity = (Float[]) dObject.value;
-                break;
-            case PhoneSensors.MAGNET:
-                lastMagnet = (Float[]) dObject.value;
-                break;
-            case PhoneSensors.GYRO:
-                lastGyro = (Float[]) dObject.value;
-                break;
-            case PhoneSensors.ACCEL:
-                lastAccel = (Float[]) dObject.value;
-                break;
-            // case ROTATION:
-            //     lastRotation = (Float[]) dObject.value;
-            //     break;
+
+        Map<Registry.Information, Object> latestValues = new HashMap<>();
+        latestValues.put(information, dObject.value);
+
+
+        // Can auto generate this given the definitions
+        if (produceWorldPointingRotation.matchesRequired(information)
+            && produceWorldPointingRotation.haveReceivedAllRequiredData(latestValues.keySet())) {
+
+            outputData(
+                    // Output this info
+                    Registry.WorldPointingRotation,
+
+                    // Get value from this callback
+                    produceWorldPointingRotation(
+                        (Float3)latestValues.get(Registry.Gravity),
+                        (Float3)latestValues.get(Registry.Magnetometer)));
         }
 
 
-        /*
-        Need to go from the JSON description of the IO of this algorithm to the following functions
-         */
+
 
         /*
         TODO Need to only call the function IF it is statically loaded in this invocation
          */
 
-        // TODO "sensor" is just a string. That's because DataObject passes a string around. It might be nice to pass Information objects around, like eveyrone else.
-
-        Map<Registry.Information, Object> latestValues = new HashMap<>();
 
 
+        // TODO a more systematic and reasonable approach to map from JSON description to callback
+        // TODO IF it is a "uses" relationship, we should call a setState() .. but that should already happen
+        // IF it is a "uses" relationship, and we just got the data, we should still invoke it
+        // In general, it is "invoke the guy" if each of the required information is NOT NULL.
+        // If it is set somewhere.
+
+        // TODO also -- don't call UNLESS we got new data.
+
+        // BUT this COULD VERY EASILY be quite manual-looking. It can be auto-generated for sure.
         // if (sensor.equals(PhoneSensors.MAGNET) || sensor.equals(PhoneSensors.GRAVITY)) {
         //     if (lastGravity != null && lastMagnet != null)
         //         outputData(
