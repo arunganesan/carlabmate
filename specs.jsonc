@@ -3,7 +3,7 @@
         "platform": "android",
         "functions": { 
             "produceWorldPointingRotation": {
-                "output": "worldPointingRotation", 
+                "output": "world-pointing-rotation", 
                 "input": ["gravity", "magnetometer"] 
             },
 
@@ -62,7 +62,7 @@
     "obd-devices": {
         "platform": "android",
         "functions": { 
-            "readFuelLevel": { "output": "car-fuel", "input": "obd-fuel" }
+            "readFuelLevel": { "output": "car-fuel", "input": ["obd-fuel"] }
         }
     },
 

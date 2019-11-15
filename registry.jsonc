@@ -31,5 +31,5 @@
     "magnetometer": {"type": "float[3]", "sensor": true},
     "gyro": {"type": "float[3]", "sensor": true},
     "gravity": {"type": "float[3]", "sensor": true},
-    "obd-fuel": {"type": "float", "sensor": true},
+    "obd-fuel": {"type": "float", "sensor": true}
 }
