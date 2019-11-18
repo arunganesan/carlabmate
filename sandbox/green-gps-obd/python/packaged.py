@@ -1,15 +1,17 @@
 #! /usr/bin/env python3
-from libcarlab import AlgorithmFunction, Algorithm, Information, LinkGatewayService, Registry
+from libcarlab.libcarlab import AlgorithmFunction, Algorithm, Information, LinkGatewayService, Registry
 from termcolor import cprint
 
 import argparse
-import fall_detect
 import json
-import time
-from typing import List, Dict
 import os
 import pickle
+import time
+from typing import List, Dict
 
+import map_match
+
+ 
 """
 This is the wrapper script
 
@@ -21,16 +23,17 @@ It is responsible for just a few things:
 """
 
 # per algorithm stuff
-alg = fall_detect.algorithm.FallDetect()
+alg = map_match.algorithm.AlgorithmImpl()
 
 loaded_functions: List[AlgorithmFunction] = [
-    alg.produce_fall_function,
-    alg.check_user_is_ok_function,
+    alg.mapmatch_function,
 ]
 
 
+# XXX this needs to be used somewhere to actually save the data.
+# But it may not be relevant for Python 
 to_save_information: List[Information] = [
-    Registry.Fall
+    Registry.MapMatchedLocation
 ]
 
 def main():
@@ -57,7 +60,7 @@ def main():
             multiplex_routing.setdefault(info, [])
             multiplex_routing[info].append(alg)
         
-        for info in func.refersinfo:
+        for info in func.usesinfo:
             multiplex_routing.setdefault(info, [])
             multiplex_routing[info].append(alg)
 
@@ -68,8 +71,8 @@ def main():
     state_refers_info: List[Information] = []
     for func in loaded_functions:
         required_info += func.inputinfo
-        requires_info += func.refersinfo
-        state_refers_info += func.refersinfo
+        required_info += func.usesinfo
+        state_refers_info += func.usesinfo
 
     # XXX the output sensors from here
     # which ones to output are specified in the spec
@@ -77,7 +80,7 @@ def main():
         args.session,
         required_info,
         state_refers_info,
-        [],
+        [], # output info
         LOCALFILE,
         False,
     )

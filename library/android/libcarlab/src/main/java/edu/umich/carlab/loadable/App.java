@@ -43,7 +43,7 @@ public abstract class App implements IApp {
     // Indexed by [device][sensor][N second bucket]
     protected boolean enableHistoricalLogging = false;
     boolean uploadData = true;
-    String URL = Constants.DEFAULT_UPLOAD_URL;
+    // String URL = Constants.DEFAULT_UPLOAD_URL;
 
     Long startTime;
     // Latest DataObject storage

@@ -207,7 +207,7 @@ public class CLService extends Service implements CLDataProvider {
 
         // String multiplexKey = dataObject.device + ":" + dataObject.sensor;
         Intent statusIntent;
-        String infoname = dataObject.information;
+        String infoname = dataObject.information.name;
 
         if (toServerMultiplexing.contains(infoname)) linkServerGateway.addNewData(dataObject);
 
@@ -219,7 +219,7 @@ public class CLService extends Service implements CLDataProvider {
             statusIntent = new Intent();
             statusIntent.setAction(Constants.INTENT_APP_STATE_UPDATE);
             statusIntent.putExtra("information", infoname);
-            statusIntent.putExtra("value", dataObject.value);
+            statusIntent.putExtra("value", Registry.FormatString(dataObject));
             CLService.this.sendBroadcast(statusIntent);
             lastStateUpdate.put(infoname, currTime);
         }

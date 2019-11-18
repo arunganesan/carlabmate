@@ -1,6 +1,7 @@
 package edu.umich.carlab;
 
 import android.hardware.Sensor;
+import android.provider.ContactsContract;
 import android.renderscript.Float2;
 import android.renderscript.Float3;
 
@@ -76,6 +77,21 @@ public class Registry {
         }
 
         return valString;
+    }
+
+
+    public static Information DevSenToInformation(DevSen devSen) {
+        if (devSen.device.equals(PhoneSensors.DEVICE)) {
+            if (devSen.sensor.equals(PhoneSensors.MAGNET)) return Magnetometer;
+            else if (devSen.sensor.equals(PhoneSensors.GYRO)) return Gyro;
+            else if (devSen.sensor.equals(PhoneSensors.GRAVITY)) return Gravity;
+            else if (devSen.sensor.equals(PhoneSensors.ACCEL)) return Accel;
+            else if (devSen.sensor.equals(PhoneSensors.GPS)) return GPS;
+        } else if (devSen.device.equals(ObdSensors.DEVICE)) {
+            if (devSen.sensor.equals(ObdSensors.FUEL_LEVEL)) return ObdFuel;
+        }
+
+        return null;
     }
 
     public static class Information {

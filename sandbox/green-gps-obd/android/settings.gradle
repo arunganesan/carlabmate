@@ -1,7 +1,7 @@
-include ':app', ':android-passthroughs', ':obd-devices', ':libcarlab', ':carlabui'
+include ':app', ':android-passthroughs', ':obd-devices', ':libcarlab'//, ':carlabui'
 rootProject.name='Packaged'
 
 project(':libcarlab').projectDir = new File(settingsDir, '../../../library/android/libcarlab')
-project(':carlabui').projectDir = new File(settingsDir, '../../../library/android//carlabui')
+//project(':carlabui').projectDir = new File(settingsDir, '../../../library/android//carlabui')
 project(':android-passthroughs').projectDir = new File(settingsDir, '../../../library/android/android-passthroughs')
 project(':obd-devices').projectDir = new File(settingsDir, '../../../library/android/obd-devices')

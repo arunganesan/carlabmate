@@ -125,7 +125,10 @@ public class AlgorithmSandboxActivity extends AppCompatActivity {
         @Override
         public void onClick (final View v) {
             Registry.Information information = (Registry.Information) v.getTag();
-            final float[] obj = (float[]) information.dataType;
+
+            // Initialize this constructor.
+            // But more generally we literally don't care about this Wtf is this anyway.
+            final float[] obj = (information.dataType.getClass().con) information.dataType;
 
             LinearLayout ll = new LinearLayout(AlgorithmSandboxActivity.this);
             ll.setOrientation(LinearLayout.VERTICAL);

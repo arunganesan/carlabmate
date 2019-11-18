@@ -28,18 +28,18 @@ public class UploadValuesTask extends AsyncTask {
 
     @Override
     protected Object doInBackground(Object[] objects) {
-        try {
-            URL url = new URL(Constants.DEFAULT_UPLOAD_URL + "?experimentId=" + this.experimentId);
-            MultipartUtility mpu = new MultipartUtility(url);
-            mpu.addFilePart("gzip", uploadFile);
-            mpu.finish();
-            Log.v(TAG, "Upload succeeded!");
-
-        } catch (MalformedURLException mue) {
-
-        } catch (IOException ieo) {
-            Log.e(TAG, "Upload filed due to error: " + ieo.getMessage());
-        }
+        // try {
+        //     URL url = new URL(Constants.DEFAULT_UPLOAD_URL + "?experimentId=" + this.experimentId);
+        //     MultipartUtility mpu = new MultipartUtility(url);
+        //     mpu.addFilePart("gzip", uploadFile);
+        //     mpu.finish();
+        //     Log.v(TAG, "Upload succeeded!");
+        //
+        // } catch (MalformedURLException mue) {
+        //
+        // } catch (IOException ieo) {
+        //     Log.e(TAG, "Upload filed due to error: " + ieo.getMessage());
+        // }
 
         return null;
     }

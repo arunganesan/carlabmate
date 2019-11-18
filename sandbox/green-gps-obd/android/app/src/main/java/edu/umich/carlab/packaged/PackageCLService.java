@@ -4,21 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
-import java.util.Arrays;
-import java.util.List;
-
-import edu.umich.aligned_imu.AlignedIMU;
 import edu.umich.carlab.Constants;
-import edu.umich.carlab.Registry;
-import edu.umich.carlab.loadable.Algorithm;
-import edu.umich.watchfone.WatchFone;
+
 
 public class PackageCLService extends edu.umich.carlab.CLService {
-    @Override
-    protected void loadRequirements () {
-        strategy = new PackageStrategy();
-    }
-
     public static void turnOffCarLab (Context context) {
         Intent intent = new Intent(context, PackageCLService.class);
         intent.setAction(Constants.MASTER_SWITCH_OFF);
@@ -36,5 +25,10 @@ public class PackageCLService extends edu.umich.carlab.CLService {
         } else {
             context.startService(intent);
         }
+    }
+
+    @Override
+    protected void loadRequirements () {
+        strategy = new PackageStrategy();
     }
 }

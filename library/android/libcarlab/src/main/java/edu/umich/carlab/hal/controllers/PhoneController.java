@@ -13,13 +13,25 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import com.google.android.gms.location.*;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 import edu.umich.carlab.Constants;
 import edu.umich.carlab.DataMarshal;
+import edu.umich.carlab.Registry;
 import edu.umich.carlab.sensors.PhoneSensors;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import edu.umich.carlab.utils.DevSen;
 
 /**
  * This class polls all available sensors on the Android phone and keeps track of their sampling
@@ -27,36 +39,57 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 
 public class PhoneController {
-    private SensorManager mSensorManager;
-    private Context ctx;
-    private DataMarshal dm;
-
-    // Used to make sure we're not registering multiple to teh same listener
-    // The keys are Sensor Types (could be > 1 dimensional)
-    private ConcurrentHashMap<Integer, SensorListenerClass> allListeners;
-
-    // Keeps track of individual sensors
-    // The keys are sensor names (always 1D)
-    Set<String> listeningSensors;
-
     final int DOWNSAMPLE_TO_EVERY = 3;
-    int downsampleCounter = 0;
-
-    final String TAG = "PhoneController";
     final String DeviceName = "phone";
-
-    private FusedLocationProviderClient mFusedLocationClient;
-    private LocationRequest mLocationRequest;
-
+    final int GPSID = 12345;
+    final String TAG = "PhoneController";
+    int downsampleCounter = 0;
+    Map<Integer, HandlerThread> listeningSensorHandlingThreads;
     // These are indexed by the sensor type ID. NOT the calling sensor name.
     // For example, accel_x,and accel_y both belong to the ACCELEROMETER type ID
     Map<Integer, Looper> listeningSensorLoopers;
-    Map<Integer, HandlerThread> listeningSensorHandlingThreads;
-    final int GPSID = 12345;
+    // Keeps track of individual sensors
+    // The keys are sensor names (always 1D)
+    Set<String> listeningSensors;
+    // Used to make sure we're not registering multiple to teh same listener
+    // The keys are Sensor Types (could be > 1 dimensional)
+    private ConcurrentHashMap<Integer, SensorListenerClass> allListeners;
+    private Context ctx;
+    private DataMarshal dm;
+    /**
+     * Simple GPS callback
+     */
+    LocationCallback mLocationCallback = new LocationCallback() {
+        @Override
+        public void onLocationResult (LocationResult locationResult) {
+            for (Location location : locationResult.getLocations()) {
+                double latitude = location.getLatitude(), longitude = location.getLongitude(),
+                        speed = location.getSpeed();
 
-    public PhoneController(Context ctx, DataMarshal dmm) {
-        this.dm = dmm; this.ctx = ctx;
-        mSensorManager = (SensorManager)ctx.getSystemService(Context.SENSOR_SERVICE);
+                speed *= 2.23694; // Convert to miles per hour
+                long milliseconds = System.currentTimeMillis();
+
+                Log.v(TAG, String.format("Got location. [time,lat,lon] = [%d,%f, %f]", milliseconds,
+                                         latitude, longitude));
+
+                Float[] data = new Float[]{(float) latitude, (float) longitude, (float) speed};
+
+                dm.broadcastData(milliseconds, Registry.DevSenToInformation(
+                        new DevSen(PhoneSensors.DEVICE, PhoneSensors.GPS)), data,
+                                 DataMarshal.MessageType.DATA);
+            }
+        }
+
+        ;
+    };
+    private FusedLocationProviderClient mFusedLocationClient;
+    private LocationRequest mLocationRequest;
+    private SensorManager mSensorManager;
+
+    public PhoneController (Context ctx, DataMarshal dmm) {
+        this.dm = dmm;
+        this.ctx = ctx;
+        mSensorManager = (SensorManager) ctx.getSystemService(Context.SENSOR_SERVICE);
         listeningSensors = new HashSet<String>();
         allListeners = new ConcurrentHashMap<>();
         listeningSensorLoopers = new HashMap<>();
@@ -71,24 +104,20 @@ public class PhoneController {
      * and LATITUDE would only get latitude of the GPS sensor.
      * Any useful app would probably request all three.
      *
-     *
      * @param sensorName
      * @throws SensorNotFound
      * @throws SensorError
      */
-    public void startSensor(String sensorName) throws SensorNotFound, SensorError {
-        if (!PhoneSensors.validSensor(sensorName))
-            throw new SensorNotFound();
+    public void startSensor (String sensorName) throws SensorNotFound, SensorError {
+        if (!PhoneSensors.validSensor(sensorName)) throw new SensorNotFound();
 
-        if (listeningSensors.contains(sensorName))
-            return;
+        if (listeningSensors.contains(sensorName)) return;
 
         if (PhoneSensors.isBroadcastSensor(sensorName)) {
             // Check if it is a valid sensor
             int typeId = PhoneSensors.sensorNameToType(sensorName);
             List<Sensor> allSensorsOfType = mSensorManager.getSensorList(typeId);
-            if (allSensorsOfType == null || allSensorsOfType.size() == 0)
-                throw new SensorError();
+            if (allSensorsOfType == null || allSensorsOfType.size() == 0) throw new SensorError();
             Sensor mSensor = allSensorsOfType.get(0);
             if (mSensor == null) throw new SensorError();
 
@@ -113,13 +142,14 @@ public class PhoneController {
             Handler handler = new Handler(looper);
             listeningSensorHandlingThreads.put(typeId, handlerThread);
             listeningSensorLoopers.put(typeId, looper);
-            mSensorManager.registerListener(listener, mSensor, SensorManager.SENSOR_DELAY_UI, handler);
+            mSensorManager
+                    .registerListener(listener, mSensor, SensorManager.SENSOR_DELAY_UI, handler);
 
         } else if (sensorName.equals(PhoneSensors.GPS)) {
 
-            int permissionGranted = ContextCompat.checkSelfPermission(ctx, Manifest.permission.ACCESS_FINE_LOCATION);
-            if (permissionGranted == PackageManager.PERMISSION_DENIED)
-                throw new SensorError();
+            int permissionGranted = ContextCompat
+                    .checkSelfPermission(ctx, Manifest.permission.ACCESS_FINE_LOCATION);
+            if (permissionGranted == PackageManager.PERMISSION_DENIED) throw new SensorError();
             listeningSensors.add(sensorName);
 
 
@@ -136,34 +166,41 @@ public class PhoneController {
                     mLocationRequest = new LocationRequest();
                     mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
                     mLocationRequest.setInterval(Constants.GPS_INTERVAL);
-                    mFusedLocationClient.requestLocationUpdates(mLocationRequest,
-                            mLocationCallback,
-                            looper);
+                    mFusedLocationClient
+                            .requestLocationUpdates(mLocationRequest, mLocationCallback, looper);
                 } catch (SecurityException se) {
                     Log.e(TAG, "GPS Security Exception.");
-                    dm.broadcastData(
-                            sensorName,
-                            Constants.NO_GPS_PERMISSION_ERROR,
-                            DataMarshal.MessageType.ERROR);
+                    dm.broadcastData(Registry.DevSenToInformation(
+                            new DevSen(PhoneSensors.DEVICE, PhoneSensors.GPS)),
+                                     Constants.NO_GPS_PERMISSION_ERROR,
+                                     DataMarshal.MessageType.ERROR);
                     return;
                 }
 
-                dm.broadcastData(
-                        sensorName,
-                        Constants.GPS_STARTED_STATUS,
-                        DataMarshal.MessageType.STATUS);
+                dm.broadcastData(Registry.DevSenToInformation(
+                        new DevSen(PhoneSensors.DEVICE, PhoneSensors.GPS)),
+                                 Constants.GPS_STARTED_STATUS, DataMarshal.MessageType.STATUS);
             }
         }
     }
 
 
+    /******************************************************************************
+     * ****************************************************************************
+     * SENSOR CALLBACK FUNCTIONS
+     * ****************************************************************************
+     * These receive the data first. Then they send it out
+     * ****************************************************************************
+     * ****************************************************************************/
+
     /**
      * Remove this sensor from {@link #listeningSensors}.
      * Get the type corresponding to this sensor. If all other sensors from this type
      * are also removed, then unregister.
+     *
      * @param sensor
      */
-    public void stopSensor(String sensor) {
+    public void stopSensor (String sensor) {
         listeningSensors.remove(sensor);
         Log.e(TAG, "stopSensor(" + sensor + ")");
         if (PhoneSensors.isBroadcastSensor(sensor)) {
@@ -175,10 +212,8 @@ public class PhoneController {
             Looper looper = listeningSensorLoopers.get(sensorType);
             HandlerThread handlerThread = listeningSensorHandlingThreads.get(sensorType);
 
-            if (looper != null)
-                looper.quitSafely();
-            if (handlerThread != null)
-                handlerThread.quitSafely();
+            if (looper != null) looper.quitSafely();
+            if (handlerThread != null) handlerThread.quitSafely();
             Log.e(TAG, "Unregistering sensor type: " + sensorType);
             allListeners.remove(sensorType);
         } else if (sensor.equals(PhoneSensors.GPS)) {
@@ -195,43 +230,10 @@ public class PhoneController {
         }
     }
 
-
-    /******************************************************************************
-     * ****************************************************************************
-     * SENSOR CALLBACK FUNCTIONS
-     * ****************************************************************************
-     * These receive the data first. Then they send it out
-     * ****************************************************************************
-     * ****************************************************************************/
-
-
     /**
-     * Simple GPS callback
+     * If the sensor couldn't start for whatever reason
      */
-    LocationCallback mLocationCallback = new LocationCallback() {
-        @Override
-        public void onLocationResult(LocationResult locationResult) {
-            for (Location location : locationResult.getLocations()) {
-                double  latitude = location.getLatitude(),
-                        longitude = location.getLongitude(),
-                        speed = location.getSpeed();
-
-                speed *= 2.23694; // Convert to miles per hour
-                long milliseconds = System.currentTimeMillis();
-
-                Log.v(TAG, String.format("Got location. [time,lat,lon] = [%d,%f, %f]", milliseconds, latitude, longitude));
-
-                Float [] data = new Float [] { (float)latitude, (float)longitude, (float)speed };
-
-                dm.broadcastData(
-                            milliseconds,
-                            PhoneSensors.GPS,
-                            data,
-                            DataMarshal.MessageType.DATA);
-            }
-        };
-    };
-
+    public class SensorError extends Exception {}
 
     /**
      * Sensor listener started for some sensor type.
@@ -243,7 +245,10 @@ public class PhoneController {
         String TAG = "PhoneController";
 
         @Override
-        public void onSensorChanged(SensorEvent sensorEvent) {
+        public void onAccuracyChanged (Sensor sensor, int i) { }
+
+        @Override
+        public void onSensorChanged (SensorEvent sensorEvent) {
             // https://stackoverflow.com/questions/5500765/accelerometer-sensorevent-timestamp
             // Timestamp now and subtract out the change in time between timestamp and nanotime of system start
             //long ms = System.currentTimeMillis() + (sensorEvent.timestamp - System.nanoTime())/ 1000000L;
@@ -254,31 +259,22 @@ public class PhoneController {
             String formatted = "";
             int sensorType = sensorEvent.sensor.getType();
             String sensorGroupName = PhoneSensors.typeToSensorName(sensorType);
-            Float [] values = new Float[sensorEvent.values.length];
+            Float[] values = new Float[sensorEvent.values.length];
             for (int i = 0; i < sensorEvent.values.length; i++) {
                 values[i] = sensorEvent.values[i];
             }
 
-            dm.broadcastData(ms,
-                    sensorGroupName,
-                    values,
-                    DataMarshal.MessageType.DATA);
-
+            dm.broadcastData(ms, Registry.DevSenToInformation(
+                    new DevSen(PhoneSensors.DEVICE, sensorGroupName)), values,
+                             DataMarshal.MessageType.DATA);
 
 
         }
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int i) { }
     }
 
     /**
      * If the sensor name is not valid
      */
     public class SensorNotFound extends Exception {}
-
-    /**
-     * If the sensor couldn't start for whatever reason
-     */
-    public class SensorError extends Exception {}
 
 }

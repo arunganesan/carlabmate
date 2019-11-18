@@ -22,20 +22,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import edu.umich.carlab.CLService;
 import edu.umich.carlab.Constants;
 import edu.umich.carlab.Registry;
 import edu.umich.carlab.loadable.Algorithm;
-import edu.umich.carlabui.AppsAdapter;
+
 
 import static edu.umich.carlab.Constants.CARLAB_STATUS;
 import static edu.umich.carlab.Constants.GATEWAY_STATUS;
 import static edu.umich.carlab.Constants.ManualChoiceKey;
 import static edu.umich.carlab.Constants.SESSION;
 import static edu.umich.carlab.Constants._STATUS_MESSAGE;
-import static edu.umich.carlabui.AppsAdapter.AppState.ACTIVE;
+import static edu.umich.carlab.packaged.AppsAdapter.AppState.ACTIVE;
 
 
 public class MainActivity extends AppCompatActivity {

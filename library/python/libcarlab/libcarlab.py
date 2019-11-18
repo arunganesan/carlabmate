@@ -114,7 +114,9 @@ class LinkGatewayService:
         self.required_info = required_info
         self.refers_info = refers_info
         self.output_info = output_info
-        baseurl = 'http://localhost:1234/'
+
+        # XXX weird to harcode this here
+        baseurl = 'http://localhost:3000/'
         self.fetch_url = baseurl + \
             'list?information={info}&session=%s&sincetime={time}' % session
         self.push_url = baseurl + 'add?information={info}&session=%s' % session

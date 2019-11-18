@@ -59,12 +59,12 @@ public class GetLatestTrip extends BroadcastReceiver {
 
         // Get the list of currently uploaded receipts. Only upload ones that weren't successfully
         // uploaded and processed
-        StringRequest myReq = new StringRequest(Request.Method.GET,
-                Constants.LATEST_TRIP_URL + "?uid=" + UID,
-                gotLatestTrip,
-                gotLatestError) {
-        };
+        // StringRequest myReq = new StringRequest(Request.Method.GET,
+        //         Constants.LATEST_TRIP_URL + "?uid=" + UID,
+        //         gotLatestTrip,
+        //         gotLatestError) {
+        // };
 
-        queue.add(myReq);
+        // queue.add(myReq);
     }
 }
