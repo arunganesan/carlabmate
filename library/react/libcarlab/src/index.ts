@@ -72,9 +72,5 @@ export class Libcarlab {
       cache: "no-cache",
       headers: { "Content-type": "application/json" },
       body: dm.toJson()
-    }).then(res => {
-      // Success
-      // await this.storageHandler.clearData(info);
-    });
-  }
+    }).then(res => callback(res));
 }

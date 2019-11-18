@@ -47,6 +47,76 @@ for alg, details in algorithms.items():
 
 
 """
+REACT
+
+SPEC:
+
+    "user-input": {
+        "platform": "react",
+        "functions": {
+            "acceptFuelLevel": { "output": "car-fuel" },
+            "acceptPhoneNumber": {"output": "phone-number"},
+
+            // For now literally just use the car models for which we already have models
+            "acceptCarModel": { "output": "car-model" }
+
+        }
+
+COMPONENT:
+
+
+// ALGORITHM SPECIFIC STATE
+type acceptFuelLevelProps = { 
+  libcarlab: Libcarlab
+};
+
+type acceptFuelLevelState = {
+  fuelLevel: string
+}
+
+
+
+
+export class acceptFuelLevel extends React.Component<acceptFuelLevelProps, acceptFuelLevelState> {
+
+  constructor(props: acceptFuelLevelProps) {
+    super(props);
+
+    this.state = {
+      // This value changes per thing
+      fuelLevel: '',
+    };
+  }
+
+
+  // TODO need to call this on a timer
+  // Also how does this know what the data is?
+  componentDidMount() {
+    this.props.libcarlab.checkNewInfo((data: DataMarshal) => {
+        // TODO -- IF the data matches any of the input, then we need to set the state.
+    });
+  }
+    
+  submitData() {
+    this.props.libcarlab.outputNewInfo(
+      new DataMarshal(
+        Registry.FuelLevel, // XXX algorithm specific
+        this.state.fuelLevel));
+  }
+
+  render() {
+    const { libcarlab } = this.props;
+    // Write code here
+    // Do something to setState() and call submitData
+    // e.g. can be a text box with a submit button
+    return null;
+  }
+}
+
+"""
+
+
+"""
 PYTHON
 
 

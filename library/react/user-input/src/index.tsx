@@ -11,6 +11,9 @@ const style = {
     marginTop: "25px"
   }
 };
+
+
+
 type acceptFuelLevelProps = { 
   libcarlab: Libcarlab
 };
@@ -18,6 +21,9 @@ type acceptFuelLevelProps = {
 type acceptFuelLevelState = {
   fuelLevel: string
 }
+
+
+
 
 export class acceptFuelLevel extends React.Component<acceptFuelLevelProps, acceptFuelLevelState> {
 
@@ -45,12 +51,7 @@ export class acceptFuelLevel extends React.Component<acceptFuelLevelProps, accep
     this.props.libcarlab.outputNewInfo(
       new DataMarshal(
         Registry.FuelLevel,
-        this.state.fuelLevel), 
-      
-        res => {
-          console.log("Response msessage ", res);
-        }
-      );
+        this.state.fuelLevel));
   }
 
   render() {
@@ -65,7 +66,7 @@ export class acceptFuelLevel extends React.Component<acceptFuelLevelProps, accep
         <Form.Control
             type="text"
             value={this.state.fuelLevel}
-            onChange={(evt) =>
+            onChange={(evt: React.ChangeEvent<HTMLInputElement>) =>
               this.setState({
                 fuelLevel: evt.target.value
               })
@@ -87,19 +88,28 @@ export class acceptFuelLevel extends React.Component<acceptFuelLevelProps, accep
 
 
 
-export class acceptPhoneNumber extends React.Component<Props> {
-  render() {
-    const { text } = this.props;
+// type acceptPhoneNumberProps = { 
+//   libcarlab: Libcarlab
+// };
 
-    return <div style={{ color: "blue" }}>Hello {text}</div>;
-  }
-}
+// type acceptPhoneNumberState = {
+//   phoneNumber: string
+// }
 
 
-export class acceptCarModel extends React.Component<Props> {
-  render() {
-    const { text } = this.props;
+// export class acceptPhoneNumber extends React.Component<acceptPhoneNumberProps, acceptPhoneNumberState> {
+//   render() {
+//     const { text } = this.props;
 
-    return <div style={{ color: "blue" }}>Hello {text}</div>;
-  }
-}
+//     return <div style={{ color: "blue" }}>Hello {text}</div>;
+//   }
+// }
+
+
+// export class acceptCarModel extends React.Component<Props> {
+//   render() {
+//     const { text } = this.props;
+
+//     return <div style={{ color: "blue" }}>Hello {text}</div>;
+//   }
+// }
