@@ -26,10 +26,9 @@ export class DataMarshal {
 }
 
 export class Registry {
-  static WorldAlignedAccel = new Information("world-aligned-accel", 0);
-  static WorldAlignedGyro = new Information("world-aligned-gyro", 0);
-  static CarModel = new Information("car-model", "");
+  static CarModel = new Information("car-model", '');
   static PhoneNumber = new Information('phone-number', '');
+  static CarFuel = new Information('car-fuel', 0.0);
 }
 
 export class Libcarlab {
