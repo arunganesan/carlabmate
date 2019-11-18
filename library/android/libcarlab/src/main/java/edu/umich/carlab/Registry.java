@@ -6,6 +6,7 @@ import android.renderscript.Float3;
 
 import java.util.Arrays;
 
+import edu.umich.carlab.sensors.ObdSensors;
 import edu.umich.carlab.sensors.PhoneSensors;
 import edu.umich.carlab.utils.DevSen;
 
@@ -39,6 +40,10 @@ public class Registry {
             new Information("magnetometer", Float3.class, Sensor.TYPE_MAGNETIC_FIELD,
                             Sensor.STRING_TYPE_MAGNETIC_FIELD,
                             new DevSen(PhoneSensors.DEVICE, PhoneSensors.MAGNET));
+    //  "obd-fuel": {"type": "float", "sensor": true}
+    public static Information ObdFuel = new Information("obd-fuel", Float.class, 1, null,
+                                                        new DevSen(ObdSensors.DEVICE,
+                                                                   ObdSensors.FUEL_LEVEL));
     public static Information PhoneNumber = new Information("phone-numner", String.class);
     public static Information VehicleAlignedAccel =
             new Information("vehicle-aligned-accel", Float3.class);
@@ -50,6 +55,28 @@ public class Registry {
             new Information("world-aligned-gyro", Float3.class);
     public static Information WorldPointingRotation =
             new Information("world-pointing-rotation", Float[].class);
+
+    public static String FormatString (DataMarshal.DataObject dataObject) {
+        Information information = dataObject.information;
+        Object value = dataObject.value;
+        String valString = "";
+
+        if (information.dataType.equals(Float3.class)) {
+            Float3 obj = (Float3) value;
+            valString = Arrays.toString(new Float[]{obj.x, obj.y, obj.z});
+        } else if (information.dataType.equals(Float2.class)) {
+            Float2 obj = (Float2) value;
+            valString = Arrays.toString(new Float[]{obj.x, obj.y});
+        } else if (information.dataType.equals(Float.class)) {
+            valString = "" + value;
+        } else if (information.dataType.equals(String.class)) {
+            valString = (String) value;
+        } else if (information.dataType.equals(Float[].class)) {
+            valString = Arrays.toString((Float[]) value);
+        }
+
+        return valString;
+    }
 
     public static class Information {
         public Class<?> dataType;
@@ -75,33 +102,5 @@ public class Registry {
             if (!other.getClass().equals(Information.class)) return false;
             return ((Information) other).name.equals(name);
         }
-    }
-
-
-    public static String FormatString (DataMarshal.DataObject dataObject) {
-        Information information = dataObject.information;
-        Object value = dataObject.value;
-        String valString = "";
-
-        if (information.dataType.equals(Float3.class)) {
-            Float3 obj = (Float3)value;
-            valString = Arrays.toString(new Float[] {
-                    obj.x, obj.y, obj.z
-            });
-        }else if (information.dataType.equals(Float2.class)) {
-            Float2 obj = (Float2)value;
-            valString = Arrays.toString(new Float[] {
-                    obj.x, obj.y
-            });
-        }
-        else if (information.dataType.equals(Float.class)) {
-            valString = "" + value;
-        } else if (information.dataType.equals(String.class)) {
-            valString = (String)value;
-        } else if (information.dataType.equals(Float[].class)) {
-            valString = Arrays.toString((Float[]) value);
-        }
-
-        return valString;
     }
 }

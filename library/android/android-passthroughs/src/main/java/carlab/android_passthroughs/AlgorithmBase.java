@@ -4,12 +4,17 @@ import android.content.Context;
 import android.renderscript.Float2;
 import android.renderscript.Float3;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import edu.umich.carlab.CLDataProvider;
 import edu.umich.carlab.DataMarshal;
 import edu.umich.carlab.Registry;
 import edu.umich.carlab.loadable.Algorithm;
 
 public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm {
+    Map<Registry.Information, Object> latestValues = new HashMap<>();
+
     public static Function getLocation = new Function(
             "getLocation",
             Algorithm.class,
@@ -20,28 +25,28 @@ public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm 
 
     public AlgorithmBase (CLDataProvider cl, Context context) {
         super(cl, context);
-        name = "android-passthrough";
+        name = "android-passthroughs";
     }
 
     @Override
     public void newData (DataMarshal.DataObject dObject) {
         super.newData(dObject);
-        String sensor = dObject.information;
+
+        Registry.Information information = dObject.information;
         if (dObject.dataType != DataMarshal.MessageType.DATA) return;
         if (dObject.value == null) return;
 
-        switch (sensor) {
+        latestValues.put(information, dObject.value);
+
+
+        // Can auto generate this given the definitions
+        if (getLocation.matchesRequired(information) &&
+            getLocation.haveReceivedAllRequiredData(latestValues.keySet())) {
+
+            outputData(
+                    Registry.Location,
+                    getLocation((Float3) latestValues.get(Registry.GPS)));
         }
-
-
-        /*
-        Need to go from the JSON description of the IO of this algorithm to the following functions
-         */
-
-        /*
-        TODO Need to only call the function IF it is statically loaded in this invocation
-         */
-        // Actually call values
     }
 
     public abstract Float2 getLocation (Float3 gps);

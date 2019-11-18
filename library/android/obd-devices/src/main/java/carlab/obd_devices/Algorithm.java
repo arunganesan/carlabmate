@@ -10,8 +10,8 @@ public class Algorithm extends AlgorithmBase {
     }
 
     @Override
-    public Float readFuelLevel () {
-        return 0.0f;
+    public Float readFuelLevel (Float obdFuel) {
+        return obdFuel;
     }
 
 }

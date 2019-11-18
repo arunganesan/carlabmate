@@ -13,6 +13,8 @@ import edu.umich.carlab.loadable.Algorithm;
 
 
 public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm {
+    Map<Registry.Information, Object> latestValues = new HashMap<>();
+
     public static Function produceGravityAlignedGyro =
             new Function("produceWorldAlignedAccel", Algorithm.class, Registry.GravityAlignedGyro,
                          Registry.Gravity, Registry.Gyro);
@@ -34,6 +36,7 @@ public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm 
             new Function("produceWorldPointingRotation", Algorithm.class,
                          Registry.WorldPointingRotation, Registry.Gravity, Registry.Magnetometer);
 
+    
 
     public AlgorithmBase (CLDataProvider cl, Context context) {
         super(cl, context);
@@ -47,8 +50,6 @@ public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm 
         if (dObject.dataType != DataMarshal.MessageType.DATA) return;
         if (dObject.value == null) return;
 
-
-        Map<Registry.Information, Object> latestValues = new HashMap<>();
         latestValues.put(information, dObject.value);
 
 
