@@ -3,7 +3,7 @@
 import jsmin, json, pprint
 from termcolor import cprint
 
-datatype_mapping = {
+java_datatype_mapping = {
     'float[2]': 'Float2',
     'float': 'Float',
     'int': 'Integer',
@@ -11,6 +11,17 @@ datatype_mapping = {
     'float[3]': 'Float3',
     'string': 'String',
 }
+
+
+python_datatype_mapping = {
+    'float[2]': 'Tuple[float, float]',
+    'float': 'float',
+    'int': 'int',
+    'float[9]': 'List[float]',
+    'float[3]': 'Tuple[float, float, float]',
+    'string': 'str',
+}
+
 
 def transform_variable_name (name):
     parts = name.split('-')
@@ -35,9 +46,61 @@ for alg, details in algorithms.items():
             ), 'grey')
 
 
+"""
+PYTHON
+
+
+SPEC
+
+    "map-match": {
+        "platform": "python",
+        "functions": {
+            "mapmatch": {
+                "input": ["location"],
+                "output": "map-mached-location"
+            }
+        }
+    },
+
+
+FUNC DEF
+ self.mapmatch_function = AlgorithmFunction(
+                    "mapmatch",
+                    AlgorithmImpl,
+                    Registry.MapMatchedLocation, 
+                    [Registry.Location])
+
+
+
+IVOKCATION
+    if self.mapmatch_function.matches_required(dobj.info) and self.mapmatch_function.have_received_all_required_data(self.latest_values.keys()):
+            retval = self.mapmatch(Registry.Location.datatype(dobj.value))
+            if retval is not None:
+                return_values.append(DataMarshal(
+                    Registry.MapMatchedLocation,
+                    retval
+                ))
+            
+        return return_values
+    
+
+STUB:
+
+# Split into 2 files if it makes it cleaner 
+class AlgorithmImpl (AlgorithmBase):
+    def __init__ (self):
+        super(AlgorithmImpl, self).__init__()
+
+    def mapmatch (self, location: Registry.Location.datatype) -> Registry.MapMatchedLocation.datatype:
+        # TODO implement
+        return None
 
 """
 
+
+
+"""
+JAVA
 "produceWorldPointingRotation": {
                 "output": "world-pointing-rotation", 
                 "input": ["gravity", "magnetometer"] 

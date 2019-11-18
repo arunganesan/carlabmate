@@ -83,7 +83,6 @@ class Registry:
     GearModelFile = Information('gear-model-file', str)
     Sighting = Information('sighting', Tuple[float, Tuple[int, int]])
     SightingsMap = Information('sightings-map', Any)
-    UserText = Information('user-text', str)
 
 
 """

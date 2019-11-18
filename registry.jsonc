@@ -20,6 +20,7 @@
     "car-model": {"type": "string" }, // Car model might also be an enum
 
     "phone-number": {"type": "string"},
+    "user-text": {"type": "string"},
 
     // Ubi related
     "sighting": {"type": "float,location", "description": "time, lat, lng"}, // whoa, wait, this can include other data types.........

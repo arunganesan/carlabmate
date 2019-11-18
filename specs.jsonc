@@ -70,7 +70,7 @@
     "text-input": {
         "platform": "python",
         "functions": {
-            "accept_fuel_level": { "output": "car-fuel" }
+            "accept_fuel_level": { "output": "car-fuel", "input": ["user-text"], "uses": ["phone-number"] }
         }
     },
 
