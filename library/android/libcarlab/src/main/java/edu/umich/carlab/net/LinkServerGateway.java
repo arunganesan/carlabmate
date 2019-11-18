@@ -42,6 +42,7 @@ import edu.umich.carlab.io.MultipartUtility;
 import edu.umich.carlab.utils.Utilities;
 
 import static edu.umich.carlab.Constants.GATEWAY_STATUS;
+import static edu.umich.carlab.Constants.UPLOAD_URL;
 import static edu.umich.carlab.Constants._STATUS_MESSAGE;
 
 
@@ -59,7 +60,6 @@ public class LinkServerGateway extends Service {
     SharedPreferences prefs;
     final String FILE_INFO_MAPPING = "saved file info mapping";
 
-    final String UPLOAD_URL = "http://35.3.71.19:3000/packet/upload?information=%s&session=%s";
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -101,7 +101,7 @@ public class LinkServerGateway extends Service {
         // TODO When new info comes in, we need to call DataMarshal's "broadcast new data"
         // Or directly call CLService.newData()
         DataMarshal dm = new DataMarshal(null);
-        dm.broadcastData("info", "value");
+        // dm.broadcastData("info", "value");
         return null;
 
     }
@@ -115,10 +115,10 @@ public class LinkServerGateway extends Service {
         synchronized (allData) {
             if (!allData.containsKey(data.information))
                 allData.put(
-                        data.information,
+                        data.information.name,
                         new ArrayList<DataMarshal.DataObject>());
 
-            allData.get(data.information).add(data);
+            allData.get(data.information.name).add(data);
         }
     }
 

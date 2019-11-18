@@ -66,8 +66,6 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver appStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive (Context context, Intent intent) {
-            //activeApps = prefs.getStringSet(Constants.ACTIVE_APPS_KEY, new HashSet<String>());
-
             String infoname = intent.getStringExtra("information");
 
             if (infoFunctionIndexMapping == null) return;

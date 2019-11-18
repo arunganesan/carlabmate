@@ -22,11 +22,9 @@ import edu.umich.carlab.Constants;
 import edu.umich.carlab.utils.Utilities;
 
 import static android.preference.PreferenceManager.getDefaultSharedPreferences;
-
-// http://localhost:3000/login?username=arunganesan&password=super
+import static edu.umich.carlab.Constants.LOGINURL;
 
 public class Login extends AppCompatActivity {
-    final String LOGINURL = "http://35.3.71.19:3000/login?username=%s&password=%s";
     Button loginButton;
     Response.ErrorListener loginRequestError = new Response.ErrorListener() {
         @Override

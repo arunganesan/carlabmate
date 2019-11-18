@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.List;
+import java.util.Set;
 
 import edu.umich.carlab.Registry;
 
@@ -21,9 +22,9 @@ public class AppsAdapter extends BaseAdapter {
 
     static public class AppModel {
         public String name;
-        public List<Registry.Information> inputInformation;
+        public Set<Registry.Information> inputInformation;
         public AppState state;
-        public AppModel(String name, List<Registry.Information> ii, AppState state) {
+        public AppModel(String name, Set<Registry.Information> ii, AppState state) {
             inputInformation = ii;
             this.name = name;
             this.state = state;
