@@ -11,8 +11,8 @@
             <option value="$PROJECT_DIR$/../../algorithms/watchfon/watchfone" />
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/../../helpers/libraries/carlab/carlabui" />
-            <option value="$PROJECT_DIR$/../../helpers/libraries/carlab/libcarlab" />
+            <option value="$PROJECT_DIR$/../../libraries/android-carlab/carlabui" />
+            <option value="$PROJECT_DIR$/../../libraries/android-carlab/libcarlab" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
