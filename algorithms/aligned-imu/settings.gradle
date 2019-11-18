@@ -1,5 +1,0 @@
-include ':aligned-imu', ':sandbox', ':libcarlab', ':carlabui'
-rootProject.name='Aligned IMU'
-
-project(':libcarlab').projectDir = new File(settingsDir, '../../helpers/libraries/carlab/libcarlab')
-project(':carlabui').projectDir = new File(settingsDir, '../../helpers/libraries/carlab/carlabui')
