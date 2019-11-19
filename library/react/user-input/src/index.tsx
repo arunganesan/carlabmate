@@ -1,6 +1,5 @@
 import * as React from "react";
 import { Button, Container, Form } from "react-bootstrap";
-import { Libcarlab, DataMarshal, Registry } from 'libcarlab';
 import "bootstrap/dist/css/bootstrap.css";
 
 const style = {
@@ -15,7 +14,7 @@ const style = {
 
 
 type acceptFuelLevelProps = { 
-  libcarlab: Libcarlab
+  produce: Function
 };
 
 type acceptFuelLevelState = {
@@ -37,25 +36,13 @@ export class acceptFuelLevel extends React.Component<acceptFuelLevelProps, accep
   }
 
 
-  // TODO need to call this on a timer
-  // Also how does this know what the data is?
-  componentDidMount() {
-    this.props.libcarlab.checkNewInfo((data: DataMarshal) => {
-      console.log("Got info ", data.info, "with data", data.value);
-    });
-  }
-
-
   submitData() {
     console.log('Sending ', this.state.fuelLevel);
-    this.props.libcarlab.outputNewInfo(
-      new DataMarshal(
-        Registry.FuelLevel,
-        this.state.fuelLevel));
+    
   }
 
   render() {
-    const { libcarlab } = this.props;
+    const { produce } = this.props;
 
 
     return (
@@ -75,7 +62,7 @@ export class acceptFuelLevel extends React.Component<acceptFuelLevelProps, accep
        
        
         <Button
-          onClick={() => this.submitData()}
+          onClick={() => produce(this.state.fuelLevel)}
           style={style.button}
           size="lg"
         >
@@ -113,3 +100,69 @@ export class acceptFuelLevel extends React.Component<acceptFuelLevelProps, accep
 //     return <div style={{ color: "blue" }}>Hello {text}</div>;
 //   }
 // }
+const carmodels = [
+  "Abarth",
+  "Alfa Romeo",
+  "Aston Martin",
+  "Audi",
+  "Bentley",
+  "BMW",
+  "Bugatti",
+  "Cadillac",
+  "Chevrolet",
+  "Chrysler",
+  "Citroën",
+  "Dacia",
+  "Daewoo",
+  "Daihatsu",
+  "Dodge",
+  "Donkervoort",
+  "DS",
+  "Ferrari",
+  "Fiat",
+  "Fisker",
+  "Ford",
+  "Honda",
+  "Hummer",
+  "Hyundai",
+  "Infiniti",
+  "Iveco",
+  "Jaguar",
+  "Jeep",
+  "Kia",
+  "KTM",
+  "Lada",
+  "Lamborghini",
+  "Lancia",
+  "Land Rover",
+  "Landwind",
+  "Lexus",
+  "Lotus",
+  "Maserati",
+  "Maybach",
+  "Mazda",
+  "McLaren",
+  "Mercedes-Benz",
+  "MG",
+  "Mini",
+  "Mitsubishi",
+  "Morgan",
+  "Nissan",
+  "Opel",
+  "Peugeot",
+  "Porsche",
+  "Renault",
+  "Rolls-Royce",
+  "Rover",
+  "Saab",
+  "Seat",
+  "Skoda",
+  "Smart",
+  "SsangYong",
+  "Subaru",
+  "Suzuki",
+  "Tesla",
+  "Toyota",
+  "Volkswagen",
+  "Volvo"
+];

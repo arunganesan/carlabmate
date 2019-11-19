@@ -1,33 +1,24 @@
 import React from "react";
 import "./App.css";
-import InputCarModel from "./InputCarModel/Algorithm";
-import InputPhoneNumber from './InputPhoneNumber/Algorithm';
 import { Nav, NavItem, Navbar, Button } from "react-bootstrap";
 import { Modal, Container, Row, Form, Col } from "react-bootstrap";
 
-import ExampleComponent from 'user-input';
+import { acceptFuelLevel as AcceptFuelLevel } from "user-input";
 
 import "bootstrap/dist/css/bootstrap.css";
-import {
-  Libcarlab,
-  Information,
-  DataMarshal,
-  Registry
-} from "./Libcarlab";
+import { Libcarlab, Information, DataMarshal, Registry } from "libcarlab";
 
 type AppState = {
   message: string;
   session: string | null;
   showLoginForm: boolean;
-  test: boolean;
   required_info: Information[];
-  outputSensors: string[];
   username: string;
   password: string;
 };
 
 class App extends React.Component<{}, AppState> {
-  carlab: Libcarlab;
+  libcarlab: Libcarlab;
 
   constructor(props: any) {
     super(props);
@@ -38,31 +29,38 @@ class App extends React.Component<{}, AppState> {
 
     let sessionLocal = null;
     if (sessionString != null) sessionLocal = JSON.parse(sessionString);
-    else 
+    else
       sessionLocal = {
-        'session': null,
-        'username': ''
-      }
+        session: null,
+        username: ""
+      };
     this.state = {
       message: "",
-      test: props.test === undefined ? false : props.test,
       required_info: [],
-      outputSensors: ["car-model"],
-      showLoginForm: sessionLocal['session'] == null,
-      session: sessionLocal['session'],
-      username: sessionLocal['username'],
+      showLoginForm: sessionLocal["session"] == null,
+      session: sessionLocal["session"],
+      username: sessionLocal["username"],
       password: ""
     };
 
-    this.carlab = new Libcarlab(this.state.session, this.state.required_info);
+    this.libcarlab = new Libcarlab(
+      this.state.session,
+      this.state.required_info
+    );
+  }
 
-    // Go through all algorithms, get their required list of sensors
-    // Instatiate them as objects, can render them later
-    // Login page. That's the main thing TBH
+  // TODO need to call this on a timer
+  // TODO ONCE we get the relevant data, we just have to set the state,
+  // and that'll automatically propagate to the components
+  // And this is already initialized with the required info, so it should happen quite automatically...
+  componentDidMount() {
+    this.libcarlab.checkNewInfo((data: DataMarshal) => {
+      // console.log("Got info ", data.info, "with data", data.value);
+    });
   }
 
   tryLoggingIn() {
-    let loginurl = `http://localhost:1234/login?username=${this.state.username}&password=${this.state.password}`;
+    let loginurl = `http://localhost:3000/login?username=${this.state.username}&password=${this.state.password}`;
     fetch(loginurl, {
       method: "post",
       mode: "cors",
@@ -71,13 +69,10 @@ class App extends React.Component<{}, AppState> {
     })
       .then(res => res.json())
       .then(data => {
-        window.localStorage.setItem(
-          "localSession",
-          JSON.stringify(data)
-        );
+        window.localStorage.setItem("localSession", JSON.stringify(data));
         this.setState({
-          session: data['session'],
-          username: data['username'],
+          session: data["session"],
+          username: data["username"],
           showLoginForm: false
         });
       })
@@ -177,9 +172,13 @@ class App extends React.Component<{}, AppState> {
         </Row>
 
         {this.state.session != null && [
-          <InputCarModel libcarlab={this.carlab} />,
-          <InputPhoneNumber libcarlab={this.carlab} />,
-          <ExampleComponent text="Test" />
+          <AcceptFuelLevel
+            produce={(fuelLevel: Number) => {
+              this.libcarlab.outputNewInfo(
+                new DataMarshal(Registry.FuelLevel, fuelLevel)
+              );
+            }}
+          />
         ]}
       </Container>
     );

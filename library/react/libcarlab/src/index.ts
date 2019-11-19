@@ -63,7 +63,7 @@ export class Libcarlab {
     this.lastCheckTime = Math.round(new Date().getTime() / 1000);
   }
 
-  outputNewInfo(dm: DataMarshal) {
+  outputNewInfo(dm: DataMarshal, callback: Function) {
     // XXX this should fail
     console.log('Push url is: ', this.pushUrl(dm.info.name))
     fetch(this.pushUrl(dm.info.name), {
@@ -73,4 +73,5 @@ export class Libcarlab {
       headers: { "Content-type": "application/json" },
       body: dm.toJson()
     }).then(res => callback(res));
+  }
 }
