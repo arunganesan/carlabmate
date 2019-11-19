@@ -109,6 +109,10 @@ class PacketController < ApplicationController
         
         if user.blank?
             head :invalid
+            puts 'No user found for session', session
+            User.all.each do | u |
+              puts u.to_json
+            end
             return
         end
 
@@ -140,9 +144,10 @@ class PacketController < ApplicationController
             return
         end
 
-        render :json => Packet.where('received > :sincetime AND person_id = :person_id AND information_id = :information_id', {
+      
+        render :json => Packet.where('received > :sincetime AND user_id = :user_id AND information_id = :information_id', {
                 sincetime: DateTime.strptime(params[:sincetime], '%s'),
-                person_id: params[:person],
+                user_id: user.id,
                 information_id: information.id,
             })
     end

@@ -5,7 +5,6 @@ package edu.umich.carlab;
  */
 
 public class Constants {
-    public static final String BLACKLIST_APPS_KEY = "blacklist apps keys";
     public static final String BLUETOOTH_CONN_FAILED = "BluetoothConnFailed";
     public static final String BT_FAILED = "bluetooth failed";
     public static final int CARLAB_NOTIFICATION_ID = 0x818;
@@ -47,7 +46,6 @@ public class Constants {
     public static final String SESSION = "session id";
     public final static float STARTING_STATUS = 3;
     public static final String Session_State_Key = "session state key";
-    public static final int TAG_CODE_PERMISSION_LOCATION = 777;
     public static final String TRIGGER_BT_SEARCH = "TriggerBTSearch";
     public static final String Trip_Id_Offset = "trip id offset";
     public static final String UPLOAD_URL =

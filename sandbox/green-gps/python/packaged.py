@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-from libcarlab.libcarlab import AlgorithmFunction, Algorithm, Information, LinkGatewayService, Registry
+from libcarlab.libcarlab import AlgorithmFunction, Algorithm, Information, LinkGatewayService, Registry, DataMarshal
 from termcolor import cprint
 
 import argparse
@@ -92,7 +92,7 @@ def main():
     for info in required_info:
         storage.setdefault(info, None)
 
-    for info, value in gateway.initialize_state():
+    for info, value in gateway.initialize_state().items():
         storage[info] = value
 
     while True:
@@ -103,22 +103,29 @@ def main():
             #     len(value)
             # ))
             storage[info] = value
-
+        
+        new_storage = {}
         for info, values in storage.items():
             if info in multiplex_routing:
                 for alg in multiplex_routing[info]:
-                    output_values = alg.add_new_data(info, values)
+                    dm = DataMarshal(info, value)
+                    output_values = alg.add_new_data(dm)
                     for output in output_values:
                         if output is None:
                             continue
-                        storage.setdefault(output.info, [])
-                        storage[output.info] = output.value
+                        new_storage.setdefault(output.info, [])
+                        new_storage[output.info] = output.value
 
                 # TODO need to throw it away once consumed
-
+        
+ 
+        for info, values in new_storage.items():
+            storage.setdefault(info, [])
+            storage[info] += values
+        
         for info, value in storage.items():
             gateway.output_new_info(info, value)
-
+       
         gateway.upload_data()
 
         time.sleep(1)

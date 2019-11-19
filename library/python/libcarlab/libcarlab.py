@@ -154,6 +154,7 @@ class LinkGatewayService:
             results = requests.get(url)
             new_data[info] = results.json()
         self.last_check_time = calendar.timegm(time.gmtime())
+
         return new_data
 
     def output_new_info(self, info, value):

@@ -22,6 +22,7 @@ class UsersController < ApplicationController
         user = User.find_by(username: username, password: password)
         if user.blank?
             head :unauthorized
+            puts 'Invalid username and password'
             return 
         end
 
