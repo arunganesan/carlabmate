@@ -1,0 +1,19 @@
+{
+    "required information": [
+        "location",
+        "map-matched-location",
+        "car-fuel"
+    ],
+    "available platforms": [
+        "android",
+        "python",
+        "react"
+    ],
+    "exclude information": [
+        "accel"
+    ],
+
+    "force algorithms": [
+        { "algorithm": "user-input", "function": "acceptPhoneNumber" }
+    ]
+}

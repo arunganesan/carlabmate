@@ -1,39 +1,8 @@
-{
-  "algorithms": [
-    { "algorithm": "watchfon", "information": "car-steering", "save": true },
-    { "algorithm": "watchfon", "information": "car-speed" },
-    { "algorithm": "???", "information": "car-model" },
-
-    { "algorithm": "aligned-imu", "information": "world-aligned-gyro" },
-    { "algorithm": "aligned-imu", "information": "world-aligned-accel" },
-    { "algorithm": "aligned-imu", "information": "rotation" },
-
-    { "algorithm": "android-raw-sensors", "information": "gravity"},
-    { "algorithm": "android-raw-sensors", "information": "magnetometer"},
-    { "algorithm": "android-raw-sensors", "information": "gyro"},
-    { "algorithm": "android-raw-sensors", "information": "accel"},
-    { "algorithm": "android-raw-sensors", "information": "location"}
-  ],
-  "wiring": [
-    { "algorithm": 0, "inputs": [1, 3, 2] },
-    { "algorithm": 1, "inputs": [10, 4] },
-    { "algorithm": 3, "inputs": [8, 5] },
-    { "algorithm": 4, "inputs": [9, 5] },
-    { "algorithm": 5, "inputs": [6, 7] }
-  ]
-}
-
-
-
-{
-  "algorithms": [
-    { "algorithm": "aligned-imu", "information": "world-aligned-gyro", "save": true },
-    { "algorithm": "aligned-imu", "information": "world-aligned-accel", "save": true },
-    { "algorithm": "aligned-imu", "information": "rotation" },
-
-
-    # certain algorithms use the raw sensors
-    # that is inherent to the algorithm
-    # aligned IMU needs Gyro, which is a raw sensor.
-  ],
-}
+[
+  { "algorithm": "android-passthroughs", "function": "getLocation" },
+  { "algorithm": "map-match", "function": "mapmatch" },
+  { "algorithm": "obd-devices", "function": "readFuelLevel" },
+  { "algorithm": "user-input", "function": "acceptFuelLevel" },
+  { "algorithm": "text-input", "function": "accept_fuel_level" },
+  { "algorithm": "user-input", "function": "acceptPhoneNumber" }
+]
