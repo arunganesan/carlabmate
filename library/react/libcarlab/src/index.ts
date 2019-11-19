@@ -29,6 +29,7 @@ export class Registry {
   static CarModel = new Information("car-model", '');
   static PhoneNumber = new Information('phone-number', '');
   static CarFuel = new Information('car-fuel', 0.0);
+  static Location = new Information('location', 0.0);
 }
 
 export class Libcarlab {
@@ -44,7 +45,7 @@ export class Libcarlab {
     this.session = session;
     this.requiredInfo = requiredInfo;
 
-    this.baseUrl = "http://localhost:1234/packet/";
+    this.baseUrl = "http://localhost:3000/packet/";
     this.fetchUrl = info =>
       `${this.baseUrl}list?information=${info}&session=${this.session}&sincetime=${this.lastCheckTime}`;
     this.pushUrl = info =>

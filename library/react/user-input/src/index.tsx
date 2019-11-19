@@ -47,7 +47,7 @@ export class acceptFuelLevel extends React.Component<acceptFuelLevelProps, accep
 
     return (
       <Container>
-        <Form.Label style={style.input}>Save phone number</Form.Label>
+        <Form.Label style={style.input}>Enter fuel level</Form.Label>
           
           
         <Form.Control
