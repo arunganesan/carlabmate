@@ -22,7 +22,7 @@ public class DataMarshal {
     }
 
 
-    public void broadcastData(long timestamp, Registry.Information information, Serializable value, MessageType dataType) {
+    public void broadcastData(long timestamp, Registry.Information information, Object value, MessageType dataType) {
         DataObject d = new DataObject();
         d.time = timestamp;
         d.information = information;
@@ -32,13 +32,13 @@ public class DataMarshal {
     }
 
     // Overloaded helper function
-    public void broadcastData(Registry.Information information, Serializable value, MessageType dataType) {
+    public void broadcastData(Registry.Information information, Object value, MessageType dataType) {
         //Double seconds = (new Double(System.currentTimeMillis())) / 1e+3;
         long seconds = System.currentTimeMillis();
         broadcastData(seconds, information, value, dataType);
     }
 
-    public void broadcastData(Registry.Information information, Serializable value) {
+    public void broadcastData(Registry.Information information, Object value) {
         //Double seconds = (new Double(System.currentTimeMillis())) / 1e+3;
         long seconds = System.currentTimeMillis();
         broadcastData(seconds, information, value, MessageType.DATA);

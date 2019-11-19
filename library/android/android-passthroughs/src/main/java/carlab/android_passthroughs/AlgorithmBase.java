@@ -10,7 +10,6 @@ import java.util.Map;
 import edu.umich.carlab.CLDataProvider;
 import edu.umich.carlab.DataMarshal;
 import edu.umich.carlab.Registry;
-import edu.umich.carlab.loadable.Algorithm;
 
 public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm {
     Map<Registry.Information, Object> latestValues = new HashMap<>();

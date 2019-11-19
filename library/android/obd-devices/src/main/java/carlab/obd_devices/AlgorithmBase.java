@@ -1,7 +1,6 @@
 package carlab.obd_devices;
 
 import android.content.Context;
-import android.renderscript.Float3;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,8 +8,6 @@ import java.util.Map;
 import edu.umich.carlab.CLDataProvider;
 import edu.umich.carlab.DataMarshal;
 import edu.umich.carlab.Registry;
-import edu.umich.carlab.loadable.Algorithm;
-import edu.umich.carlab.sensors.PhoneSensors;
 
 public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm {
     Map<Registry.Information, Object> latestValues = new HashMap<>();

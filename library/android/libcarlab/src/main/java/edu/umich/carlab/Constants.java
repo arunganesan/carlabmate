@@ -46,6 +46,7 @@ public class Constants {
     public static final String SESSION = "session id";
     public final static float STARTING_STATUS = 3;
     public static final String Session_State_Key = "session state key";
+    public static final int TAG_CODE_PERMISSION_LOCATION = 777;
     public static final String TRIGGER_BT_SEARCH = "TriggerBTSearch";
     public static final String Trip_Id_Offset = "trip id offset";
     public static final String UPLOAD_URL =

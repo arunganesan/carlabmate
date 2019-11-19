@@ -11,6 +11,7 @@ import android.location.Location;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.renderscript.Float3;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
@@ -72,8 +73,7 @@ public class PhoneController {
                 Log.v(TAG, String.format("Got location. [time,lat,lon] = [%d,%f, %f]", milliseconds,
                                          latitude, longitude));
 
-                Float[] data = new Float[]{(float) latitude, (float) longitude, (float) speed};
-
+                Float3 data = new Float3((float)latitude, (float)longitude, (float)speed);
                 dm.broadcastData(milliseconds, Registry.DevSenToInformation(
                         new DevSen(PhoneSensors.DEVICE, PhoneSensors.GPS)), data,
                                  DataMarshal.MessageType.DATA);

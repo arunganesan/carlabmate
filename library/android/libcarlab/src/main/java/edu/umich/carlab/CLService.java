@@ -134,9 +134,9 @@ public class CLService extends Service implements CLDataProvider {
         if (!dataMultiplexing.containsKey(infoname))
             dataMultiplexing.put(infoname, new HashSet<String>());
         dataMultiplexing.get(infoname).add(algclass.getName());
+
+        String algname = algclass.getName();
         lastDataUpdate.get(algclass.getName()).put(infoname, 0L);
-
-
     }
 
     /**

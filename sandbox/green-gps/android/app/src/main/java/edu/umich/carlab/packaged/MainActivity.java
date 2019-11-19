@@ -1,5 +1,6 @@
 package edu.umich.carlab.packaged;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -7,9 +8,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -118,7 +122,36 @@ public class MainActivity extends AppCompatActivity {
         algorithmsGridView.setAdapter(appsAdapter);
         initializedGrid = true;
     }
+    /**
+     * Function to get permission for location
+     * Ideally this happens in PhoneSensors where the GPS sensor is turned on
+     * But, since we need an Activity handle, this might be the most reasonable place to do it for now
+     * https://developer.android.com/training/permissions/requesting.html#java
+     */
+    void checkAndRequestLocPermission() {
+        // Here, thisActivity is the current activity
+        if ((ContextCompat.checkSelfPermission(MainActivity.this,
+                                               Manifest.permission.ACCESS_FINE_LOCATION)
+             != PackageManager.PERMISSION_GRANTED)
 
+            ||
+
+            (ContextCompat.checkSelfPermission(MainActivity.this,
+                                               Manifest.permission.ACCESS_COARSE_LOCATION)
+             != PackageManager.PERMISSION_GRANTED)) {
+
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+                                                                     Manifest.permission.ACCESS_FINE_LOCATION)) {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(MainActivity.this,
+                                                  new String[]{
+                                                          Manifest.permission.ACCESS_FINE_LOCATION,
+                                                          Manifest.permission.ACCESS_COARSE_LOCATION
+                                                  },
+                                                  edu.umich.carlab.Constants.TAG_CODE_PERMISSION_LOCATION);
+            }
+        }
+    }
     @Override
     protected void onCreate (Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -126,6 +159,8 @@ public class MainActivity extends AppCompatActivity {
         wireUI();
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefs.edit().putInt(Constants.Session_State_Key, 1).apply();
+
+        checkAndRequestLocPermission();
     }
 
     @Override
