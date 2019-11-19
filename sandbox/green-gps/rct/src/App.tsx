@@ -175,7 +175,8 @@ class App extends React.Component<{}, AppState> {
           <AcceptFuelLevel
             produce={(fuelLevel: Number) => {
               this.libcarlab.outputNewInfo(
-                new DataMarshal(Registry.FuelLevel, fuelLevel)
+                new DataMarshal(Registry.CarFuel, fuelLevel), 
+                () => {}
               );
             }}
           />
