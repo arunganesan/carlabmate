@@ -6,7 +6,7 @@ import { Modal, Container, Row, Form, Col } from "react-bootstrap";
 import { acceptFuelLevel as AcceptFuelLevel } from "user-input";
 
 import "bootstrap/dist/css/bootstrap.css";
-import { Libcarlab, Information, DataMarshal, Registry } from "libcarlab";
+import { Libcarlab, Information, DataMarshal, Registry } from 'libcarlab';
 
 type AppState = {
   message: string;
