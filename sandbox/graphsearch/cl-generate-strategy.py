@@ -322,7 +322,7 @@ def main():
         if node[0] == 'impl':
             alg, func = node[1].split('/')
             strategy.append({ 'algorithm': alg, 'function': func})
-    pprint(strategy)
+    print(json.dumps(strategy))
         
     if args.plot:
         draw_network(

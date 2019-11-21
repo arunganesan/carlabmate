@@ -11,9 +11,5 @@
     ],
     "exclude information": [
         "accel"
-    ],
-
-    "force algorithms": [
-        { "algorithm": "user-input", "function": "acceptPhoneNumber" }
     ]
 }
