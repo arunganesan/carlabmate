@@ -9,12 +9,12 @@
 
             "produceWorldAlignedGyro": {
                 "output": "world-aligned-gyro", 
-                "input": ["gyro", "rotation"] 
+                "input": ["gyro", "world-pointing-rotation"] 
             },
 
             "produceWorldAlignedAccel": {
                 "output": "world-aligned-accel", 
-                "input": ["accel", "rotation"] 
+                "input": ["accel", "world-pointing-rotation"] 
             },
 
             "produceVehicleAlignedAccel": {
@@ -41,7 +41,7 @@
         "functions": {
             "mapmatch": {
                 "input": ["location"],
-                "output": "map-mached-location"
+                "output": "map-matched-location"
             }
         }
     },
@@ -106,7 +106,7 @@
         "functions": {
             "get_gear_model_file": {
                 "uses": ["car-model"],
-                "output": ["gear-model-file"]
+                "output": "gear-model-file"
             }
         }
     },
@@ -117,11 +117,11 @@
             "acceptSightingReport": {
                 "input": ["location"],
                 "output": "sighting"
-            },
-
-            "showWarning": {
-                "uses": ["sightings-map"]
             }
+
+            // "showWarning": {
+            //     "uses": ["sightings-map"]
+            // }
         }
     },
 
