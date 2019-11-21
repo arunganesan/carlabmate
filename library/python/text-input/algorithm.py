@@ -38,8 +38,8 @@ class AlgorithmImpl (AlgorithmBase):
     def __init__ (self):
         super(AlgorithmImpl, self).__init__()
 
-    def accept_fuel_level (self, user_tet: Registry.UserText.datatype) -> Registry.CarFuel.datatype:
-        # TODO implement
+    def accept_fuel_level (self, user_text: Registry.UserText.datatype) -> Registry.CarFuel.datatype:
+        print("GOT FUEL LEVEL FOR USERTEXT", user_text.value)
         return None
 
 
