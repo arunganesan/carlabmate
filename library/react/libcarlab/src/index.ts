@@ -37,19 +37,25 @@ export class Libcarlab {
   session: string | null;
   requiredInfo: Information[];
   baseUrl: string;
+  portno: number;
   pushUrl: (arg: string) => string;
   fetchUrl: (arg: string) => string;
+  registerUrl: (arg: string) => string;
+  
 
   constructor(session: string | null, requiredInfo: Information[]) {
     this.lastCheckTime = Math.round(new Date().getTime() / 1000);
     this.session = session;
     this.requiredInfo = requiredInfo;
+    this.portno = 3000;
 
-    this.baseUrl = "http://localhost:3000/packet/";
+    this.baseUrl = `http://localhost:${this.portno}/packet/`;
     this.fetchUrl = info =>
       `${this.baseUrl}list?information=${info}&session=${this.session}&sincetime=${this.lastCheckTime}`;
     this.pushUrl = info =>
       `${this.baseUrl}upload?information=${info}&session=${this.session}`;
+
+    this.registerUrl = phoneno => `http://localhost:1234/texting/register_phone?session=${this.session}&number=${phoneno}&serverport=${this.portno}`;
   }
 
 
@@ -65,7 +71,12 @@ export class Libcarlab {
   }
 
   outputNewInfo(dm: DataMarshal, callback: Function) {
-    // XXX this should fail
+    if (dm.info == Registry.PhoneNumber) {
+      alert('Received phone number!');
+      this.registerPhoneNumber(dm.message);
+    }
+
+
     console.log('Push url is: ', this.pushUrl(dm.info.name))
     fetch(this.pushUrl(dm.info.name), {
       method: "post",
@@ -74,5 +85,15 @@ export class Libcarlab {
       headers: { "Content-type": "application/json" },
       body: dm.toJson()
     }).then(res => callback(res));
+  }
+
+
+  registerPhoneNumber (phoneno: string) {
+    fetch(this.registerUrl(phoneno), {
+      method: 'get',
+      mode: 'cors',
+      cache: 'no-cache',
+      headers: {'content-type': 'application/json'}
+    });
   }
 }

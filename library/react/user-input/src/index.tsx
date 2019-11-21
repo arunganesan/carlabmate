@@ -36,11 +36,6 @@ export class acceptFuelLevel extends React.Component<acceptFuelLevelProps, accep
   }
 
 
-  submitData() {
-    console.log('Sending ', this.state.fuelLevel);
-    
-  }
-
   render() {
     const { produce } = this.props;
 
@@ -75,22 +70,57 @@ export class acceptFuelLevel extends React.Component<acceptFuelLevelProps, accep
 
 
 
-// type acceptPhoneNumberProps = { 
-//   libcarlab: Libcarlab
-// };
+type acceptPhoneNumberProps = { 
+  produce: Function
+};
 
-// type acceptPhoneNumberState = {
-//   phoneNumber: string
-// }
+type acceptPhoneNumberState = {
+  phoneNumber: string
+}
 
 
-// export class acceptPhoneNumber extends React.Component<acceptPhoneNumberProps, acceptPhoneNumberState> {
-//   render() {
-//     const { text } = this.props;
+export class acceptPhoneNumber extends React.Component<acceptPhoneNumberProps, acceptPhoneNumberState> {
 
-//     return <div style={{ color: "blue" }}>Hello {text}</div>;
-//   }
-// }
+  constructor(props: acceptPhoneNumberProps) {
+    super(props);
+
+    this.state = {
+      // This value changes per thing
+      phoneNumber: '',
+    };
+  }
+
+  render() {
+    const { produce } = this.props;
+
+
+    return (
+      <Container>
+        <Form.Label style={style.input}>Enter phone number</Form.Label>
+          
+          
+        <Form.Control
+            type="text"
+            value={this.state.phoneNumber}
+            onChange={(evt: React.ChangeEvent<HTMLInputElement>) =>
+              this.setState({
+                phoneNumber: evt.target.value
+              })
+            }
+          />
+       
+       
+        <Button
+          onClick={() => produce(this.state.phoneNumber)}
+          style={style.button}
+          size="lg"
+        >
+          Submit
+        </Button>
+      </Container>
+    );
+  }
+}
 
 
 // export class acceptCarModel extends React.Component<Props> {
