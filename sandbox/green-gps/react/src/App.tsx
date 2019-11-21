@@ -4,6 +4,7 @@ import { Nav, NavItem, Navbar, Button } from "react-bootstrap";
 import { Modal, Container, Row, Form, Col } from "react-bootstrap";
 
 import { acceptFuelLevel as AcceptFuelLevel } from "user-input";
+import { acceptPhoneNumber as AcceptPhoneNumber } from "user-input";
 
 import "bootstrap/dist/css/bootstrap.css";
 import { Libcarlab, Information, DataMarshal, Registry } from 'libcarlab';
@@ -176,6 +177,16 @@ class App extends React.Component<{}, AppState> {
             produce={(fuelLevel: Number) => {
               this.libcarlab.outputNewInfo(
                 new DataMarshal(Registry.CarFuel, fuelLevel), 
+                () => {}
+              );
+            }}
+          />
+
+
+          <AcceptPhoneNumber
+            produce={(phoneNumber: Number) => {
+              this.libcarlab.outputNewInfo(
+                new DataMarshal(Registry.PhoneNumber, phoneNumber), 
                 () => {}
               );
             }}
