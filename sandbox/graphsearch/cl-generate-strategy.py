@@ -7,6 +7,7 @@ from pprint import pprint
 from typing import *
 from termcolor import cprint
 
+import argparse
 import json
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -15,7 +16,6 @@ import os
 
 REGISTRY = 'registry.jsonc'
 SPECS = 'specs.jsonc'
-REQUIREMENTS = 'requirements.jsonc'
 
 
 ODIR = 'images'
@@ -180,25 +180,8 @@ def solve_graph (
     blacklist_info:List[Information]=[], 
     exclusive: Dict[Information, Algorithm]={}, 
     limit_rounds=np.inf):
-    # exclusive[info] = implementation. 
-    #   this means IF we need that requirement to solve this graph
-    #   then we force use that implementation over others 
     
-    """
-    Our goal is to find the smallest sub-graph subject to:
-        * Required: Must contain required information nodes
-        * Blacklisted: We may have restrictions on which nodes are available (blacklist some information, blacklist some devices) but none of those are required
-        * Conditional exclusion: If a certain information is required, we may have a specific implementation that we require
-    """
-
-    # still it's a bit tricky how we pick an implementation given 
-    # for now, I think we can just pick all possible implementations
-
-    # information
-    # implementations
-    # return a set of nodes/edges
     all_nodes = []
-
     required_info = []
     required_impl = []
 
@@ -225,9 +208,6 @@ def solve_graph (
                     if impl not in required_impl and impl not in new_required_impl:
                         if impl.platform in platforms:
                             new_required_impl.append(impl)
-                        else:
-                            # none of the devices are available
-                            continue
 
             
         for impl in _next_required_impl:
@@ -240,13 +220,6 @@ def solve_graph (
         if round > limit_rounds:
             break
     
-    print(required_info, required_impl)
-    
-    # initialize set of information
-    # get all implementations for information set
-    # get their required information
-    # loop until we don't add any more to info or impl sets
-
     return [n.node() for n in required_info + required_impl]
 
 
@@ -266,7 +239,6 @@ def draw_network(selected_nodes, filename, information, algorithms):
         positioning, label_positioning, 
         highlighted, 1)
     
-    # remaining['edges'] = []
     _draw_helper(
         dg, 
         positioning, label_positioning, 
@@ -287,12 +259,16 @@ def draw_network(selected_nodes, filename, information, algorithms):
     plt.draw()
     plt.savefig(filename)
 
-    
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--plot', action='store_true')
+    parser.add_argument('requirements')
+    args = parser.parse_args()
+
     registry = json.loads(jsmin(open(REGISTRY, 'r').read()))
     specs = json.loads(jsmin(open(SPECS, 'r').read()))
-    requirements = json.loads(jsmin(open(REQUIREMENTS, 'r').read()))
+    requirements = json.loads(jsmin(open(args.requirements, 'r').read()))
 
     # 1. Create dependency graph out of registry (aka informations) and specs (aka algorithms)
     indexed_information: Dict[str, Information] = {
@@ -329,16 +305,6 @@ def main():
             indexed_functions[algfn] = alg
             outputinfo.implemented_by.append(alg)
 
-
-    cprint('Information', 'magenta')
-    for n in indexed_information.keys():
-        cprint('\t{}'.format(n), 'cyan')
-    
-    cprint('Algorithms', 'magenta')
-    for n in indexed_functions.keys():
-        cprint('\t{}'.format(n), 'cyan')
-
-
     # 2. Use requirements to try and find a suitable algorithm
     required_information = []
     for infoname in requirements['required information']:
@@ -351,18 +317,19 @@ def main():
         blacklisted_information.append(indexed_information[infoname])
 
     selected_nodes = solve_graph(required_information, platforms, blacklisted_information)
-    # for info in indexed_information.values():
-    #     if 'fuel' in info.name:
-    #         selected_nodes.append(info.node())
-    
-    # for alg in indexed_functions.values():
-    #     selected_nodes.append(alg.node())
-
-    draw_network(
-        selected_nodes, 
-        '{}/full-graph.png'.format(ODIR), 
-        indexed_information.values(), 
-        indexed_functions.values())
+    strategy = []
+    for node in selected_nodes:
+        if node[0] == 'impl':
+            alg, func = node[1].split('/')
+            strategy.append({ 'algorithm': alg, 'function': func})
+    pprint(strategy)
+        
+    if args.plot:
+        draw_network(
+            selected_nodes, 
+            '{}/full-graph.png'.format(ODIR), 
+            indexed_information.values(), 
+            indexed_functions.values())
 
 
 
