@@ -31,6 +31,13 @@
                 android:enabled="true"
                 android:exported="false" />
 
+
+        <service
+            android:name="edu.umich.carlab.net.ActivityRecogService"
+            android:enabled="true"
+            android:exported="false" />
+
+
         <service
                 android:name="edu.umich.carlab.net.LinkServerGateway"
                 android:enabled="true"

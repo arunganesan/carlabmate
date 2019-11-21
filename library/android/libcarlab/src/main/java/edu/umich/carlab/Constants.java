@@ -31,6 +31,11 @@ public class Constants {
     public static final String MASTER_SWITCH_ON = "MasterSwitchON";
     public static final String Main_Activity = "this main activity";
     public static final String ManualChoiceKey = "Manual Button State";
+
+    public static final String Last_Activity_Update = "Last_Activity_Update";
+    public static final String Last_Time_In_Vehicle = "Last_Time_In_Vehicle";
+
+
     /**
      * Return value codes
      **/
