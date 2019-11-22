@@ -1,0 +1,15 @@
+{
+    "required": [
+        "location",
+        "map-matched-location",
+        "car-fuel"
+    ],
+    "platforms": [
+        "android",
+        "python",
+        "react"
+    ],
+    "exclude": [
+        "accel"
+    ]
+}

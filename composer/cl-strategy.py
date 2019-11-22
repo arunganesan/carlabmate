@@ -307,13 +307,13 @@ def main():
 
     # 2. Use requirements to try and find a suitable algorithm
     required_information = []
-    for infoname in requirements['required information']:
+    for infoname in requirements['required']:
         required_information.append(indexed_information[infoname])
     
-    platforms = requirements['available platforms']
+    platforms = requirements['platforms']
 
     blacklisted_information = []
-    for infoname in requirements['exclude information']:
+    for infoname in requirements['exclude']:
         blacklisted_information.append(indexed_information[infoname])
 
     selected_nodes = solve_graph(required_information, platforms, blacklisted_information)
@@ -322,7 +322,9 @@ def main():
         if node[0] == 'impl':
             alg, func = node[1].split('/')
             strategy.append({ 'algorithm': alg, 'function': func})
-    print(json.dumps(strategy))
+    
+    pprint(strategy)
+    #pprint(json.dumps(strategy))
         
     if args.plot:
         draw_network(
