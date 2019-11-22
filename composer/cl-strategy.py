@@ -244,8 +244,8 @@ def solve_graph (
         if i not in all_output_info:
             cprint('Unable to satisfy -> {}'.format(i), 'red')
     
-    if passed:
-        cprint('Satisfied requirements', 'green')
+    # if passed:
+        # cprint('Satisfied requirements', 'green')
     
     return [n.node() for n in required_info + required_impl]
 
@@ -356,8 +356,8 @@ def main():
             alg, func = node[1].split('/')
             strategy.append({ 'algorithm': alg, 'function': func})
     
-    pprint(strategy)
-    #pprint(json.dumps(strategy))
+    # pprint(strategy)
+    print(json.dumps(strategy))
         
     if args.plot:
         draw_network(

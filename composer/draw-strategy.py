@@ -31,41 +31,45 @@ def main():
     strategy = json.loads(jsmin(open(args.strategy, 'r').read()))
 
     all_nodes = {}
+    output_used_by = {}
+
     for algfunc in strategy:
         algname = algfunc['algorithm']
         platform = specs[algname]['platform']
         fname = algfunc['function']
+        nodename = '{}/{}'.format(algname, fname)
 
         expanded_func = {}
         funcspec = specs[algname]['functions'][fname]
         
         if 'output' in funcspec:
-            expanded_func['output'] = {funcspec['output']: registry[funcspec['output']]}
+            expanded_func['output'] = funcspec['output']
         
         if 'input' in funcspec:
             expanded_func['input'] = {
                     i: registry[i] for i in funcspec['input']}
+            for i in funcspec['input']:
+                output_used_by.setdefault(i, [])
+                output_used_by[i].append(nodename)
         
-        all_nodes['{}/{}'.format(algname, fname)] = expanded_func
-    
-    
-    # 1. create the nodes
-    # 2. connect the nodes
-    # 3. done LOL
+        
+        all_nodes[nodename] = expanded_func
 
-    dot = Digraph(comment='The Round Table')
-
+    dot = Digraph(comment='....')
+    
     for fname, _ in all_nodes.items():
         dot.node(fname, fname)
     
+    for fname, fdetails in all_nodes.items():
+        if 'output' in fdetails:
+            outinfo = fdetails['output']
+            if outinfo in output_used_by:
+                for f2 in output_used_by[outinfo]:
+                    dot.edge(fname, f2)
     
-    for _f in all_nodes.keys():
-        for _f2 in all_nodes.keys():
-            dot.edge(_f, _f2)
-    
-    dot.render('{}/round-table.gv'.format(ODIR), view=False) 
+    basename = os.path.basename(args.strategy)
+    basename, _ = os.path.splitext(basename)
+    dot.render('{}/{}.gv'.format(ODIR, basename), view=True) 
 
-    
-    
 if __name__ == '__main__':
     main()

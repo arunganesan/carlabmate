@@ -4,7 +4,7 @@
     "exclude": [],
     "choices": {
         // "car-fuel": "text-input/accept_fuel_level"
-        "car-fuel": "user-input/acceptFuelLevel"
-        // "car-fuel": "obd-devices/readFuelLevel"
+        // "car-fuel": "user-input/acceptFuelLevel"
+        "car-fuel": "obd-devices/readFuelLevel"
     }
 }

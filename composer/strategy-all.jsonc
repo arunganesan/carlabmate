@@ -1,0 +1,1 @@
+[{"algorithm": "android-passthroughs", "function": "getLocation"}, {"algorithm": "map-match", "function": "mapmatch"}, {"algorithm": "user-input", "function": "acceptFuelLevel"}, {"algorithm": "obd-devices", "function": "readFuelLevel"}, {"algorithm": "text-input", "function": "accept_fuel_level"}, {"algorithm": "user-input", "function": "acceptPhoneNumber"}]
