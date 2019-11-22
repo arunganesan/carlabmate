@@ -4,22 +4,8 @@ import pickle
 import requests
 import time
 from typing import *
+from .registry import *
 
-
-
-class Information:
-    def __init__(self, name, datatype):
-        self.name = name
-        self.datatype = datatype
-
-    def __hash__(self):
-        return hash(self.name)
-
-    def __eq__(self, other):
-        return (
-            self.__class__ == other.__class__ and
-            self.name == other.name
-        )
 
 
 class DataMarshal:
@@ -72,18 +58,6 @@ class AlgorithmFunction:
                 return False
         
         return True
-
-# Registry
-class Registry:
-    PhoneNumber = Information('phone-number', str)
-    Location = Information('location', Tuple[int, int])
-    MapMatchedLocation = Information('map-matched-location', Tuple[str, float])
-    CarFuel = Information('car-fuel', float)
-    CarModel = Information('car-model', str)
-    GearModelFile = Information('gear-model-file', str)
-    Sighting = Information('sighting', Tuple[float, Tuple[int, int]])
-    SightingsMap = Information('sightings-map', Any)
-    UserText = Information('user-text', str)
 
 
 """

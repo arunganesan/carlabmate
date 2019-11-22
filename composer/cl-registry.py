@@ -36,7 +36,7 @@ def write_for_language(platform, infoname, details):
         'android': ['accel', 'gps', 'gravity', 'gyro', 'magnetometer', 'obd-fuel']
     }
 
-    if infoname in special_sensors[platform]:
+    if platform in special_sensors and infoname in special_sensors[platform]:
         if platform == 'android':
             sensor_type = {
                 'accel': 'Sensor.TYPE_ACCELEROMETER',
@@ -165,7 +165,43 @@ public class Registry {
 """
 
 
+PYTHON_TEMPLATE = """
+from typing import *
+
+class Information:
+    def __init__(self, name, datatype):
+        self.name = name
+        self.datatype = datatype
+
+    def __hash__(self):
+        return hash(self.name)
+
+    def __eq__(self, other):
+        return (
+            self.__class__ == other.__class__ and
+            self.name == other.name
+        )
+
+
+# Registry
+class Registry:
+    %s
+"""
+
 JAVA_ENTRY = 'public static Information {formatted_name} = new Information("{infoname}", {datatype}.class);'
+PYTHON_ENTRY = "{formatted_name} = Information('{infoname}', {datatype})"
+
+    # PhoneNumber = Information('phone-number', str)
+    # Location = Information('location', Tuple[int, int])
+    # MapMatchedLocation = Information('map-matched-location', Tuple[str, float])
+    # CarFuel = Information('car-fuel', float)
+    # CarModel = Information('car-model', str)
+    # GearModelFile = Information('gear-model-file', str)
+    # Sighting = Information('sighting', Tuple[float, Tuple[int, int]])
+    # SightingsMap = Information('sightings-map', Any)
+    # UserText = Information('user-text', str)
+
+
 
 java_datatype_mapping = {
     'float[2]': 'Float2',
@@ -199,12 +235,16 @@ def android_transform_variable_name(name):
     return ''.join([p.capitalize() for p in parts])
 
 
+
 ENTRIES = {
-    'android': JAVA_ENTRY
+    'android': JAVA_ENTRY,
+    'python': PYTHON_ENTRY,
+
 }
 
 TEMPLATES = {
     'android': ANDROID_TEMPLATE,
+    'python': PYTHON_TEMPLATE
 }
 
 DATATYPE_MAPPING = {
@@ -214,6 +254,7 @@ DATATYPE_MAPPING = {
 
 VARIABLE_TRANSFORMATIONS = {
     'android': android_transform_variable_name,
+    'python': android_transform_variable_name,
 }
 
 if __name__ == '__main__':

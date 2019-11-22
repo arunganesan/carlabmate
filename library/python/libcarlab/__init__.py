@@ -1,1 +1,3 @@
-from  . import libcarlab
+from . import registry
+from . import libcarlab
+
