@@ -4,10 +4,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
+import java.util.Arrays;
+
 import edu.umich.carlab.Constants;
+import edu.umich.carlab.Registry;
+import edu.umich.carlab.Strategy;
 
 
 public class PackageCLService extends edu.umich.carlab.CLService {
+
     public static void turnOffCarLab (Context context) {
         Intent intent = new Intent(context, PackageCLService.class);
         intent.setAction(Constants.MASTER_SWITCH_OFF);
@@ -15,9 +20,6 @@ public class PackageCLService extends edu.umich.carlab.CLService {
     }
 
     public static void turnOnCarLab (Context context) {
-        // This means we havent' connected in a while.
-        // And this re-establishment isn't due to a temporary break
-        // And we just connected to the actual OBD device
         Intent intent = new Intent(context, PackageCLService.class);
         intent.setAction(Constants.MASTER_SWITCH_ON);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -30,5 +32,13 @@ public class PackageCLService extends edu.umich.carlab.CLService {
     @Override
     protected void loadRequirements () {
         strategy = new PackageStrategy();
+    }
+
+    public class PackageStrategy extends Strategy {
+        public PackageStrategy () {
+            loadedAlgorithms = Arrays.asList(carlab.android_passthroughs.Algorithm.class, carlab.obd_devices.Algorithm.class);
+            loadedFunctions = Arrays.asList(carlab.android_passthroughs.Algorithm.getLocation, carlab.obd_devices.Algorithm.readFuelLevel);
+            saveInformation = Arrays.asList(Registry.Location, Registry.CarFuel);
+        }
     }
 }

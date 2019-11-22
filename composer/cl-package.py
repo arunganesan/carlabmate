@@ -78,12 +78,51 @@ def perform_per_platform_linking (platform, func_per_algorithms):
     for react:
         we need to add the module to packages.json
         then an npm install should suffice
+
+    for python:
+        symbolically link the module but replace '-' with '_'
+    
+    for android:
+        add to settings.gradle
+        import into build.gradle
+        gradle build
     """
 
 def write_code_for_android (func_per_algorithms):
-    return 'TODO android'
+    loaded_algorithms = []
+    loaded_functions = []
+    to_save_information = []
+
+    for alg, functions in func_per_algorithms.items():
+        Alg = alg.replace('-', '_')
+        AlgCls = 'carlab.{}.Algorithm'.format(Alg)
+
+        loaded_algorithms.append('{}.class'.format(AlgCls))
+
+        
+        for funcname, funcdetails in functions.items():
+            Output = list(funcdetails['output'].keys())[0]
+            Output = transform_variable_name(Output)
+            loaded_functions.append('{}.{}'.format(AlgCls, funcname))
+            to_save_information.append('Registry.{}'.format(Output))
+    
+    return JAVA_PACKAGE_CODE % (
+        ', '.join(loaded_algorithms),
+        ', '.join(loaded_functions),
+        ', '.join(to_save_information)
+    ) 
 
 
+"""
+1: Loaded algorithms
+carlab.android_passthroughs.Algorithm.class, carlab.obd_devices.Algorithm.class
+
+2: Loaded functions 
+carlab.android_passthroughs.Algorithm.getLocation, carlab.obd_devices.Algorithm.readFuelLevel
+
+3: Information to save (right now - MAYBE everything. We can fine tune it as needed)
+Registry.Location, Registry.CarFuel
+"""
 
 
 def write_code_for_python (func_per_algorithms):
@@ -344,8 +383,58 @@ class App extends React.Component<{}, AppState> {
 }
 
 export default App;
-
 """
+
+
+
+
+JAVA_PACKAGE_CODE = """package edu.umich.carlab.packaged;
+
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
+
+import java.util.Arrays;
+
+import edu.umich.carlab.Constants;
+import edu.umich.carlab.Registry;
+import edu.umich.carlab.Strategy;
+
+
+public class PackageCLService extends edu.umich.carlab.CLService {
+
+    public static void turnOffCarLab (Context context) {
+        Intent intent = new Intent(context, PackageCLService.class);
+        intent.setAction(Constants.MASTER_SWITCH_OFF);
+        context.startService(intent);
+    }
+
+    public static void turnOnCarLab (Context context) {
+        Intent intent = new Intent(context, PackageCLService.class);
+        intent.setAction(Constants.MASTER_SWITCH_ON);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(intent);
+        } else {
+            context.startService(intent);
+        }
+    }
+
+    @Override
+    protected void loadRequirements () {
+        strategy = new PackageStrategy();
+    }
+
+    public class PackageStrategy extends Strategy {
+        public PackageStrategy () {
+            loadedAlgorithms = Arrays.asList(%s);
+            loadedFunctions = Arrays.asList(%s);
+            saveInformation = Arrays.asList(%s);
+        }
+    }
+}
+"""
+
+
 
 PYTHON_PACKAGE_CODE = """#! /usr/bin/env python3.7
 from libcarlab.libcarlab import AlgorithmFunction, Algorithm, Information, LinkGatewayService, Registry, DataMarshal
@@ -460,6 +549,13 @@ def main():
 if __name__ == '__main__':
     main()
 """
+
+
+
+
+
+
+
 
 
 
