@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-from libcarlab import *
+from libcarlab.libcarlab import *
 from termcolor import cprint
 import os, json
 
@@ -39,7 +39,7 @@ class AlgorithmImpl (AlgorithmBase):
         super(AlgorithmImpl, self).__init__()
 
     def accept_fuel_level (self, user_text: Registry.UserText.datatype) -> Registry.CarFuel.datatype:
-        print("GOT FUEL LEVEL FOR USERTEXT", user_text.value)
+        print("GOT FUEL LEVEL FOR USERTEXT", user_text)
         return None
 
 

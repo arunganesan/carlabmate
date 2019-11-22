@@ -90,7 +90,7 @@ class LinkGatewayService:
         self.output_info = output_info
 
         # XXX weird to harcode this here
-        baseurl = 'http://localhost:3000/'
+        baseurl = 'http://localhost:8080/'
         self.fetch_url = baseurl + \
             'list?information={info}&session=%s&sincetime={time}' % session
         self.push_url = baseurl + 'add?information={info}&session=%s' % session

@@ -78,10 +78,9 @@ export class Libcarlab {
 
   registerPhoneNumber (phoneno: string) {
     fetch(this.registerUrl(phoneno), {
-      method: 'get',
+      method: 'post',
       mode: 'cors',
       cache: 'no-cache',
-      headers: {'content-type': 'application/json'}
     });
   }
 }

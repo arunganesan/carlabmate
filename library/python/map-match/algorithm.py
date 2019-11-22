@@ -88,8 +88,8 @@ def find_incline_using_api(filename, lat, lng):
             parsed = json.loads(response)
 
             if parsed['status'] != 'OK':
-                print 'Error with elevation result'
-                print parsed
+                cprint('Error with elevation result', 'white', 'on_red')
+                print(parsed)
                 exit(1)
             all_results = parsed['results']
             elevation = [result['elevation'] for result in all_results]

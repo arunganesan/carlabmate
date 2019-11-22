@@ -22,7 +22,7 @@ loaded_functions: List[AlgorithmFunction] = [
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--session', default='dd2a4372516dab38535282070785853f')
+    parser.add_argument('--session', default='6068c667d402578ea20a31a809667d98')
     args = parser.parse_args()
     
     LOCALFILE = '{}.db'.format(args.session)
@@ -88,13 +88,14 @@ def main():
         for info, values in storage.items():
             if info in multiplex_routing:
                 for alg in multiplex_routing[info]:
-                    dm = DataMarshal(info, value)
-                    output_values = alg.add_new_data(dm)
-                    for output in output_values:
-                        if output is None:
-                            continue
-                        new_storage.setdefault(output.info, [])
-                        new_storage[output.info] = output.value
+                    if len(value) > 0:
+                        dm = DataMarshal(info, value)
+                        output_values = alg.add_new_data(dm)
+                        for output in output_values:
+                            if output is None:
+                                continue
+                            new_storage.setdefault(output.info, [])
+                            new_storage[output.info] = output.value
 
                 # TODO need to throw it away once consumed
         
