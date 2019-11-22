@@ -23,8 +23,8 @@
     "user-text": {"type": "string"},
 
     // Ubi related
-    "sighting": {"type": "float,location", "description": "time, lat, lng"}, // whoa, wait, this can include other data types.........
-    "sightings-map": {"type": "sighting[]" }, // list of sightings. Indeterminate length of array
+    "sighting": {"type": "float[3]", "description": "time, lat, lng"}, 
+    "sightings-map": {"type": "list[float[3]]" }, // list of sightings. Indeterminate length of array
     
     // Raw sensors
     "gps": {"type": "float[3]", "sensor": true},

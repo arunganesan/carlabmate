@@ -1,3 +1,4 @@
+
 package edu.umich.carlab;
 
 import android.hardware.Sensor;
@@ -12,50 +13,30 @@ import edu.umich.carlab.sensors.PhoneSensors;
 import edu.umich.carlab.utils.DevSen;
 
 public class Registry {
-    public static Information Accel =
-            new Information("accel", Float3.class, Sensor.TYPE_ACCELEROMETER,
-                            Sensor.STRING_TYPE_ACCELEROMETER,
-                            new DevSen(PhoneSensors.DEVICE, PhoneSensors.ACCEL));
-    public static Information CarFuel = new Information("car-fuel", Float.class);
-    public static Information CarGear = new Information("car-gear", Float.class);
-    public static Information CarModel = new Information("car-model", String.class);
-    public static Information CarSpeed = new Information("car-speed", Float.class);
-    public static Information CarSteering = new Information("car-steering", Float.class);
-    public static Information GPS = new Information("gps", Float.class, 1, null,
-                                                    new DevSen(PhoneSensors.DEVICE,
-                                                               PhoneSensors.GPS));
-    public static Information GearModelFile = new Information("gear-model-file", String.class);
-    public static Information Gravity =
-            new Information("gravity", Float3.class, Sensor.TYPE_GRAVITY,
-                            Sensor.STRING_TYPE_GRAVITY,
-                            new DevSen(PhoneSensors.DEVICE, PhoneSensors.GRAVITY));
-    public static Information GravityAlignedGyro =
-            new Information("gravity-aligned-gyro", Float.class);
-    public static Information Gyro = new Information("gyro", Float3.class, Sensor.TYPE_GYROSCOPE,
-                                                     Sensor.STRING_TYPE_GYROSCOPE,
-                                                     new DevSen(PhoneSensors.DEVICE,
-                                                                PhoneSensors.GYRO));
-    // "map-matched-location": {"type": "string,float", "description": "Road name, percentage into road"},
+    public static Information MapMatchedLocation = new Information("map-matched-location", Pair.class);
     public static Information Location = new Information("location", Float2.class);
-    public static Information Magnetometer =
-            new Information("magnetometer", Float3.class, Sensor.TYPE_MAGNETIC_FIELD,
-                            Sensor.STRING_TYPE_MAGNETIC_FIELD,
-                            new DevSen(PhoneSensors.DEVICE, PhoneSensors.MAGNET));
-    //  "obd-fuel": {"type": "float", "sensor": true}
-    public static Information ObdFuel = new Information("obd-fuel", Float.class, 1, null,
-                                                        new DevSen(ObdSensors.DEVICE,
-                                                                   ObdSensors.FUEL_LEVEL));
-    public static Information PhoneNumber = new Information("phone-numner", String.class);
-    public static Information VehicleAlignedAccel =
-            new Information("vehicle-aligned-accel", Float3.class);
-    public static Information VehiclePointingRotation =
-            new Information("vehicle-pointing-rotation", Float[].class);
-    public static Information WorldAlignedAccel =
-            new Information("world-aligned-accel", Float3.class);
-    public static Information WorldAlignedGyro =
-            new Information("world-aligned-gyro", Float3.class);
-    public static Information WorldPointingRotation =
-            new Information("world-pointing-rotation", Float[].class);
+    public static Information CarSpeed = new Information("car-speed", Float.class);
+    public static Information CarGear = new Information("car-gear", Integer.class);
+    public static Information CarFuel = new Information("car-fuel", Float.class);
+    public static Information CarSteering = new Information("car-steering", Float.class);
+    public static Information VehiclePointingRotation = new Information("vehicle-pointing-rotation", Float[].class);
+    public static Information WorldPointingRotation = new Information("world-pointing-rotation", Float[].class);
+    public static Information VehicleAlignedAccel = new Information("vehicle-aligned-accel", Float3.class);
+    public static Information WorldAlignedAccel = new Information("world-aligned-accel", Float3.class);
+    public static Information WorldAlignedGyro = new Information("world-aligned-gyro", Float3.class);
+    public static Information GravityAlignedGyro = new Information("gravity-aligned-gyro", Float.class);
+    public static Information GearModelFile = new Information("gear-model-file", String.class);
+    public static Information CarModel = new Information("car-model", String.class);
+    public static Information PhoneNumber = new Information("phone-number", String.class);
+    public static Information UserText = new Information("user-text", String.class);
+    public static Information Sighting = new Information("sighting", Float3.class);
+    public static Information SightingsMap = new Information("sightings-map", List<Float[]>.class);
+    public static Information GPS = new Information("gps", Float3.class, 1, null, new DevSen(PhoneSensors.DEVICE, PhoneSensors.GPS));
+    public static Information Accel = new Information("accel", Float3.class, Sensor.TYPE_ACCELEROMETER, Sensor.STRING_TYPE_ACCELEROMETER, new DevSen(PhoneSensors.DEVICE, PhoneSensors.ACCEL));
+    public static Information Magnetometer = new Information("magnetometer", Float3.class, Sensor.TYPE_MAGNETIC_FIELD, Sensor.STRING_TYPE_MAGNETIC_FIELD, new DevSen(PhoneSensors.DEVICE, PhoneSensors.MAGNET));
+    public static Information Gyro = new Information("gyro", Float3.class, Sensor.TYPE_GYROSCOPE, Sensor.STRING_TYPE_GYROSCOPE, new DevSen(PhoneSensors.DEVICE, PhoneSensors.GYRO));
+    public static Information Gravity = new Information("gravity", Float3.class, Sensor.TYPE_GRAVITY, Sensor.STRING_TYPE_GRAVITY, new DevSen(PhoneSensors.DEVICE, PhoneSensors.GRAVITY));
+    public static Information ObdFuel = new Information("obd-fuel", Float.class, 1, null, new DevSen(ObdSensors.DEVICE, ObdSensors.FUEL_LEVEL));
 
     public static String FormatString (DataMarshal.DataObject dataObject) {
         Information information = dataObject.information;
@@ -79,7 +60,6 @@ public class Registry {
         return valString;
     }
 
-
     public static Information DevSenToInformation(DevSen devSen) {
         if (devSen.device.equals(PhoneSensors.DEVICE)) {
             if (devSen.sensor.equals(PhoneSensors.MAGNET)) return Magnetometer;
@@ -93,6 +73,9 @@ public class Registry {
 
         return null;
     }
+
+
+
 
     public static class Information {
         public Class<?> dataType;
@@ -120,3 +103,4 @@ public class Registry {
         }
     }
 }
+
