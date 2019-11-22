@@ -20,6 +20,7 @@ ODIR = 'images'
 if not os.path.exists(ODIR):
     os.makedirs(ODIR)
 
+lowlevel = ['gps', 'obd-fuel', 'user-text', 'accel', 'magnetometer', 'gravity', 'gyro']
 
 def main():
     parser = argparse.ArgumentParser()
@@ -45,12 +46,22 @@ def main():
         if 'output' in funcspec:
             expanded_func['output'] = funcspec['output']
         
+        all_input = []
+
         if 'input' in funcspec:
-            expanded_func['input'] = {
-                    i: registry[i] for i in funcspec['input']}
-            for i in funcspec['input']:
-                output_used_by.setdefault(i, [])
-                output_used_by[i].append(nodename)
+            all_input += funcspec['input']
+        
+        if 'uses' in funcspec:
+            all_input += funcspec['uses']
+        
+        for i in all_input:
+            output_used_by.setdefault(i, [])
+            output_used_by[i].append(nodename)
+
+            if i in lowlevel:
+                all_nodes[i] = {
+                    'output': i
+                }
         
         
         all_nodes[nodename] = expanded_func
