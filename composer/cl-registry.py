@@ -87,6 +87,7 @@ import android.hardware.Sensor;
 import android.provider.ContactsContract;
 import android.renderscript.Float2;
 import android.renderscript.Float3;
+import android.util.Pair;
 
 import java.util.Arrays;
 
@@ -210,18 +211,6 @@ export class Registry {
 JAVA_ENTRY = 'public static Information {formatted_name} = new Information("{infoname}", {datatype}.class);'
 PYTHON_ENTRY = "{formatted_name} = Information('{infoname}', {datatype})"
 REACT_ENTRY = "static {formatted_name} = new Information('{infoname}', {datatype})"
-
-    # PhoneNumber = Information('phone-number', str)
-    # Location = Information('location', Tuple[int, int])
-    # MapMatchedLocation = Information('map-matched-location', Tuple[str, float])
-    # CarFuel = Information('car-fuel', float)
-    # CarModel = Information('car-model', str)
-    # GearModelFile = Information('gear-model-file', str)
-    # Sighting = Information('sighting', Tuple[float, Tuple[int, int]])
-    # SightingsMap = Information('sightings-map', Any)
-    # UserText = Information('user-text', str)
-
-
 
 java_datatype_mapping = {
     'float[2]': 'Float2',
