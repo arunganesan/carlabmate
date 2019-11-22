@@ -2,12 +2,12 @@ import React from "react";
 import "./App.css";
 import { Nav, NavItem, Navbar, Button } from "react-bootstrap";
 import { Modal, Container, Row, Form, Col } from "react-bootstrap";
+import { Libcarlab, Information, DataMarshal, Registry } from "libcarlab";
+
+import "bootstrap/dist/css/bootstrap.css";
 
 import { acceptFuelLevel as AcceptFuelLevel } from "user-input";
 import { acceptPhoneNumber as AcceptPhoneNumber } from "user-input";
-
-import "bootstrap/dist/css/bootstrap.css";
-import { Libcarlab, Information, DataMarshal, Registry } from 'libcarlab';
 
 type AppState = {
   message: string;
@@ -151,7 +151,7 @@ class App extends React.Component<{}, AppState> {
         <>
           Logged in as {this.state.username}
           <Button
-            style={{marginLeft: 10}}
+            style={{ marginLeft: 10 }}
             onClick={() =>
               this.setState({
                 session: null
@@ -167,7 +167,7 @@ class App extends React.Component<{}, AppState> {
 
   render() {
     return (
-      <Container style={{paddingTop: 25}}>
+      <Container style={{ paddingTop: 25 }}>
         {this.state.showLoginForm && this.generateLoginForm()}
         <Row>
           <Col>{this.showLoginInfo()}</Col>
@@ -177,7 +177,7 @@ class App extends React.Component<{}, AppState> {
           <AcceptFuelLevel
             produce={(fuelLevel: Number) => {
               this.libcarlab.outputNewInfo(
-                new DataMarshal(Registry.CarFuel, fuelLevel), 
+                new DataMarshal(Registry.CarFuel, fuelLevel),
                 () => {}
               );
             }}
@@ -186,7 +186,7 @@ class App extends React.Component<{}, AppState> {
           <AcceptPhoneNumber
             produce={(phoneNumber: Number) => {
               this.libcarlab.outputNewInfo(
-                new DataMarshal(Registry.PhoneNumber, phoneNumber), 
+                new DataMarshal(Registry.PhoneNumber, phoneNumber),
                 () => {}
               );
             }}

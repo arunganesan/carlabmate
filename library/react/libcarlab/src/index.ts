@@ -1,4 +1,5 @@
 import { Information, Registry } from './registry'
+export {Information, Registry};
 
 export class DataMarshal {
   info: Information;
@@ -16,7 +17,6 @@ export class DataMarshal {
     });
   }
 }
-
 
 export class Libcarlab {
   lastCheckTime: number;
