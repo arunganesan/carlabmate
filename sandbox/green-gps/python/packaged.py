@@ -11,29 +11,11 @@ from typing import List, Dict
 
 import map_match
 
- 
-"""
-This is the wrapper script
-
-It is responsible for just a few things:
-
-    0. Initialize and give life to algorithms
-    1. Multiplex data around
-    2. IO from gateway server
-"""
-
 # per algorithm stuff
 alg = map_match.algorithm.AlgorithmImpl()
 
 loaded_functions: List[AlgorithmFunction] = [
     alg.mapmatch_function,
-]
-
-
-# XXX this needs to be used somewhere to actually save the data.
-# But it may not be relevant for Python 
-to_save_information: List[Information] = [
-    Registry.MapMatchedLocation
 ]
 
 def main():

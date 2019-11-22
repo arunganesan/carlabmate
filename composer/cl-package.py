@@ -33,7 +33,6 @@ def main():
     specs = json.loads(jsmin(open(SPECS, 'r').read()))
     registry = json.loads(jsmin(open(REGISTRY, 'r').read()))
     strategy = json.loads(jsmin(open(args.strategy, 'r').read()))
-    # pprint(strategy)
 
 
     # collect each algorithm/function into the platfortm it belongs to
@@ -82,12 +81,31 @@ def perform_per_platform_linking (platform, func_per_algorithms):
     """
 
 def write_code_for_android (func_per_algorithms):
-  return 'TODO android'
+    return 'TODO android'
+
+
 
 
 def write_code_for_python (func_per_algorithms):
-  return 'TODO python'
+    import_calls = []
+    create_alg = []
+    list_of_functions = []
 
+    for alg, functions in func_per_algorithms.items():
+        Alg = alg.replace('-', '_')
+        TmpAlg = '_tmp_{0}'.format(Alg)
+        import_calls.append('import {}'.format(Alg))
+        create_alg.append('{} = {}.algorithm.AlgorithmImpl()'.format(TmpAlg, Alg))
+        
+        for funcname, funcdetails in functions.items():
+            list_of_functions.append('\t{}.{}_function'.format(TmpAlg, funcname))
+
+    return PYTHON_PACKAGE_CODE % (
+        '\n'.join(import_calls),
+        '\n'.join(create_alg),
+        ',\n'.join(list_of_functions)
+    ) 
+        
 def write_code_for_react (func_per_algorithms):
     import_calls = []
     inputs = []
@@ -125,9 +143,6 @@ def write_code_for_react (func_per_algorithms):
 
 
 
-# In general the packaging has the strategy and all other shit.
-# the strategy doesn't usually matter. That only really matters for Android and Python.
-# for React, we don't multiplex data anyway. That is done through the props. We still do need to fetchNewData for the required information but we dont need to explicitly define algorithm functions is my point. IT IS DONE ENTIRELT STATICALLY WHERE AS FOR JHAVA ND PYTHON IT IS DONE STATIC+DYNAMICALLY. (IT COULD BE DONE ENTIRELY STATICALLY THERE TOO LOL)
 
 
 EXT = {
@@ -141,37 +156,6 @@ PER_PLATFORM_CODEGEN = {
   'python': write_code_for_python,
   'android': write_code_for_android,
 }
-
-"""
-
-1: imports
-import { acceptFuelLevel as AcceptFuelLevel } from "user-input";
-import { acceptPhoneNumber as AcceptPhoneNumber } from "user-input";
-
-2: list of required input information names
-e.g. "Registry.UserText, Registry.PhoneNumber"
-
-3: actual components for each function 
-
-    <AcceptFuelLevel
-        produce={(fuelLevel: Number) => {
-            this.libcarlab.outputNewInfo(
-            new DataMarshal(Registry.CarFuel, fuelLevel), 
-            () => {}
-            );
-        }}
-        />,
-
-    <AcceptPhoneNumber
-        produce={(phoneNumber: Number) => {
-            this.libcarlab.outputNewInfo(
-            new DataMarshal(Registry.PhoneNumber, phoneNumber), 
-            () => {}
-            );
-        }}
-    />
-
-"""
 
 
 
@@ -363,62 +347,126 @@ export default App;
 
 """
 
+PYTHON_PACKAGE_CODE = """#! /usr/bin/env python3.7
+from libcarlab.libcarlab import AlgorithmFunction, Algorithm, Information, LinkGatewayService, Registry, DataMarshal
+from termcolor import cprint
+
+import argparse
+import json
+import os
+import pickle
+import time
+from typing import List, Dict
+
+%s
+
+%s
+
+loaded_functions: List[AlgorithmFunction] = [
+%s
+]
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--session', default='dd2a4372516dab38535282070785853f')
+    args = parser.parse_args()
+    
+    LOCALFILE = '{}.db'.format(args.session)
+
+    running_algorithms: List[Algorithm] = []
+    for func in loaded_functions:
+        if func.belongsto not in running_algorithms:
+            running_algorithms.append(func.belongsto)
+
+    multiplex_routing: Dict[Information, List[Algorithm]] = {}
+
+    for func in loaded_functions:
+        # instantiate all classes
+        alg = func.belongsto()
+        running_algorithms.append(alg)
+
+        # set up multiplexing
+        for info in func.inputinfo:
+            multiplex_routing.setdefault(info, [])
+            multiplex_routing[info].append(alg)
+        
+        for info in func.usesinfo:
+            multiplex_routing.setdefault(info, [])
+            multiplex_routing[info].append(alg)
+
+    # Loop through
+    # infonames = [info.name for alg in running_algorithms]
+    # this is all the required info
+    required_info: List[Information] = []
+    state_refers_info: List[Information] = []
+    for func in loaded_functions:
+        required_info += func.inputinfo
+        required_info += func.usesinfo
+        state_refers_info += func.usesinfo
+
+    # XXX the output sensors from here
+    # which ones to output are specified in the spec
+    gateway = LinkGatewayService(
+        args.session,
+        required_info,
+        state_refers_info,
+        [], # output info
+        LOCALFILE,
+        False,
+    )
 
 
+    storage = {}
+    if os.path.exists(LOCALFILE):
+        storage = pickle.load(open(LOCALFILE, 'rb'))
+    for info in required_info:
+        storage.setdefault(info, None)
 
+    for info, value in gateway.initialize_state().items():
+        storage[info] = value
 
+    while True:
+        cprint('Running', 'green')
+        for info, value in gateway.check_new_info().items():
+            storage[info] = value
+        
+        new_storage = {}
+        for info, values in storage.items():
+            if info in multiplex_routing:
+                for alg in multiplex_routing[info]:
+                    dm = DataMarshal(info, value)
+                    output_values = alg.add_new_data(dm)
+                    for output in output_values:
+                        if output is None:
+                            continue
+                        new_storage.setdefault(output.info, [])
+                        new_storage[output.info] = output.value
 
+                # TODO need to throw it away once consumed
+        
+ 
+        for info, values in new_storage.items():
+            storage.setdefault(info, [])
+            storage[info] += values
+        
+        for info, value in storage.items():
+            gateway.output_new_info(info, value)
+       
+        gateway.upload_data()
 
-
-
-
-
-
-
-
-
-
+        time.sleep(1)
 
 
 if __name__ == '__main__':
     main()
-
-
-
-
-
-
-
+"""
 
 
 
 
 
 """
-
-
-# PYTHON
-
-import map_match
-
-# per algorithm stuff
-alg = map_match.algorithm.AlgorithmImpl()
-
-loaded_functions: List[AlgorithmFunction] = [
-    alg.mapmatch_function,
-]
-
-
-
-# XXX this needs to be used somewhere to actually save the data.
-# But it may not be relevant for Python 
-to_save_information: List[Information] = [
-    Registry.MapMatchedLocation
-]
-
-
-
-JAVA, really its just this:
+JAVA, really its just this (and some Gradle stuff but that's OK)
 
 package edu.umich.carlab.packaged;
 
@@ -444,4 +492,5 @@ public class PackageStrategy extends Strategy {
 
 
 
-
+if __name__ == '__main__':
+    main()
