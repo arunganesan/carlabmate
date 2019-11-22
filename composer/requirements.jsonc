@@ -1,10 +1,6 @@
 {
-    "required": [ "location", "map-matched-location", "car-fuel" ],
+    "required": [ "car-speed", "car-steering", "car-gear"],
     "platforms": [ "android", "python", "react" ],
     "exclude": [],
-    "choices": {
-        // "car-fuel": "text-input/accept_fuel_level"
-        // "car-fuel": "user-input/acceptFuelLevel"
-        "car-fuel": "obd-devices/readFuelLevel"
-    }
+    "choices": {}
 }

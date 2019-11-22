@@ -234,7 +234,7 @@ def solve_graph (
     
     # assume low level sensors are automatically read
     for i in required_info:
-        if i.name in ['gps', 'obd-fuel', 'user-text']:
+        if i.name in ['gps', 'obd-fuel', 'user-text', 'accel', 'magnetometer', 'gravity', 'gyro']:
             all_output_info.append(i)
 
     
