@@ -82,14 +82,7 @@ def main():
         storage[info] = value
     
 
-    pprint(storage)
-    # exit(1)
-
     while True:
-        # cprint('Running', 'green')
-        for info, value in gateway.check_new_info().items():
-            storage[info] = value
-        
         new_storage = {}
         for info, value in storage.items():
             if info in multiplex_routing:
@@ -119,6 +112,10 @@ def main():
         gateway.upload_data()
 
         time.sleep(1)
+
+        for info, value in gateway.check_new_info().items():
+            storage[info] = value
+    
 
 
 if __name__ == '__main__':
