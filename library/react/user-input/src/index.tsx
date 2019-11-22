@@ -79,7 +79,7 @@ interface TextInputProps {
  
 
  const TextInput: React.SFC<TextInputProps> = (props) => <Container>
-    <Form.Label style={style.input}>Enter fuel level</Form.Label>
+    <Form.Label style={style.input}>{props.name}</Form.Label>
       
     <Form.Control
         type="text"
