@@ -34,7 +34,11 @@ class Information ():
 
     def node (self):
         return ('info', self.name)
+    
+    def __repr__ (self):
+        return self.name
 
+    
 class Algorithm ():
     name: str
     outputinfo: Information
@@ -58,6 +62,9 @@ class Algorithm ():
 
     def node (self):
         return ('impl', self.name)
+    
+    def __repr__ (self):
+        return self.name
 
 
 def create_digraph(information, algorithms):
@@ -181,7 +188,6 @@ def solve_graph (
     choices: Dict[Information, Algorithm]={}, 
     limit_rounds=np.inf):
     
-    all_nodes = []
     required_info = []
     required_impl = []
 
@@ -219,8 +225,31 @@ def solve_graph (
         round += 1
         if round > limit_rounds:
             break
+
+    
+    all_output_info = []
+
+    for impl in required_impl:
+        all_output_info.append(impl.outputinfo)
+    
+    # assume low level sensors are automatically read
+    for i in required_info:
+        if i.name in ['gps', 'obd-fuel', 'user-text']:
+            all_output_info.append(i)
+
+    
+    # for low level info we need more checking
+    passed = True
+    for i in required_info:
+        if i not in all_output_info:
+            cprint('Unable to satisfy -> {}'.format(i), 'red')
+    
+    if passed:
+        cprint('Satisfied requirements', 'green')
     
     return [n.node() for n in required_info + required_impl]
+
+
 
 
 def draw_network(selected_nodes, filename, information, algorithms):

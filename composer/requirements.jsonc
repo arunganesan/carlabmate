@@ -1,17 +1,7 @@
 {
-    "required": [
-        "location",
-        "map-matched-location",
-        "car-fuel"
-    ],
-    "platforms": [
-        "android",
-        "python",
-        "react"
-    ],
-    "exclude": [
-        "accel"
-    ],
+    "required": [ "location", "map-matched-location", "car-fuel" ],
+    "platforms": [ "android", "python", "react" ],
+    "exclude": [],
     "choices": {
         // "car-fuel": "text-input/accept_fuel_level"
         "car-fuel": "user-input/acceptFuelLevel"
