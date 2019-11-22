@@ -151,6 +151,7 @@ class App extends React.Component<{}, AppState> {
         <>
           Logged in as {this.state.username}
           <Button
+            style={{marginLeft: 10}}
             onClick={() =>
               this.setState({
                 session: null
@@ -166,7 +167,7 @@ class App extends React.Component<{}, AppState> {
 
   render() {
     return (
-      <Container>
+      <Container style={{paddingTop: 25}}>
         {this.state.showLoginForm && this.generateLoginForm()}
         <Row>
           <Col>{this.showLoginInfo()}</Col>
