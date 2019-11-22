@@ -2,10 +2,19 @@ class PacketController < ApplicationController
     require 'time'
     require 'digest'
     require 'fileutils'
+    require 'colorize'
+
     skip_before_action :verify_authenticity_token
 
     PUBLIC = Rails.root.join('public')
     MAX_DB_MESSAGE_SIZE = 50
+
+    # * -> Received.......Android..........Location
+    # * -> Received.......Web..............Phone number
+    # * -> Received.......Python...........Fuel text
+    # * <- Downloaded.....Python...........Fuel
+    # * <- Request........Python (but this is gray if it didn't send any data)
+
 
     def upload
         # Must be post
@@ -20,7 +29,6 @@ class PacketController < ApplicationController
 
         # must have message or file
         if !params.has_key? :file and !params.has_key? :message
-            puts 'Dont have message'
             head :invalid
             return
         end
@@ -60,6 +68,8 @@ class PacketController < ApplicationController
                 packet.message = params[:message]
             end
         end
+
+        puts "-> Received #{params[:information]}".colorize(:color => :green)
 
         # move file to location
         if params.has_key? :file
@@ -144,11 +154,19 @@ class PacketController < ApplicationController
             return
         end
 
+
+        return_data = Packet.where('received > :sincetime AND user_id = :user_id AND information_id = :information_id', {
+            sincetime: DateTime.strptime(params[:sincetime], '%s'),
+            user_id: user.id,
+            information_id: information.id,
+        })
+
+        if return_data.size == 0
+            puts "-> Request #{params[:information]}".colorize(:color => :gray)
+        else
+            puts "-> Downloaded #{params[:information]}".colorize(:color => :green)
+        end
       
-        render :json => Packet.where('received > :sincetime AND user_id = :user_id AND information_id = :information_id', {
-                sincetime: DateTime.strptime(params[:sincetime], '%s'),
-                user_id: user.id,
-                information_id: information.id,
-            })
+        render :json => return_data
     end
 end
