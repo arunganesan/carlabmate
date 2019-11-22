@@ -65,7 +65,7 @@ def main():
         args.session,
         required_info,
         state_refers_info,
-        [], # output info
+        [Registry.CarFuel], # output info
         LOCALFILE,
         False,
     )
@@ -101,10 +101,10 @@ def main():
 
                 # TODO need to throw it away once consumed
         
- 
-        for info, values in new_storage.items():
-            storage.setdefault(info, [])
-            storage[info] += values
+        
+        for info, value in new_storage.items():
+            #storage.setdefault(info, )
+            storage[info] = value
         
         for info, value in storage.items():
             gateway.output_new_info(info, value)

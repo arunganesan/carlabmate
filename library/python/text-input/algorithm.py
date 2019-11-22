@@ -22,15 +22,20 @@ class AlgorithmBase (Algorithm):
         self.latest_values[dobj.info] = dobj.value
         
         cprint('\tReceived information: {} = {}'.format(dobj.info, dobj.value), 'magenta')
-        cprint('\tLatest value has keys: {}'.format(self.latest_values.keys()), 'orange')
+        cprint('\tLatest value has keys: {}'.format(self.latest_values.keys()), 'blue')
         
         if self.accept_fuel_level_function.matches_required(dobj.info) and self.accept_fuel_level_function.have_received_all_required_data(self.latest_values.keys()):
-            retval = self.accept_fuel_level(dobj.value)
-            if retval is not None:
-                return_values.append(DataMarshal(
-                    Registry.CarFuel,
-                    retval
-                ))
+            # NO - only should call this IF it is fuel info
+            # it could be phone info too
+            
+            if dobj.info == Registry.UserText:
+                retval = self.accept_fuel_level(dobj.value)
+                
+                if retval is not None:
+                    return_values.append(DataMarshal(
+                        Registry.CarFuel,
+                        retval
+                    ))
             
         return return_values
 
@@ -41,8 +46,12 @@ class AlgorithmImpl (AlgorithmBase):
         super(AlgorithmImpl, self).__init__()
 
     def accept_fuel_level (self, user_text: Registry.UserText.datatype) -> Registry.CarFuel.datatype:
-        print("GOT FUEL LEVEL FOR USERTEXT", user_text)
-        return None
+        try:
+            val = float(user_text[0]['message'])
+            return val
+        except:
+            print('Not a number')
+            return None
 
 
 
