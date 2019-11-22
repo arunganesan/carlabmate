@@ -178,7 +178,7 @@ def solve_graph (
     required:List[Information]=[], 
     platforms:List[str]=[], 
     blacklist_info:List[Information]=[], 
-    exclusive: Dict[Information, Algorithm]={}, 
+    choices: Dict[Information, Algorithm]={}, 
     limit_rounds=np.inf):
     
     all_nodes = []
@@ -199,8 +199,8 @@ def solve_graph (
         new_required_info = []
 
         for info in _next_required_info:
-            if info in exclusive:
-                impl = exclusive[info]
+            if info in choices:
+                impl = choices[info]
                 if impl.platform in platforms:
                     new_required_impl.append(impl)
             else:
@@ -315,8 +315,12 @@ def main():
     blacklisted_information = []
     for infoname in requirements['exclude']:
         blacklisted_information.append(indexed_information[infoname])
+    
+    choices = {}
+    for infoname, algfn in requirements['choices'].items():
+        choices[indexed_information[infoname]] = indexed_functions[algfn]
 
-    selected_nodes = solve_graph(required_information, platforms, blacklisted_information)
+    selected_nodes = solve_graph(required_information, platforms, blacklisted_information, choices)
     strategy = []
     for node in selected_nodes:
         if node[0] == 'impl':
