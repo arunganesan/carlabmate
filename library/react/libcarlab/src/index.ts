@@ -27,6 +27,7 @@ export class Libcarlab {
   pushUrl: (arg: string) => string;
   fetchUrl: (arg: string) => string;
   registerUrl: (arg: string) => string;
+  latestUrl: (arg: string) => string;
   
 
   constructor(session: string | null, requiredInfo: Information[]) {
@@ -38,12 +39,27 @@ export class Libcarlab {
     this.baseUrl = `http://localhost:${this.portno}/packet/`;
     this.fetchUrl = info =>
       `${this.baseUrl}list?information=${info}&session=${this.session}&sincetime=${this.lastCheckTime}`;
+
+    this.latestUrl = info =>
+      `${this.baseUrl}latest?information=${info}&session=${this.session}`;
     this.pushUrl = info =>
       `${this.baseUrl}upload?information=${info}&session=${this.session}`;
 
 
     // This goes to the texting server
     this.registerUrl = phoneno => `http://localhost:1234/texting/register_phone?session=${this.session}&number=${phoneno}&serverport=${this.portno}`;
+  }
+
+
+  async checkLatestInfo(callback: Function) {
+    // Get new data
+    // check with local storage first to only get relevant data
+    for (let info of this.requiredInfo)
+      fetch(this.latestUrl(info.name))
+        .then(res => res.json())
+        .then(data => callback(info, data));
+
+    this.lastCheckTime = Math.round(new Date().getTime() / 1000);
   }
 
 

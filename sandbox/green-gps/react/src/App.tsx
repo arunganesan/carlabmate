@@ -37,7 +37,7 @@ class App extends React.Component<{}, AppState> {
       };
     this.state = {
       message: "",
-      required_info: [],
+      required_info: [Registry.PhoneNumber],
       showLoginForm: sessionLocal["session"] == null,
       session: sessionLocal["session"],
       username: sessionLocal["username"],
@@ -55,9 +55,14 @@ class App extends React.Component<{}, AppState> {
   // and that'll automatically propagate to the components
   // And this is already initialized with the required info, so it should happen quite automatically...
   componentDidMount() {
-    this.libcarlab.checkNewInfo((data: DataMarshal) => {
-      // console.log("Got info ", data.info, "with data", data.value);
+    this.libcarlab.checkLatestInfo((data: DataMarshal) => {
+      
+      console.log("Got info ", data.info, "with data", data.value);
     });
+
+    // this.libcarlab.checkNewInfo((data: DataMarshal) => {
+    //   console.log("Got info ", data.info, "with data", data.value);
+    // });
   }
 
   tryLoggingIn() {
