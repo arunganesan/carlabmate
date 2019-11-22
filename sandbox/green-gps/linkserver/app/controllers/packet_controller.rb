@@ -9,13 +9,6 @@ class PacketController < ApplicationController
     PUBLIC = Rails.root.join('public')
     MAX_DB_MESSAGE_SIZE = 50
 
-    # * -> Received.......Android..........Location
-    # * -> Received.......Web..............Phone number
-    # * -> Received.......Python...........Fuel text
-    # * <- Downloaded.....Python...........Fuel
-    # * <- Request........Python (but this is gray if it didn't send any data)
-
-
     def upload
         ActiveRecord::Base.logger = nil
         Rails.logger.level = 5 # at any time
@@ -58,20 +51,18 @@ class PacketController < ApplicationController
         save_filename = "#{dest_dir}/#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}.json"
         
         if params.has_key? :message
+            file = File.open(save_filename, 'w')
+            file.puts(params[:message])
+            file.close
+            
             if params[:message].length > MAX_DB_MESSAGE_SIZE
-                file = File.open(save_filename, 'w')
-                file.puts(params[:message])
-                file.close
-                
-                puts 'Message too long. Saved to file ', save_filename
                 packet.file = save_filename
-
             else
                 packet.message = params[:message]
             end
         end
 
-        puts "-> Received #{params[:information]}".colorize(:color => :green)
+        puts "-> [#{Time.now.utc.iso8601}] Received #{params[:information]}".colorize(:color => :green)
 
         # move file to location
         if params.has_key? :file
@@ -140,7 +131,7 @@ class PacketController < ApplicationController
             information = Information.create(name: params[:information])
         end
         last_info = Packet.where(user: user, information: information).order('received DESC').first
-        puts "returning latest info for #{information}: #{last_info}: ".colorize(:color => :green)
+        puts "<- [#{Time.now.utc.iso8601}] Return latest #{information}: #{last_info}: ".colorize(:color => :green)
         render :json => last_info
     end
     
@@ -175,9 +166,9 @@ class PacketController < ApplicationController
         })
 
         if return_data.size == 0
-            puts "-> Request #{params[:information]}".colorize(:color => :gray)
+            puts "~ [#{Time.now.utc.iso8601}] Request #{params[:information]}".colorize(:color => :black)
         else
-            puts "-> Downloaded #{params[:information]}".colorize(:color => :green)
+            puts "<- [#{Time.now.utc.iso8601}] Downloaded #{params[:information]}".colorize(:color => :green)
         end
       
         render :json => return_data

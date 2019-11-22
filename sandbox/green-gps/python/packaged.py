@@ -86,10 +86,8 @@ def main():
     # exit(1)
 
     while True:
-        cprint('Running', 'green')
+        # cprint('Running', 'green')
         for info, value in gateway.check_new_info().items():
-            print("Adding to storage latest value (WHICH IS FUCKING OVERWRITING IT LOLOLOL) {} {}".format(info, value))
-            
             storage[info] = value
         
         new_storage = {}
@@ -101,7 +99,6 @@ def main():
 
                     dm = DataMarshal(info, value)
 
-                    print("ADDING TO ALGORITHM: {} {} {}".format(alg, info, value))
                     output_values = alg.add_new_data(dm)
                     for output in output_values:
                         if output is None:
