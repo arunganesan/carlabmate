@@ -1,12 +1,4 @@
-export class Information {
-  name: string;
-  dtype: any;
-
-  constructor(name: string, dtype: any) {
-    this.name = name;
-    this.dtype = dtype;
-  }
-}
+import { Information, Registry } from './registry'
 
 export class DataMarshal {
   info: Information;
@@ -25,12 +17,6 @@ export class DataMarshal {
   }
 }
 
-export class Registry {
-  static CarModel = new Information("car-model", '');
-  static PhoneNumber = new Information('phone-number', '');
-  static CarFuel = new Information('car-fuel', 0.0);
-  static Location = new Information('location', 0.0);
-}
 
 export class Libcarlab {
   lastCheckTime: number;

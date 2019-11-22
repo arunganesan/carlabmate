@@ -188,8 +188,28 @@ class Registry:
     %s
 """
 
+
+REACT_TEMPLATE = """
+export class Information {
+  name: string;
+  dtype: any;
+
+  constructor(name: string, dtype: any) {
+    this.name = name;
+    this.dtype = dtype;
+  }
+}
+
+export class Registry {
+    %s
+}
+
+"""
+
+
 JAVA_ENTRY = 'public static Information {formatted_name} = new Information("{infoname}", {datatype}.class);'
 PYTHON_ENTRY = "{formatted_name} = Information('{infoname}', {datatype})"
+REACT_ENTRY = "static {formatted_name} = new Information('{infoname}', {datatype})"
 
     # PhoneNumber = Information('phone-number', str)
     # Location = Information('location', Tuple[int, int])
@@ -226,8 +246,20 @@ python_datatype_mapping = {
     'list[float[3]]': 'List[List[float]]'
 }
 
+react_datatype_mapping = {
+    'float[2]': '0.0',
+    'float': '0.0',
+    'int': '0.0',
+    'float[9]': '0.0',
+    'float[3]': '0.0',
+    'string': '0.0',
+    'string,float': '0.0',
+    'list[float[3]]': '0.0'
+}
 
-def android_transform_variable_name(name):
+
+
+def transform_variable_name(name):
     if name == 'gps':
         return 'GPS'
 
@@ -239,22 +271,26 @@ def android_transform_variable_name(name):
 ENTRIES = {
     'android': JAVA_ENTRY,
     'python': PYTHON_ENTRY,
+    'react': REACT_ENTRY,
 
 }
 
 TEMPLATES = {
     'android': ANDROID_TEMPLATE,
-    'python': PYTHON_TEMPLATE
+    'python': PYTHON_TEMPLATE,
+    'react': REACT_TEMPLATE
 }
 
 DATATYPE_MAPPING = {
     'android': java_datatype_mapping,
-    'python': python_datatype_mapping
+    'python': python_datatype_mapping,
+    'react': react_datatype_mapping
 }
 
 VARIABLE_TRANSFORMATIONS = {
-    'android': android_transform_variable_name,
-    'python': android_transform_variable_name,
+    'android': transform_variable_name,
+    'python': transform_variable_name,
+    'react': transform_variable_name
 }
 
 if __name__ == '__main__':
