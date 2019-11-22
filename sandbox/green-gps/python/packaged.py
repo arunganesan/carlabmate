@@ -7,6 +7,7 @@ import json
 import os
 import pickle
 import time
+from pprint import pprint
 from typing import List, Dict
 
 import map_match
@@ -73,29 +74,40 @@ def main():
     storage = {}
     if os.path.exists(LOCALFILE):
         storage = pickle.load(open(LOCALFILE, 'rb'))
+    
     for info in required_info:
         storage.setdefault(info, None)
 
     for info, value in gateway.initialize_state().items():
         storage[info] = value
+    
+
+    pprint(storage)
+    # exit(1)
 
     while True:
         cprint('Running', 'green')
         for info, value in gateway.check_new_info().items():
+            print("Adding to storage latest value (WHICH IS FUCKING OVERWRITING IT LOLOLOL) {} {}".format(info, value))
+            
             storage[info] = value
         
         new_storage = {}
-        for info, values in storage.items():
+        for info, value in storage.items():
             if info in multiplex_routing:
                 for alg in multiplex_routing[info]:
-                    if len(value) > 0:
-                        dm = DataMarshal(info, value)
-                        output_values = alg.add_new_data(dm)
-                        for output in output_values:
-                            if output is None:
-                                continue
-                            new_storage.setdefault(output.info, [])
-                            new_storage[output.info] = output.value
+                    if type(value) is list and len(value) == 0:
+                        continue
+
+                    dm = DataMarshal(info, value)
+
+                    print("ADDING TO ALGORITHM: {} {} {}".format(alg, info, value))
+                    output_values = alg.add_new_data(dm)
+                    for output in output_values:
+                        if output is None:
+                            continue
+                        new_storage.setdefault(output.info, [])
+                        new_storage[output.info] = output.value
 
                 # TODO need to throw it away once consumed
         

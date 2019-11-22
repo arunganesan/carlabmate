@@ -2,6 +2,7 @@ class TextingController < ApplicationController
     require 'time'
     require 'fileutils'
     require 'twilio-ruby'
+    require 'colorize'
 
     skip_before_action :verify_authenticity_token
     PUBLIC = Rails.root.join('public')
@@ -19,6 +20,8 @@ class TextingController < ApplicationController
 
         tablerow.session = params[:session]
         tablerow.port = params[:serverport]
+        tablerow.phoneno = params[:number]
+        tablerow.save
         head :ok
         return
     end
@@ -56,11 +59,23 @@ class TextingController < ApplicationController
 
         message = params[:Body]
         from_number = params[:From]
-        from_number.sub! '+', ''
-
+        from_number.sub! '+1', ''
+        
         tablerow = Phone.find_by(phoneno: from_number)
         if tablerow.blank?
-            puts "Error - phone number not registered"
+            puts "Error - phone number >#{from_number}< not registered".colorize(:color => :white, :background => :red)
+
+            account_sid = ENV['TWILIO_ACCOUNT_SID']
+            auth_token = ENV['TWILIO_AUTH_TOKEN']
+            @client = Twilio::REST::Client.new(account_sid, auth_token)
+            message = @client.messages.create(
+                body: "This phone number isn't registered with CarLab.",
+                from: '+17344363993',
+                to: from_number
+            )
+            
+            head :ok
+            return
         else
             port = tablerow.port
             session = tablerow.session
@@ -70,7 +85,7 @@ class TextingController < ApplicationController
             response = Net::HTTP.post_form(uri, {
                 "session" => session, 
                 "message" => message,
-                "information" => "text"
+                "information" => "user-text"
             })
         end
         

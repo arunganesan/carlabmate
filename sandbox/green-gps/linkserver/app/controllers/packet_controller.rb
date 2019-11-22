@@ -134,12 +134,13 @@ class PacketController < ApplicationController
             end
             return
         end
-
+        
         information = Information.find_by(name: params[:information])
         if information.blank?
             information = Information.create(name: params[:information])
         end
         last_info = Packet.where(user: user, information: information).order('received DESC').first
+        puts "returning latest info for #{information}: #{last_info}: ".colorize(:color => :green)
         render :json => last_info
     end
     

@@ -17,10 +17,12 @@ class AlgorithmBase (Algorithm):
     
     def add_new_data(self, dobj: DataMarshal) -> List[Union[DataMarshal, None]]:
         return_values = []
-
-        cprint('\tReceived information: {} = {}'.format(dobj.info, dobj.value), 'magenta')
+        
 
         self.latest_values[dobj.info] = dobj.value
+        
+        cprint('\tReceived information: {} = {}'.format(dobj.info, dobj.value), 'magenta')
+        cprint('\tLatest value has keys: {}'.format(self.latest_values.keys()), 'orange')
         
         if self.accept_fuel_level_function.matches_required(dobj.info) and self.accept_fuel_level_function.have_received_all_required_data(self.latest_values.keys()):
             retval = self.accept_fuel_level(dobj.value)
@@ -41,5 +43,6 @@ class AlgorithmImpl (AlgorithmBase):
     def accept_fuel_level (self, user_text: Registry.UserText.datatype) -> Registry.CarFuel.datatype:
         print("GOT FUEL LEVEL FOR USERTEXT", user_text)
         return None
+
 
 

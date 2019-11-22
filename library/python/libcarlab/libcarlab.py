@@ -122,9 +122,10 @@ class LinkGatewayService:
 
     def initialize_state(self):
         new_data = {}
-
+        
         for info in self.required_info:
             url = self.latest_url.format(info=info.name)
+            print('LATEST INFO CHECK FOR {}'.format(url))
             results = requests.get(url)
             new_data[info] = results.json()
         self.last_check_time = calendar.timegm(time.gmtime())

@@ -60,7 +60,6 @@ export class Libcarlab {
 
   outputNewInfo(dm: DataMarshal, callback: Function) {
     if (dm.info == Registry.PhoneNumber) {
-      alert('Received phone number!');
       this.registerPhoneNumber(dm.message);
     }
 
