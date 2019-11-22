@@ -17,10 +17,12 @@ class PacketController < ApplicationController
 
 
     def upload
+        ActiveRecord::Base.logger = nil
+        Rails.logger.level = 5 # at any time
+
         # Must be post
         # Must contain params about information + person
         # Must contain data
-        puts "Got upload. Params are: ", params[:message]
         if !request.post? or !params.has_key? :information or !params.has_key? :session
             puts 'Invalid post params'
             head :invalid
@@ -90,6 +92,10 @@ class PacketController < ApplicationController
 
 
     def listall
+        ActiveRecord::Base.logger = nil
+        Rails.logger.level = 5 # at any time
+
+
         if !request.get? or !params.has_key? :session
             head :invalid
             return
@@ -106,6 +112,9 @@ class PacketController < ApplicationController
 
 
     def latest
+        ActiveRecord::Base.logger = nil
+        Rails.logger.level = 5 # at any time
+
         # Must be get
         # Must contain params about info and person and last date
         
@@ -135,6 +144,9 @@ class PacketController < ApplicationController
     end
     
     def list 
+        ActiveRecord::Base.logger = nil
+        Rails.logger.level = 5 # at any time
+
         # Must be get
         # Must contain params about info and person and last date
         if !request.get? or !params.has_key? :information or !params.has_key? :session or !params.has_key? :sincetime

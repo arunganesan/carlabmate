@@ -2,14 +2,11 @@ import * as React from "react";
 import { Button, Container, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.css";
 
-const style = {
-  input: {
-    marginTop: "25px"
-  },
-  button: {
-    marginTop: "25px"
-  }
-};
+
+/************************************
+ * AUTO GENERATED - do not change
+ **********************************/
+
 
 
 
@@ -23,9 +20,7 @@ type acceptFuelLevelState = {
 
 
 
-
-export class acceptFuelLevel extends React.Component<acceptFuelLevelProps, acceptFuelLevelState> {
-
+class acceptFuelLevelBase extends React.Component<acceptFuelLevelProps, acceptFuelLevelState> {
   constructor(props: acceptFuelLevelProps) {
     super(props);
 
@@ -34,41 +29,7 @@ export class acceptFuelLevel extends React.Component<acceptFuelLevelProps, accep
       fuelLevel: '',
     };
   }
-
-
-  render() {
-    const { produce } = this.props;
-
-
-    return (
-      <Container>
-        <Form.Label style={style.input}>Enter fuel level</Form.Label>
-          
-          
-        <Form.Control
-            type="text"
-            value={this.state.fuelLevel}
-            onChange={(evt: React.ChangeEvent<HTMLInputElement>) =>
-              this.setState({
-                fuelLevel: evt.target.value
-              })
-            }
-          />
-       
-       
-        <Button
-          onClick={() => produce(this.state.fuelLevel)}
-          style={style.button}
-          size="lg"
-        >
-          Submit
-        </Button>
-      </Container>
-    );
-  }
 }
-
-
 
 type acceptPhoneNumberProps = { 
   produce: Function
@@ -78,123 +39,89 @@ type acceptPhoneNumberState = {
   phoneNumber: string
 }
 
-
-export class acceptPhoneNumber extends React.Component<acceptPhoneNumberProps, acceptPhoneNumberState> {
-
+class acceptPhoneNumberBase extends React.Component<acceptPhoneNumberProps, acceptPhoneNumberState> {
   constructor(props: acceptPhoneNumberProps) {
     super(props);
-
     this.state = {
-      // This value changes per thing
       phoneNumber: '',
     };
   }
+}
+
+/************************************
+ * End of auto generated
+ **********************************/
+
+
+
+
+
+const style = {
+  input: {
+    marginTop: "25px"
+  },
+  button: {
+    marginTop: "25px"
+  }
+};
+
+
+
+
+interface TextInputProps {
+  name: string,
+  value: string,
+  changeVal: Function,
+  produce: Function,
+ }
+
+
+ 
+
+ const TextInput: React.SFC<TextInputProps> = (props) => <Container>
+    <Form.Label style={style.input}>Enter fuel level</Form.Label>
+      
+    <Form.Control
+        type="text"
+        value={props.value}
+        onChange={(evt: React.ChangeEvent<HTMLInputElement>) =>
+          props.changeVal(evt.target.value)
+        }
+      />
+   
+   
+    <Button
+      onClick={() => props.produce(props.value)}
+      style={style.button}
+      size="lg"
+    >
+      Submit
+    </Button>
+  </Container>;
+
+
+
+export class acceptFuelLevel extends acceptFuelLevelBase {
 
   render() {
-    const { produce } = this.props;
-
-
-    return (
-      <Container>
-        <Form.Label style={style.input}>Enter phone number</Form.Label>
-          
-          
-        <Form.Control
-            type="text"
-            value={this.state.phoneNumber}
-            onChange={(evt: React.ChangeEvent<HTMLInputElement>) =>
-              this.setState({
-                phoneNumber: evt.target.value
-              })
-            }
-          />
-       
-       
-        <Button
-          onClick={() => produce(this.state.phoneNumber)}
-          style={style.button}
-          size="lg"
-        >
-          Submit
-        </Button>
-      </Container>
-    );
+    return <TextInput
+      name="Enter fuel level"
+      value={this.state.fuelLevel}
+      changeVal={(val: string) => this.setState({fuelLevel: val})}
+      produce={this.props.produce} />
   }
 }
 
 
-// export class acceptCarModel extends React.Component<Props> {
-//   render() {
-//     const { text } = this.props;
 
-//     return <div style={{ color: "blue" }}>Hello {text}</div>;
-//   }
-// }
+export class acceptPhoneNumber extends acceptPhoneNumberBase {
+  render() {
+      return <TextInput
+        name="Enter phone number"
+        value={this.state.phoneNumber}
+        changeVal={(val: string) => this.setState({phoneNumber: val})}
+        produce={this.props.produce} />
+    }
+}
 
 
-// const carmodels = [
-//   "Abarth",
-//   "Alfa Romeo",
-//   "Aston Martin",
-//   "Audi",
-//   "Bentley",
-//   "BMW",
-//   "Bugatti",
-//   "Cadillac",
-//   "Chevrolet",
-//   "Chrysler",
-//   "Citroën",
-//   "Dacia",
-//   "Daewoo",
-//   "Daihatsu",
-//   "Dodge",
-//   "Donkervoort",
-//   "DS",
-//   "Ferrari",
-//   "Fiat",
-//   "Fisker",
-//   "Ford",
-//   "Honda",
-//   "Hummer",
-//   "Hyundai",
-//   "Infiniti",
-//   "Iveco",
-//   "Jaguar",
-//   "Jeep",
-//   "Kia",
-//   "KTM",
-//   "Lada",
-//   "Lamborghini",
-//   "Lancia",
-//   "Land Rover",
-//   "Landwind",
-//   "Lexus",
-//   "Lotus",
-//   "Maserati",
-//   "Maybach",
-//   "Mazda",
-//   "McLaren",
-//   "Mercedes-Benz",
-//   "MG",
-//   "Mini",
-//   "Mitsubishi",
-//   "Morgan",
-//   "Nissan",
-//   "Opel",
-//   "Peugeot",
-//   "Porsche",
-//   "Renault",
-//   "Rolls-Royce",
-//   "Rover",
-//   "Saab",
-//   "Seat",
-//   "Skoda",
-//   "Smart",
-//   "SsangYong",
-//   "Subaru",
-//   "Suzuki",
-//   "Tesla",
-//   "Toyota",
-//   "Volkswagen",
-//   "Volvo"
-// ];
