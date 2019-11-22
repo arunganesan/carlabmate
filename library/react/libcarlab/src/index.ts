@@ -47,7 +47,7 @@ export class Libcarlab {
     this.lastCheckTime = Math.round(new Date().getTime() / 1000);
     this.session = session;
     this.requiredInfo = requiredInfo;
-    this.portno = 3000;
+    this.portno = 8080; // port of the linking server
 
     this.baseUrl = `http://localhost:${this.portno}/packet/`;
     this.fetchUrl = info =>
@@ -55,6 +55,8 @@ export class Libcarlab {
     this.pushUrl = info =>
       `${this.baseUrl}upload?information=${info}&session=${this.session}`;
 
+
+    // This goes to the texting server
     this.registerUrl = phoneno => `http://localhost:1234/texting/register_phone?session=${this.session}&number=${phoneno}&serverport=${this.portno}`;
   }
 

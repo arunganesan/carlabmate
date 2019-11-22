@@ -180,8 +180,7 @@ class App extends React.Component<{}, AppState> {
                 () => {}
               );
             }}
-          />
-
+          />,
 
           <AcceptPhoneNumber
             produce={(phoneNumber: Number) => {
