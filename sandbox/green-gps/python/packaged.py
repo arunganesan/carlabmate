@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#! /usr/bin/env python3.7
 from libcarlab.libcarlab import AlgorithmFunction, Algorithm, Information, LinkGatewayService, Registry, DataMarshal
 from termcolor import cprint
 
@@ -10,12 +10,14 @@ import time
 from typing import List, Dict
 
 import map_match
+import text_input
 
-# per algorithm stuff
-alg = map_match.algorithm.AlgorithmImpl()
+_tmp_map_match = map_match.algorithm.AlgorithmImpl()
+_tmp_text_input = text_input.algorithm.AlgorithmImpl()
 
 loaded_functions: List[AlgorithmFunction] = [
-    alg.mapmatch_function,
+	_tmp_map_match.mapmatch_function,
+	_tmp_text_input.accept_fuel_level_function
 ]
 
 def main():
@@ -80,10 +82,6 @@ def main():
     while True:
         cprint('Running', 'green')
         for info, value in gateway.check_new_info().items():
-            # cprint('\tReceived {} => {}'.format(
-            #     info.name, 
-            #     len(value)
-            # ))
             storage[info] = value
         
         new_storage = {}
