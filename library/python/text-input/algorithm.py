@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#! /usr/bin/env python3.7
 
 from libcarlab.libcarlab import *
 from termcolor import cprint
@@ -25,9 +25,6 @@ class AlgorithmBase (Algorithm):
         cprint('\tLatest value has keys: {}'.format(self.latest_values.keys()), 'blue')
         
         if self.accept_fuel_level_function.matches_required(dobj.info) and self.accept_fuel_level_function.have_received_all_required_data(self.latest_values.keys()):
-            # NO - only should call this IF it is fuel info
-            # it could be phone info too
-            
             if dobj.info == Registry.UserText:
                 retval = self.accept_fuel_level(dobj.value)
                 

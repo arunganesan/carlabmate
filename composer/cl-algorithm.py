@@ -43,18 +43,116 @@ def main():
 
 
 def write_code_for_android (algdetails):
-  return '1'
+    return '1'
 
 
 def write_code_for_react (algdetails):
-  stubs = []
-  for fname, fndetails in algdetails['functions'].items():
-    stubs.append(REACT_STUB % fname)
-  return REACT_TEMPLATE % '\n'.join(stubs)
+    stubs = []
+    for fname, fndetails in algdetails['functions'].items():
+        stubs.append(REACT_STUB % fname)
+    return REACT_TEMPLATE % '\n'.join(stubs)
 
 
 def write_code_for_python (algdetails):
-  return '1'
+    function_definitions = []
+    function_invocation = []
+    function_stubs = []
+
+    for fname, fndetails in algdetails['functions'].items():
+        FnUses = [] if 'uses' not in fndetails else fndetails['uses']
+        Output = transform_variable_name(fndetails['output'])
+        Inputs = map(transform_variable_name, fndetails['input'])
+        Uses = map(transform_variable_name, FnUses)
+        function_definitions.append(PYTHON_FUNC_DEF % (
+            fname, fname,
+            Output,
+            ', '.join(['Registry.{}'.format(i) for i in Inputs]),
+            ', '.join(['Registry.{}'.format(i) for i in Uses])
+        ))
+
+        
+        PyInputs = [i.replace('-', '_') for i in fndetails['input']]
+        PyUses = [i.replace('-', '_') for i in FnUses]
+    
+        invoke = ['self.latest_values["%s"]' % i for i in fndetails['input'] + FnUses]
+        function_invocation.append(PYTHON_FUNC_INVO % (
+            fname, fname, fname, fname,
+            invoke, Output
+        ))
+
+
+        function_stubs.append(PYTHON_FUNC_STUB % (
+            fname, ', '.join(PyInputs + PyUses), Output
+        ))
+
+
+    return PYTHON_TEMPLATE % (
+        '\n\n'.join(function_definitions),
+        '\n\n'.join(function_invocation),
+        '\n\n'.join(function_stubs)
+    )
+
+
+
+PYTHON_FUNC_INVO = """
+    if self.%s_function.matches_required(dobj.info) and self.%s_function.have_received_all_required_data(self.latest_values.keys()):        
+        if dobj.info in self.%s_function.inputinfo:
+            retval = self.%s(%s)
+            if retval is not None:
+                return_values.append(DataMarshal(
+                    Registry.%s,
+                    retval
+                ))
+"""
+
+PYTHON_FUNC_STUB = """
+def %s (self, %s) -> Registry.%s.datatype:
+    # Write code here
+    return None
+"""
+
+
+PYTHON_FUNC_DEF = """
+self.%s_function = AlgorithmFunction(
+          "%s",
+          AlgorithmImpl,
+          Registry.%s, 
+          [%s],
+          [%s])
+"""
+
+PYTHON_TEMPLATE = """#! /usr/bin/env python3.7
+
+from libcarlab.libcarlab import *
+from termcolor import cprint
+import os, json
+
+class AlgorithmBase (Algorithm):
+    def __init__ (self):
+        self.latest_values = {}
+
+%s       
+    
+    def add_new_data(self, dobj: DataMarshal) -> List[Union[DataMarshal, None]]:
+        return_values = []
+
+        self.latest_values[dobj.info] = dobj.value
+        
+        cprint('\tReceived information: {} = {}'.format(dobj.info, dobj.value), 'magenta')
+        cprint('\tLatest value has keys: {}'.format(self.latest_values.keys()), 'blue')
+        
+%s
+
+        return return_values
+
+
+# Split into 2 files if it makes it cleaner 
+class AlgorithmImpl (AlgorithmBase):
+    def __init__ (self):
+        super(AlgorithmImpl, self).__init__()
+
+%s
+"""
 
 
 
@@ -84,7 +182,6 @@ type Props = {
 
 %s
 """
-
 
 EXT = {
   'react': 'tsx',

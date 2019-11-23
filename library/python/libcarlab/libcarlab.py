@@ -60,26 +60,6 @@ class AlgorithmFunction:
         return True
 
 
-"""
-Find some place to put this.
-Both the session ariable and everything else has to be loaded in from the request
-
-SESSION = 'dd2a4372516dab38535282070785853f'
-
-def send_text(phonenumber, message="Msg"):
-    import requests, urllib.parse
-    # call the guy
-    texting_server = "http://localhost:3030/texting/schedule_text"
-    result = requests.post(texting_server, 
-        { 
-            'number': phonenumber,
-            'message': urllib.parse.quote(message),
-            'session': SESSION,
-            'serverport': 1234
-        })
-
-"""
-
 
 class LinkGatewayService:
     def __init__(self, session: str, required_info: List[Information], refers_info: List[Information], output_info: List[Information], save_filename, test=False):
