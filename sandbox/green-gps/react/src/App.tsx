@@ -16,7 +16,9 @@ type AppState = {
   required_info: Information[];
   username: string;
   password: string;
-  carFuel: string,
+
+  carFuel: string;
+  phoneNumber: string;
 };
 
 class App extends React.Component<{}, AppState> {
@@ -45,6 +47,7 @@ class App extends React.Component<{}, AppState> {
       password: "",
 
       carFuel: '',
+      phoneNumber: '',
     };
 
     this.libcarlab = new Libcarlab(
@@ -72,6 +75,10 @@ class App extends React.Component<{}, AppState> {
       if (data.info.name == 'car-fuel') {
         this.setState({
           carFuel: data.message.message
+        });
+      } else if (data.info.name == 'phone-number') {
+        this.setState({
+          phoneNumber: data.message.message
         });
       }
       console.log("Got info ", data.info, "with data", data.message);
@@ -197,7 +204,7 @@ class App extends React.Component<{}, AppState> {
 
         {this.state.session != null && [
           <AcceptFuelLevel
-            fuelLevel={this.state.carFuel}
+            value={this.state.carFuel}
             update={(carFuel: string) => this.setState({carFuel: carFuel })}
             produce={(fuelLevel: string) => {
               this.libcarlab.outputNewInfo(
@@ -207,14 +214,16 @@ class App extends React.Component<{}, AppState> {
             }}
           />,
 
-          // <AcceptPhoneNumber
-          //   produce={(phoneNumber: Number) => {
-          //     this.libcarlab.outputNewInfo(
-          //       new DataMarshal(Registry.PhoneNumber, phoneNumber),
-          //       () => {}
-          //     );
-          //   }}
-          // />
+          <AcceptPhoneNumber
+            value={this.state.phoneNumber}
+            update={(phoneNumber: string) => this.setState({phoneNumber: phoneNumber })}
+            produce={(phoneNumber: Number) => {
+              this.libcarlab.outputNewInfo(
+                new DataMarshal(Registry.PhoneNumber, phoneNumber),
+                () => {}
+              );
+            }}
+          />
         ]}
       </Container>
     );
