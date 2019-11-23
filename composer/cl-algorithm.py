@@ -35,20 +35,20 @@ def main():
     algdetails = specs[args.algorithm]
 
     platform = algdetails['platform']
-    code = CODEGEN_PER_PLATFORM[platform](algdetails)
+    code = CODEGEN_PER_PLATFORM[platform](args.algorithm, algdetails)
     ofile = open('{}/{}-stub.{}'.format(ODIR, platform, EXT[platform]), 'w')
     ofile.write(code)
     ofile.close()
 
 
-def write_code_for_react (algdetails):
+def write_code_for_react (algname, algdetails):
     stubs = []
     for fname, fndetails in algdetails['functions'].items():
         stubs.append(REACT_STUB % fname)
     return REACT_TEMPLATE % '\n'.join(stubs)
 
 
-def write_code_for_python (algdetails):
+def write_code_for_python (algname, algdetails):
     function_definitions = []
     function_invocation = []
     function_stubs = []
@@ -102,12 +102,13 @@ java_datatype_mapping = {
 }
 
 
-def write_code_for_android (algdetails):
+def write_code_for_android (algname, algdetails):
     function_definitions = []
     function_invokcations = []
     function_interfaces = []
     function_stubs = []
     
+
 
     for fname, fndetails in algdetails['functions'].items():
         FnUses = [] if 'uses' not in fndetails else fndetails['uses']
@@ -135,7 +136,7 @@ def write_code_for_android (algdetails):
         function_invokcations.append(JAVA_FUNC_INVOK % (
             fname, fname,
             Output, fname, 
-            ', '.join(function_params)            
+            ', \n'.join(['                        ' + p for p in function_params])
         ))
     
 
@@ -155,12 +156,12 @@ def write_code_for_android (algdetails):
             ', '.join(function_params)
         )
 
-        function_interfaces.append('public abstract {};'.format(_func_header))
-        function_stubs.append('@Override\npublic {} {{}}'.format(_func_header))
+        function_interfaces.append('    public abstract {};'.format(_func_header))
+        function_stubs.append(JAVA_FUNC_STUB % (_func_header))
     
     
     base_code = JAVA_BASE_TEMPLATE % (
-        fname,
+        algname.replace('-' ,'_'),
         '\n\n'.join(function_definitions),
         fname,
         '\n\n'.join(function_invokcations),
@@ -168,15 +169,22 @@ def write_code_for_android (algdetails):
     )
 
     impl_code = JAVA_IMPL_TEMPLATE % (
-        fname,
+        algname.replace('-' ,'_'),
         '\n\n'.join(function_stubs)
     )
 
     return base_code + '\n'*10 + impl_code
 
+JAVA_FUNC_STUB = """
+    @Override
+    public %s {
+        // Write code here
+        return null;
+    }
+"""
 
 JAVA_FUNC_DEF = """
-public static Function %s = new Function(
+    public static Function %s = new Function(
         "%s",
         Algorithm.class,
         %s,
@@ -185,11 +193,12 @@ public static Function %s = new Function(
 """
 
 JAVA_FUNC_INVOK = """
-if (%s.matchesRequired(information) &&
+        if (%s.matchesRequired(information) &&
             %s.haveReceivedAllRequiredData(latestValues.keySet())) {
             outputData(
                     Registry.%s,
-                    %s(%s));
+                    %s(
+%s));
         }
 """
 
@@ -231,7 +240,7 @@ public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm 
         %s
     }
 
-    %s 
+%s
 }
 """
 
@@ -249,7 +258,7 @@ public class Algorithm extends AlgorithmBase {
         super(cl, context);
     }
 
-    %s
+%s
 }
 """
 
@@ -265,14 +274,14 @@ public class Algorithm extends AlgorithmBase {
 
 
 PYTHON_FUNC_INVO = """
-    if self.%s_function.matches_required(dobj.info) and self.%s_function.have_received_all_required_data(self.latest_values.keys()):        
-        if dobj.info in self.%s_function.inputinfo:
-            retval = self.%s(%s)
-            if retval is not None:
-                return_values.append(DataMarshal(
-                    Registry.%s,
-                    retval
-                ))
+        if self.%s_function.matches_required(dobj.info) and self.%s_function.have_received_all_required_data(self.latest_values.keys()):        
+            if dobj.info in self.%s_function.inputinfo:
+                retval = self.%s(%s)
+                if retval is not None:
+                    return_values.append(DataMarshal(
+                        Registry.%s,
+                        retval
+                    ))
 """
 
 PYTHON_FUNC_STUB = """
@@ -283,7 +292,7 @@ def %s (self, %s) -> Registry.%s.datatype:
 
 
 PYTHON_FUNC_DEF = """
-self.%s_function = AlgorithmFunction(
+    self.%s_function = AlgorithmFunction(
           "%s",
           AlgorithmImpl,
           Registry.%s, 
