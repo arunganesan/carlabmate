@@ -54,7 +54,7 @@
 
             // For now literally just use the car models for which we already have models
             "acceptCarModel": { "output": "car-model" }
-
+            
         }
     },
 

@@ -57,9 +57,7 @@ class App extends React.Component<{}, AppState> {
   }
 
   // TODO need to call this on a timer
-  // TODO ONCE we get the relevant data, we just have to set the state,
-  // and that'll automatically propagate to the components
-  // And this is already initialized with the required info, so it should happen quite automatically...
+  // TODO ONCE we get the relevant data, we just have to set the state
   componentDidMount() {
     
     if (this.state.session != null) 

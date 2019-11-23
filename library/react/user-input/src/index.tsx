@@ -87,3 +87,16 @@ export class acceptPhoneNumber extends React.Component<Props, {}> {
   }
 }
 
+
+
+
+
+export class acceptCarModel extends React.Component<Props, {}> {
+  render() {
+    const { update, produce, value } = this.props;
+    /*
+    Enter code here.
+    */
+    return null;
+  }
+}

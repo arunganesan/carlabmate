@@ -34,133 +34,71 @@ def main():
     registry = json.loads(jsmin(open(REGISTRY, 'r').read()))
     algdetails = specs[args.algorithm]
 
+    platform = algdetails['platform']
+    code = CODEGEN_PER_PLATFORM[platform](algdetails)
+    ofile = open('{}/{}-stub.{}'.format(ODIR, platform, EXT[platform]), 'w')
+    ofile.write(code)
+    ofile.close()
 
-"""
-1: props and state definition
 
-type acceptFuelLevelProps = { 
-  produce: Function
-};
 
-type acceptFuelLevelState = {
-  fuelLevel: string
+def write_code_for_android (algdetails):
+  return '1'
+
+
+def write_code_for_react (algdetails):
+  stubs = []
+  for fname, fndetails in algdetails['functions'].items():
+    stubs.append(REACT_STUB % fname)
+  return REACT_TEMPLATE % '\n'.join(stubs)
+
+
+def write_code_for_python (algdetails):
+  return '1'
+
+
+
+REACT_STUB = """
+export class %s extends React.Component<Props, {}> {
+  render() {
+    const { update, produce, value } = this.props;
+    /*
+    Enter code here.
+    */
+    return null;
+  }
 }
-
-
 """
-REACT_TEMPLATE = """
-import * as React from "react";
 
-/************************************
- * AUTO GENERATED - do not change
- **********************************/
+
+
+REACT_TEMPLATE = """import * as React from "react";
+import { Button, Container, Form } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.css";
+
+type Props = { 
+  produce: Function,
+  update: Function,
+  value: any
+};
 
 %s
-
-class acceptFuelLevelBase extends React.Component<acceptFuelLevelProps, acceptFuelLevelState> {
-  constructor(props: acceptFuelLevelProps) {
-    super(props);
-
-    this.state = {
-      // This value changes per thing
-      fuelLevel: '',
-    };
-  }
-}
-
-type acceptPhoneNumberProps = { 
-  produce: Function
-};
-
-type acceptPhoneNumberState = {
-  phoneNumber: string
-}
-
-class acceptPhoneNumberBase extends React.Component<acceptPhoneNumberProps, acceptPhoneNumberState> {
-  constructor(props: acceptPhoneNumberProps) {
-    super(props);
-    this.state = {
-      phoneNumber: '',
-    };
-  }
-}
-
-/************************************
- * End of auto generated
- **********************************/
-
-
-
-
-
-const style = {
-  input: {
-    marginTop: "25px"
-  },
-  button: {
-    marginTop: "25px"
-  }
-};
-
-
-
-
-interface TextInputProps {
-  name: string,
-  value: string,
-  changeVal: Function,
-  produce: Function,
- }
-
-
- 
-
- const TextInput: React.SFC<TextInputProps> = (props) => <Container>
-    <Form.Label style={style.input}>{props.name}</Form.Label>
-      
-    <Form.Control
-        type="text"
-        value={props.value}
-        onChange={(evt: React.ChangeEvent<HTMLInputElement>) =>
-          props.changeVal(evt.target.value)
-        }
-      />
-   
-   
-    <Button
-      onClick={() => props.produce(props.value)}
-      style={style.button}
-      size="lg"
-    >
-      Submit
-    </Button>
-  </Container>;
-
-
-
-export class acceptFuelLevel extends acceptFuelLevelBase {
-
-  render() {
-    return <TextInput
-      name="Enter fuel level"
-      value={this.state.fuelLevel}
-      changeVal={(val: string) => this.setState({fuelLevel: val})}
-      produce={this.props.produce} />
-  }
-}
-
-
-
-export class acceptPhoneNumber extends acceptPhoneNumberBase {
-  render() {
-      return <TextInput
-        name="Enter phone number"
-        value={this.state.phoneNumber}
-        changeVal={(val: string) => this.setState({phoneNumber: val})}
-        produce={this.props.produce} />
-    }
-}
-
-
-
 """
+
+
+EXT = {
+  'react': 'tsx',
+  'python': 'py',
+  'android': 'java'
+}
+
+CODEGEN_PER_PLATFORM = {
+  'react': write_code_for_react,
+  'python': write_code_for_python,
+  'android': write_code_for_android,
+}
+
+
+
+if __name__ == '__main__':
+  main()
