@@ -8,6 +8,9 @@ class TextingController < ApplicationController
     PUBLIC = Rails.root.join('public')
     
     def register_phone    
+        ActiveRecord::Base.logger = nil
+        Rails.logger.level = 5 # at any time
+
         if !params.has_key? :number or !params.has_key? :serverport or !params.has_key? :session
             head :invalid
             return
@@ -27,6 +30,9 @@ class TextingController < ApplicationController
     end
 
     def schedule_text
+        ActiveRecord::Base.logger = nil
+        Rails.logger.level = 5 # at any time
+
         account_sid = ENV['TWILIO_ACCOUNT_SID']
         auth_token = ENV['TWILIO_AUTH_TOKEN']
     
@@ -56,6 +62,8 @@ class TextingController < ApplicationController
 
     def receive_response
         puts request
+        ActiveRecord::Base.logger = nil
+        Rails.logger.level = 5 # at any time
 
         message = params[:Body]
         from_number = params[:From]
