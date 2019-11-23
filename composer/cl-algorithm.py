@@ -23,6 +23,8 @@ def transform_variable_name(name):
     parts = name.split('-')
     return ''.join([p.capitalize() for p in parts])
 
+specs = json.loads(jsmin(open(SPECS, 'r').read()))
+registry = json.loads(jsmin(open(REGISTRY, 'r').read()))
 
 
 def main():
@@ -30,8 +32,6 @@ def main():
     parser.add_argument('--algorithm', default='user-input')
     args = parser.parse_args()
     
-    specs = json.loads(jsmin(open(SPECS, 'r').read()))
-    registry = json.loads(jsmin(open(REGISTRY, 'r').read()))
     algdetails = specs[args.algorithm]
 
     platform = algdetails['platform']
@@ -39,11 +39,6 @@ def main():
     ofile = open('{}/{}-stub.{}'.format(ODIR, platform, EXT[platform]), 'w')
     ofile.write(code)
     ofile.close()
-
-
-
-def write_code_for_android (algdetails):
-    return '1'
 
 
 def write_code_for_react (algdetails):
@@ -91,6 +86,181 @@ def write_code_for_python (algdetails):
         '\n\n'.join(function_invocation),
         '\n\n'.join(function_stubs)
     )
+
+
+
+
+java_datatype_mapping = {
+    'float[2]': 'Float2',
+    'float': 'Float',
+    'int': 'Integer',
+    'string,float': 'Pair',
+    'float[9]': 'Float[]',
+    'float[3]': 'Float3',
+    'string': 'String',
+    'list[float[3]]': 'List<Float[]>'
+}
+
+
+def write_code_for_android (algdetails):
+    function_definitions = []
+    function_invokcations = []
+    function_interfaces = []
+    function_stubs = []
+    
+
+    for fname, fndetails in algdetails['functions'].items():
+        FnUses = [] if 'uses' not in fndetails else fndetails['uses']
+        Output = transform_variable_name(fndetails['output'])
+        Inputs = list(map(transform_variable_name, fndetails['input']))
+        Uses = list(map(transform_variable_name, FnUses))
+        AllInput = Inputs + Uses
+
+        function_definitions.append(JAVA_FUNC_DEF % (
+            fname, fname,
+            'Registry.{}'.format(Output),
+            ', '.join(['Registry.{}'.format(i) for i in AllInput])
+        ))
+
+
+        function_params = []
+        for i in fndetails['input']:
+            datatype = java_datatype_mapping[registry[i]['type']]
+            function_params.append('({}) latestValues.get(Registry.{})'.format(
+                datatype,
+                transform_variable_name(i)
+            ))
+
+
+        function_invokcations.append(JAVA_FUNC_INVOK % (
+            fname, fname,
+            Output, fname, 
+            ', '.join(function_params)            
+        ))
+    
+
+        # public abstract Float2 getLocation (Float3 gps);
+        function_params = []
+        for i in fndetails['input']:
+            datatype = java_datatype_mapping[registry[i]['type']]
+            function_params.append('{} {}'.format(
+                datatype,
+                transform_variable_name(i)
+            ))
+        
+        output_datatype = java_datatype_mapping[registry[fndetails['output']]['type']]
+        _func_header = '{} {} ({})'.format(
+            output_datatype,
+            fname,
+            ', '.join(function_params)
+        )
+
+        function_interfaces.append('public abstract {};'.format(_func_header))
+        function_stubs.append('@Override\npublic {} {{}}'.format(_func_header))
+    
+    
+    base_code = JAVA_BASE_TEMPLATE % (
+        fname,
+        '\n\n'.join(function_definitions),
+        fname,
+        '\n\n'.join(function_invokcations),
+        '\n\n'.join(function_interfaces)
+    )
+
+    impl_code = JAVA_IMPL_TEMPLATE % (
+        fname,
+        '\n\n'.join(function_stubs)
+    )
+
+    return base_code + '\n'*10 + impl_code
+
+
+JAVA_FUNC_DEF = """
+public static Function %s = new Function(
+        "%s",
+        Algorithm.class,
+        %s,
+        %s
+    );
+"""
+
+JAVA_FUNC_INVOK = """
+if (%s.matchesRequired(information) &&
+            %s.haveReceivedAllRequiredData(latestValues.keySet())) {
+            outputData(
+                    Registry.%s,
+                    %s(%s));
+        }
+"""
+
+
+JAVA_BASE_TEMPLATE = """package carlab.%s;
+
+import android.content.Context;
+import android.renderscript.Float2;
+import android.renderscript.Float3;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import edu.umich.carlab.CLDataProvider;
+import edu.umich.carlab.DataMarshal;
+import edu.umich.carlab.Registry;
+
+public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm {
+    Map<Registry.Information, Object> latestValues = new HashMap<>();
+
+    %s
+
+    public AlgorithmBase (CLDataProvider cl, Context context) {
+        super(cl, context);
+        name = "%s";
+    }
+
+    @Override
+    public void newData (DataMarshal.DataObject dObject) {
+        super.newData(dObject);
+
+        Registry.Information information = dObject.information;
+        if (dObject.dataType != DataMarshal.MessageType.DATA) return;
+        if (dObject.value == null) return;
+
+        latestValues.put(information, dObject.value);
+
+
+        %s
+    }
+
+    %s 
+}
+"""
+
+
+JAVA_IMPL_TEMPLATE = """package carlab.%s;
+
+import android.content.Context;
+import android.renderscript.Float2;
+import android.renderscript.Float3;
+
+import edu.umich.carlab.CLDataProvider;
+
+public class Algorithm extends AlgorithmBase {
+    public Algorithm (CLDataProvider cl, Context context) {
+        super(cl, context);
+    }
+
+    %s
+}
+"""
+
+
+
+
+
+
+
+
+
 
 
 
@@ -182,6 +352,32 @@ type Props = {
 
 %s
 """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 EXT = {
   'react': 'tsx',
