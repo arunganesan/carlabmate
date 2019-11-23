@@ -16,6 +16,7 @@ type AppState = {
   required_info: Information[];
   username: string;
   password: string;
+  carFuel: string,
 };
 
 class App extends React.Component<{}, AppState> {
@@ -37,11 +38,13 @@ class App extends React.Component<{}, AppState> {
       };
     this.state = {
       message: "",
-      required_info: [Registry.PhoneNumber],
+      required_info: [Registry.PhoneNumber, Registry.CarFuel],
       showLoginForm: sessionLocal["session"] == null,
       session: sessionLocal["session"],
       username: sessionLocal["username"],
-      password: ""
+      password: "",
+
+      carFuel: '',
     };
 
     this.libcarlab = new Libcarlab(
@@ -55,18 +58,30 @@ class App extends React.Component<{}, AppState> {
   // and that'll automatically propagate to the components
   // And this is already initialized with the required info, so it should happen quite automatically...
   componentDidMount() {
-    this.libcarlab.checkLatestInfo((data: DataMarshal) => {
-      
-      console.log("Got info ", data.info, "with data", data.value);
-    });
-
+    
+    if (this.state.session != null) 
+      this.getLatest();
     // this.libcarlab.checkNewInfo((data: DataMarshal) => {
     //   console.log("Got info ", data.info, "with data", data.value);
     // });
   }
 
+  getLatest() {
+    this.libcarlab.checkLatestInfo((data: DataMarshal) => {
+      console.log(data);
+      if (data.info.name == 'car-fuel') {
+        this.setState({
+          carFuel: data.message.message
+        });
+      }
+      console.log("Got info ", data.info, "with data", data.message);
+    });
+
+  }
+
+  
   tryLoggingIn() {
-    let loginurl = `http://localhost:3000/login?username=${this.state.username}&password=${this.state.password}`;
+    let loginurl = `http://localhost:8080/login?username=${this.state.username}&password=${this.state.password}`;
     fetch(loginurl, {
       method: "post",
       mode: "cors",
@@ -81,6 +96,8 @@ class App extends React.Component<{}, AppState> {
           username: data["username"],
           showLoginForm: false
         });
+
+        this.getLatest();
       })
       .catch(function() {
         console.log("error");
@@ -180,7 +197,9 @@ class App extends React.Component<{}, AppState> {
 
         {this.state.session != null && [
           <AcceptFuelLevel
-            produce={(fuelLevel: Number) => {
+            fuelLevel={this.state.carFuel}
+            update={(carFuel: string) => this.setState({carFuel: carFuel })}
+            produce={(fuelLevel: string) => {
               this.libcarlab.outputNewInfo(
                 new DataMarshal(Registry.CarFuel, fuelLevel),
                 () => {}
@@ -188,14 +207,14 @@ class App extends React.Component<{}, AppState> {
             }}
           />,
 
-          <AcceptPhoneNumber
-            produce={(phoneNumber: Number) => {
-              this.libcarlab.outputNewInfo(
-                new DataMarshal(Registry.PhoneNumber, phoneNumber),
-                () => {}
-              );
-            }}
-          />
+          // <AcceptPhoneNumber
+          //   produce={(phoneNumber: Number) => {
+          //     this.libcarlab.outputNewInfo(
+          //       new DataMarshal(Registry.PhoneNumber, phoneNumber),
+          //       () => {}
+          //     );
+          //   }}
+          // />
         ]}
       </Container>
     );

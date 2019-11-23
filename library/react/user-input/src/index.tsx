@@ -10,26 +10,26 @@ import "bootstrap/dist/css/bootstrap.css";
 
 
 
-type acceptFuelLevelProps = { 
-  produce: Function
-};
+// type acceptFuelLevelProps = { 
+//   produce: Function
+// };
 
-type acceptFuelLevelState = {
-  fuelLevel: string
-}
+// type acceptFuelLevelState = {
+//   fuelLevel: string
+// }
 
 
 
-class acceptFuelLevelBase extends React.Component<acceptFuelLevelProps, acceptFuelLevelState> {
-  constructor(props: acceptFuelLevelProps) {
-    super(props);
+// class acceptFuelLevelBase extends React.Component<acceptFuelLevelProps, acceptFuelLevelState> {
+//   constructor(props: acceptFuelLevelProps) {
+//     super(props);
 
-    this.state = {
-      // This value changes per thing
-      fuelLevel: '',
-    };
-  }
-}
+//     this.state = {
+//       // This value changes per thing
+//       fuelLevel: '',
+//     };
+//   }
+// }
 
 type acceptPhoneNumberProps = { 
   produce: Function
@@ -101,16 +101,44 @@ interface TextInputProps {
 
 
 
-export class acceptFuelLevel extends acceptFuelLevelBase {
+
+type acceptFuelLevelProps = { 
+  produce: Function,
+  update: Function,
+  fuelLevel: string
+};
+
+type acceptFuelLevelState = {}
+
+
+
+export class acceptFuelLevel extends React.Component<acceptFuelLevelProps, acceptFuelLevelState> {
+  constructor(props: acceptFuelLevelProps) {
+    super(props)
+  }
 
   render() {
+    const { update, produce, fuelLevel } = this.props;
+
     return <TextInput
-      name="Enter fuel level"
-      value={this.state.fuelLevel}
-      changeVal={(val: string) => this.setState({fuelLevel: val})}
-      produce={this.props.produce} />
+          name="Enter fuel level"
+          value={fuelLevel}
+          changeVal={(val: string) => update(val)}
+          produce={produce} />
   }
 }
+
+
+
+// export class acceptFuelLevel extends acceptFuelLevelBase {
+//   render() {
+//     return <TextInput
+//       name="Enter fuel level"
+//       value={this.state.fuelLevel}
+//       changeVal={(val: string) => this.setState({fuelLevel: val})}
+//       produce={this.props.produce} />
+//   }
+// }
 
 
 

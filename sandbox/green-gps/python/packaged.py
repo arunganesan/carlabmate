@@ -110,8 +110,9 @@ def main():
             gateway.output_new_info(info, value)
        
         gateway.upload_data()
-
         time.sleep(1)
+
+        storage.clear()
 
         for info, value in gateway.check_new_info().items():
             storage[info] = value

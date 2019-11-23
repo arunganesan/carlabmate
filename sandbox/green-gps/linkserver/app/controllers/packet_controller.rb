@@ -119,7 +119,7 @@ class PacketController < ApplicationController
         
         if user.blank?
             head :invalid
-            puts 'No user found for session', session
+            puts 'No user found for session', params[:session]
             User.all.each do | u |
               puts u.to_json
             end
@@ -131,7 +131,7 @@ class PacketController < ApplicationController
             information = Information.create(name: params[:information])
         end
         last_info = Packet.where(user: user, information: information).order('received DESC').first
-        puts "<- [#{Time.now.utc.iso8601}] Return latest #{information}: #{last_info}: ".colorize(:color => :green)
+        puts "<- [#{Time.now.utc.iso8601}] Return latest #{information.name}: #{last_info.message}: ".colorize(:color => :green)
         render :json => last_info
     end
     

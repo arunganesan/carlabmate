@@ -1,50 +1,40 @@
 #! /usr/bin/env python3.7
-
-import jsmin, json, pprint
+from jsmin import jsmin
+from pprint import pprint
+from typing import *
 from termcolor import cprint
 
-java_datatype_mapping = {
-    'float[2]': 'Float2',
-    'float': 'Float',
-    'int': 'Integer',
-    'float[9]': 'Float[]',
-    'float[3]': 'Float3',
-    'string': 'String',
-}
+import argparse
+import json
+import os
+
+REGISTRY = 'registry.jsonc'
+SPECS = 'specs.jsonc'
+ODIR = 'generated'
+if not os.path.exists(ODIR):
+    os.makedirs(ODIR)
 
 
-python_datatype_mapping = {
-    'float[2]': 'Tuple[float, float]',
-    'float': 'float',
-    'int': 'int',
-    'float[9]': 'List[float]',
-    'float[3]': 'Tuple[float, float, float]',
-    'string': 'str',
-}
 
+def transform_variable_name(name):
+    if name == 'gps':
+        return 'GPS'
 
-def transform_variable_name (name):
     parts = name.split('-')
     return ''.join([p.capitalize() for p in parts])
+
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--algorithm', default='user-input')
+    args = parser.parse_args()
     
+    specs = json.loads(jsmin(open(SPECS, 'r').read()))
+    registry = json.loads(jsmin(open(REGISTRY, 'r').read()))
+    algdetails = specs[args.algorithm]
 
-algorithms = json.loads(jsmin.jsmin(open('specs.jsonc', 'r').read()))
-
-for alg, details in algorithms.items():
-    if details['platform'] == 'android':
-        cprint(alg, 'magenta')
-        # pprint.pprint(details)
-        for func, func_details in details['functions'].items():
-            cprint(func, 'cyan')
-            cprint('\tInput', 'white')
-            for info in func_details['input']:
-                cprint('\t=>'+transform_variable_name(info), 'grey') 
-
-            cprint('\tOutput', 'white')
-            cprint('\t=>'+transform_variable_name(
-                func_details['output']
-            ), 'grey')
-
+    
 
 """
 REACT

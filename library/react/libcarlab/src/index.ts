@@ -57,7 +57,7 @@ export class Libcarlab {
     for (let info of this.requiredInfo)
       fetch(this.latestUrl(info.name))
         .then(res => res.json())
-        .then(data => callback(info, data));
+        .then(data => callback(new DataMarshal(info, data)));
 
     this.lastCheckTime = Math.round(new Date().getTime() / 1000);
   }
