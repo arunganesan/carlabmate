@@ -1,6 +1,0 @@
-{
-    "required": [ "car-speed", "car-steering", "car-gear"],
-    "platforms": [ "android", "python", "react" ],
-    "exclude": [],
-    "choices": {}
-}
