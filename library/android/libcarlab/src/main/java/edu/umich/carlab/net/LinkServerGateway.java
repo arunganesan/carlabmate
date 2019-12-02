@@ -7,7 +7,7 @@ import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.telecom.GatewayInfo;
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -34,13 +34,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.GZIPOutputStream;
 
+import edu.umich.carlab.CLService;
 import edu.umich.carlab.Constants;
 import edu.umich.carlab.DataMarshal;
+import edu.umich.carlab.Registry;
 import edu.umich.carlab.io.MultipartUtility;
 import edu.umich.carlab.utils.Utilities;
 
+import static edu.umich.carlab.Constants.DOWNLOAD_URL;
 import static edu.umich.carlab.Constants.GATEWAY_STATUS;
 import static edu.umich.carlab.Constants.UPLOAD_URL;
 import static edu.umich.carlab.Constants._STATUS_MESSAGE;
@@ -52,91 +54,17 @@ import static edu.umich.carlab.Constants._STATUS_MESSAGE;
  */
 public class LinkServerGateway extends Service {
     public final String TAG = LinkServerGateway.class.getName();
-    ScheduledFuture<?> scheduled = null;
+    final String FILE_INFO_MAPPING = "saved file info mapping";
     final IBinder mBinder = new LinkServerGateway.LocalBinder();
-    ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-
     Map<String, List<DataMarshal.DataObject>> allData = new HashMap<>();
     SharedPreferences prefs;
-    final String FILE_INFO_MAPPING = "saved file info mapping";
+    CLService clService;
+    Map<String, Long> downloadSinceTime =  new HashMap<>();
 
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        // The service is starting, due to a call to startService()
-        // Or an intent
-        return Service.START_STICKY;
-    }
-
-    @Override
-    public void onCreate() {
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
-    }
-
-    @Override
-    public void onDestroy() {
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return mBinder;
-    }
-
-    @Override
-    public boolean onUnbind(Intent intent) {
-        return false;
-    }
-
-    @Override
-    public void onRebind(Intent intent) {
-        // A client is binding to the service with bindService(),
-        // after onUnbind() has already been called
-    }
-
-
-    /****************************************************************
-     * Public functions
-     ***************************************************************/
-    public Map<String, Object> checkNewInfo () {
-        // TODO When new info comes in, we need to call DataMarshal's "broadcast new data"
-        // Or directly call CLService.newData()
-        DataMarshal dm = new DataMarshal(null);
-        // dm.broadcastData("info", "value");
-        return null;
-
-    }
-    
-    public void addNewData (DataMarshal.DataObject data) {
-        /**
-         * Add the data to the internal database
-         * Will be uploaded asynchronously
-         */
-        // Save it locally
-        synchronized (allData) {
-            if (!allData.containsKey(data.information))
-                allData.put(
-                        data.information.name,
-                        new ArrayList<DataMarshal.DataObject>());
-
-            allData.get(data.information.name).add(data);
-        }
-    }
-
-
-    public static File GetTripsDir(Context context) {
-        File tracesDir = context.getExternalFilesDir("traces");
-        tracesDir.mkdirs();
-        return tracesDir;
-    }
-
-    File getNewFile (String infoname) {
-        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.US);
-        String filename = infoname + "-" + dateFormatter.format(Calendar.getInstance().getTime())+ ".json";
-        return new File(GetTripsDir(this), filename);
-    }
-
-    Runnable  uploadRunnable = new Runnable() {
-        public void run() {
+    ScheduledFuture<?> scheduledUploads, scheduledDownloads = null;
+    ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    Runnable uploadRunnable = new Runnable() {
+        public void run () {
             // Save all data to disk
             Map<String, List<DataMarshal.DataObject>> dataHolder;
             synchronized (allData) {
@@ -154,7 +82,6 @@ public class LinkServerGateway extends Service {
                     File saveFile = getNewFile(info);
 
                     FileOutputStream fos = new FileOutputStream(saveFile);
-                    // GZIPOutputStream gos = new GZIPOutputStream(fos);
                     OutputStreamWriter osw = new OutputStreamWriter(fos);
                     BufferedWriter buf = new BufferedWriter(osw);
 
@@ -169,8 +96,7 @@ public class LinkServerGateway extends Service {
                     buf.flush();
                     buf.close();
 
-                    if (!fileInfoMapping.has(info))
-                        fileInfoMapping.put(info, new JSONArray());
+                    if (!fileInfoMapping.has(info)) fileInfoMapping.put(info, new JSONArray());
 
                     JSONArray existingFiles = fileInfoMapping.getJSONArray(info);
                     existingFiles.put(saveFile.getAbsoluteFile());
@@ -182,7 +108,6 @@ public class LinkServerGateway extends Service {
             } catch (JSONException je) {
                 Log.e(TAG, "Couldn't load file info mapping JSON file");
             }
-
 
             // Load all data stored in the local file
             // Get the info/file mapping
@@ -209,17 +134,15 @@ public class LinkServerGateway extends Service {
                     filenames = fileInfoMapping.getJSONArray(info);
 
                     Intent intent = new Intent(GATEWAY_STATUS);
-                    intent.putExtra(_STATUS_MESSAGE, String.format(
-                            "Uploading %s - %d files", info, filenames.length()));
+                    intent.putExtra(_STATUS_MESSAGE, String.format("Uploading %s - %d files", info,
+                                                                   filenames.length()));
                     LinkServerGateway.this.sendBroadcast(intent);
 
 
                     for (int i = 0; i < filenames.length(); i++) {
                         filename = filenames.getString(i);
                         file = new File(filename);
-                        if (!file.exists())
-                            continue;
-
+                        if (!file.exists()) continue;
 
                         String session = prefs.getString(Constants.SESSION, null);
                         URL url = new URL(String.format(UPLOAD_URL, info, session));
@@ -238,13 +161,11 @@ public class LinkServerGateway extends Service {
                 }
 
                 // Delete successful files from shared prefs and file system
-                prefs.edit()
-                        .putString(FILE_INFO_MAPPING, remainingFileInfoMapping.toString())
-                        .commit();
+                prefs.edit().putString(FILE_INFO_MAPPING, remainingFileInfoMapping.toString())
+                     .commit();
 
                 Intent intent = new Intent(GATEWAY_STATUS);
-                intent.putExtra(_STATUS_MESSAGE, String.format(
-                        "Done uploading"));
+                intent.putExtra(_STATUS_MESSAGE, String.format("Done uploading"));
                 LinkServerGateway.this.sendBroadcast(intent);
 
 
@@ -261,26 +182,130 @@ public class LinkServerGateway extends Service {
         }
     };
 
+    public void assignCarlabService(CLService clService) {
+        this.clService = clService;
+    }
 
-    public void scheduleUploads () {
-        if (scheduled == null) {
-            scheduled = scheduler.scheduleAtFixedRate(
-                    uploadRunnable,
-                    0,
-                    10,
-                    TimeUnit.SECONDS);
+    Runnable downloadRunnable = new Runnable() {
+        @Override
+        public void run () {
+            // Make a call to the server
+            // What information do we care about?
+            //  -> ultimately this comes from the configuration file.
+
+            Registry.Information[] requiredInfo = new Registry.Information[] {
+                    Registry.CarModel,
+                    Registry.GearModelFile
+            };
+
+            String session = prefs.getString(Constants.SESSION, null);
+            DataMarshal dm = new DataMarshal(clService);
+
+            for (Registry.Information info : requiredInfo) {
+                if (!downloadSinceTime.containsKey(info.name))
+                    downloadSinceTime.put(info.name, 0L);
+
+                try {
+                    URL url = new URL(String.format(DOWNLOAD_URL, info, session));
+                    MultipartUtility mpu = new MultipartUtility(url);
+                    String response = mpu.finish();
+                    dm.broadcastData(info, response);
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to download info.");
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
+
+    public static File GetTripsDir (Context context) {
+        File tracesDir = context.getExternalFilesDir("traces");
+        tracesDir.mkdirs();
+        return tracesDir;
+    }
+
+    public void addNewData (DataMarshal.DataObject data) {
+        /**
+         * Add the data to the internal database
+         * Will be uploaded asynchronously
+         */
+        // Save it locally
+        synchronized (allData) {
+            if (!allData.containsKey(data.information))
+                allData.put(data.information.name, new ArrayList<DataMarshal.DataObject>());
+
+            allData.get(data.information.name).add(data);
         }
     }
 
-    public void unscheduleUploads () {
-        if (scheduled != null) {
-            scheduled.cancel(false);
-        }
+    /****************************************************************
+     * Public functions
+     ***************************************************************/
+    public Map<String, Object> checkNewInfo () {
+        // TODO When new info comes in, we need to call DataMarshal's "broadcast new data"
+        // Or directly call CLService.newData()
+        DataMarshal dm = new DataMarshal(null);
+        // dm.broadcastData("info", "value");
+        return null;
+
     }
 
+    File getNewFile (String infoname) {
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.US);
+        String filename =
+                infoname + "-" + dateFormatter.format(Calendar.getInstance().getTime()) + ".json";
+        return new File(GetTripsDir(this), filename);
+    }
+
+    @Override
+    public IBinder onBind (Intent intent) {
+        return mBinder;
+    }
+
+    @Override
+    public void onCreate () {
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+    }
+
+    @Override
+    public void onDestroy () {
+    }
+
+    @Override
+    public void onRebind (Intent intent) {
+        // A client is binding to the service with bindService(),
+        // after onUnbind() has already been called
+    }
+
+    @Override
+    public int onStartCommand (Intent intent, int flags, int startId) {
+        // The service is starting, due to a call to startService()
+        // Or an intent
+        return Service.START_STICKY;
+    }
+
+    @Override
+    public boolean onUnbind (Intent intent) {
+        return false;
+    }
+
+    public void scheduleGateway () {
+        if (scheduledUploads == null)
+            scheduledUploads = scheduler.scheduleAtFixedRate(
+                    uploadRunnable, 0, 10, TimeUnit.SECONDS);
+
+        if (scheduledDownloads == null)
+            scheduledDownloads = scheduler.scheduleAtFixedRate(downloadRunnable, 0, 10, TimeUnit.SECONDS);
+
+    }
+
+    public void unscheduleGateway () {
+        if (scheduledUploads != null) scheduledUploads.cancel(false);
+        if (scheduledDownloads != null) scheduledDownloads.cancel(false);
+    }
 
     public class LocalBinder extends Binder {
-        public LinkServerGateway getService() {
+        public LinkServerGateway getService () {
             // Return this instance of LocalService so clients can call public methods
             return LinkServerGateway.this;
         }

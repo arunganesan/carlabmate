@@ -166,6 +166,7 @@ def main():
                 dot.edge(info.name, nn.name)
             
             for nn in info.implemented_by:
+                dot.attr('edge', style='solid')
                 dot.edge(nn.name, info.name)
     
     elif args.draw == 'information':

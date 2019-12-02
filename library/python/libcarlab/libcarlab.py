@@ -71,7 +71,6 @@ class LinkGatewayService:
         self.output_info = output_info
         self.session = session
 
-        # XXX weird to harcode this here
         baseurl = 'http://localhost:8080/'
         self.fetch_url = baseurl + \
             'list?information={info}&session=%s&sincetime={time}' % session

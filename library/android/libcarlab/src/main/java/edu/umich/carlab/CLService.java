@@ -370,6 +370,7 @@ public class CLService extends Service implements CLDataProvider {
 
 
         if (linkServerGatewayBound) {
+            linkServerGateway.unscheduleGateway();
             unbindService(mConnection);
             linkServerGatewayBound = false;
         }
@@ -403,8 +404,8 @@ public class CLService extends Service implements CLDataProvider {
                 hal = new HardwareAbstractionLayer(CLService.this);
 
                 bringAppsToLife();
-                linkServerGateway.scheduleUploads();
-
+                linkServerGateway.assignCarlabService(CLService.this);
+                linkServerGateway.scheduleGateway();
 
                 Log.v(TAG, "Finished startup sequence. We are multiplexing these keys: ");
                 for (Map.Entry<String, Set<String>> appEntry : dataMultiplexing.entrySet()) {

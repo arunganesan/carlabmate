@@ -18,10 +18,14 @@ public class Constants {
     public final static int GPS_INTERVAL = 500;
     public final static float GPS_STARTED_STATUS = 2;
     public static final String INTENT_APP_STATE_UPDATE = "edu.umich.carlab.APP_STATE_UPDATE";
-    public static final String LINKSERVER = "35.3.73.250";
+    public static final String LINKSERVER = "35.3.91.229";
+    public static final String DOWNLOAD_URL =
+            "http://" + LINKSERVER + ":8080/list?information=%s%session=%s&sincetime=%l";
     public static final String LIVE_MODE = "live mode - no saving";
     public static final String LOGINURL =
             "http://" + Constants.LINKSERVER + ":3000/login?username=%s&password=%s";
+    public static final String Last_Activity_Update = "Last_Activity_Update";
+    public static final String Last_Time_In_Vehicle = "Last_Time_In_Vehicle";
     public static final String Load_From_Trace_Duration_End = "load from this trace file ending at";
     public static final String Load_From_Trace_Duration_Start =
             "load from this trace file starting from";
@@ -31,11 +35,6 @@ public class Constants {
     public static final String MASTER_SWITCH_ON = "MasterSwitchON";
     public static final String Main_Activity = "this main activity";
     public static final String ManualChoiceKey = "Manual Button State";
-
-    public static final String Last_Activity_Update = "Last_Activity_Update";
-    public static final String Last_Time_In_Vehicle = "Last_Time_In_Vehicle";
-
-
     /**
      * Return value codes
      **/
@@ -55,7 +54,7 @@ public class Constants {
     public static final String TRIGGER_BT_SEARCH = "TriggerBTSearch";
     public static final String Trip_Id_Offset = "trip id offset";
     public static final String UPLOAD_URL =
-            "http://" + LINKSERVER + ":3000/packet/upload?information=%s&session=%s";
+            "http://" + LINKSERVER + ":8080/add?information=%s&session=%s";
     public static final String _STATUS_MESSAGE = "MESSAGE";
     public static final int sleepCheckPeriod = 5 * 1000; //5*1000;
     public static final int wakeupCheckPeriod = 30 * 1000; //10*1000;
