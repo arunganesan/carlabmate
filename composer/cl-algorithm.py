@@ -74,7 +74,7 @@ def write_code_for_python (algname, algdetails):
         invoke = ['self.latest_values["%s"]' % i for i in fndetails['input'] + FnUses]
         function_invocation.append(PYTHON_FUNC_INVO % (
             fname, fname, fname, fname,
-            invoke, Output
+            ', '.join(invoke), Output
         ))
 
 
