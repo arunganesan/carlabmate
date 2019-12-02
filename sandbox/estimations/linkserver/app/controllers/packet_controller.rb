@@ -106,6 +106,13 @@ class PacketController < ApplicationController
         ActiveRecord::Base.logger = nil
         Rails.logger.level = 5 # at any time
 
+
+        #⚛️
+        ##🐍
+        #🤖
+        #👾
+        #📱
+
         # Must be get
         # Must contain params about info and person and last date
         
