@@ -116,13 +116,9 @@
         "platform": "react",
         "functions": {
             "acceptSightingReport": {
-                "input": ["location"],
+                "input": ["map-matched-location", "sightings-map"],
                 "output": "sighting"
             }
-
-            // "showWarning": {
-            //     "uses": ["sightings-map"]
-            // }
         }
     },
 
