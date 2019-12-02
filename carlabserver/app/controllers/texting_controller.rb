@@ -38,7 +38,6 @@ class TextingController < ApplicationController
     
         @client = Twilio::REST::Client.new(account_sid, auth_token)
         
-        if !params.has_key? :session or !params.has_key? :message
             head :invalid
             return
         end

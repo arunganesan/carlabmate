@@ -56,6 +56,8 @@ def write_code_for_python (algname, algdetails):
     for fname, fndetails in algdetails['functions'].items():
         FnUses = [] if 'uses' not in fndetails else fndetails['uses']
         Output = transform_variable_name(fndetails['output'])
+
+        fndetails.setdefault('input', [])
         Inputs = map(transform_variable_name, fndetails['input'])
         Uses = map(transform_variable_name, FnUses)
         function_definitions.append(PYTHON_FUNC_DEF % (
@@ -285,19 +287,19 @@ PYTHON_FUNC_INVO = """
 """
 
 PYTHON_FUNC_STUB = """
-def %s (self, %s) -> Registry.%s.datatype:
-    # Write code here
-    return None
+    def %s (self, %s) -> Registry.%s.datatype:
+        # Write code here
+        return None
 """
 
 
 PYTHON_FUNC_DEF = """
-    self.%s_function = AlgorithmFunction(
-          "%s",
-          AlgorithmImpl,
-          Registry.%s, 
-          [%s],
-          [%s])
+    %s_function = AlgorithmFunction(
+            "%s",
+            AlgorithmImpl,
+            Registry.%s, 
+            [%s],
+            [%s])
 """
 
 PYTHON_TEMPLATE = """#! /usr/bin/env python3.7
@@ -307,10 +309,13 @@ from termcolor import cprint
 import os, json
 
 class AlgorithmBase (Algorithm):
+
+%s
+
     def __init__ (self):
         self.latest_values = {}
 
-%s       
+    
     
     def add_new_data(self, dobj: DataMarshal) -> List[Union[DataMarshal, None]]:
         return_values = []

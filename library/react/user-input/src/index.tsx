@@ -89,14 +89,40 @@ export class acceptPhoneNumber extends React.Component<Props, {}> {
 
 
 
-
+const carmodels = [
+  "Ford Focus 2016", // https://media.ford.com/content/dam/fordmedia/North%20America/US/product/2016/focus/2016-Ford-Focus-Tech-Specs-FINAL.pdf
+  "Ford Explorer 2016", // https://media.ford.com/content/dam/fordmedia/North%20America/US/product/2016/2016-ford-explorer-tech-specs.pdf
+  "Ford Lincoln MKZ 2018", // https://media.lincoln.com/content/dam/lincolnmedia/lna/us/product/2016/17MKZ-TechSpecs.pdf
+  "Ford Fiesta 2017", // https://www.ford.com/cars/fiesta/2017/models/fiesta-se-hatchback/
+  "Ford Escape 2017" // https://media.ford.com/content/dam/fordmedia/North%20America/US/Events/17-LAAS/2017-ford-escape-tech-specs.pdf
+]
 
 export class acceptCarModel extends React.Component<Props, {}> {
   render() {
     const { update, produce, value } = this.props;
-    /*
-    Enter code here.
-    */
-    return null;
+    return <Container>
+              <Form.Label style={{marginTop: "25p"}}>Choose car model</Form.Label>
+                
+              <Form.Control
+                aria-label="large"
+                aria-describedby="inputGroup-sizing-lg"
+                value={value}
+                onChange={(evt: React.ChangeEvent<HTMLInputElement>) =>
+                   update(evt.target.value)}
+                as="select"
+              >
+                {carmodels.map(elt => (
+                  <option key={elt}>{elt}</option>
+                ))}
+              </Form.Control>
+              
+              <Button
+                onClick={() => produce(value)}
+                style={{marginTop: "25px"}}
+                size="lg"
+              >
+                Submit
+              </Button>
+          </Container>;
   }
 }

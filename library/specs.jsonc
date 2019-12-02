@@ -54,7 +54,6 @@
 
             // For now literally just use the car models for which we already have models
             "acceptCarModel": { "output": "car-model" }
-            
         }
     },
 
@@ -79,6 +78,7 @@
         "platform": "android",
         "functions": {
             "estimateSpeed": {
+                "uses": ["car-model"],
                 "input": ["vehicle-aligned-accel", "gps"],
                 "output": "car-speed"
             },
@@ -88,8 +88,9 @@
                 "input": ["car-speed"],
                 "output": "car-gear"
             },
-
+            
             "estimateSteering": {
+                "uses": ["car-model"],
                 "input": ["car-speed", "gravity-aligned-gyro"],
                 "output": "car-steering"
             }
