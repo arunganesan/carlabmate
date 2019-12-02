@@ -1,35 +1,34 @@
 package carlab.vehicle_estimate;
 
 import android.content.Context;
-import android.location.Location;
 import android.renderscript.Float3;
 import android.util.Log;
 
 import org.tensorflow.lite.Interpreter;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 
 import edu.umich.carlab.CLDataProvider;
 import edu.umich.carlab.Registry;
 
 public class Algorithm extends AlgorithmBase {
     final double INCHES_TO_METERS = 0.0254;
-    final Double MILE_PER_KM = 0.621371;
     final float MPS_TO_KMPH = 1 / 0.621371f;
-    final double TIRE_DIAM = (245 / 1000.0 * 45 / 100.0) * 2 + (18 * INCHES_TO_METERS);
     final float alpha = 0.3f;
     float STEERING_RATIO = 14.8f;
     String TAG = "algorithm";
-    float VEHICLE_LENGTH = (float) (193.9 * INCHES_TO_METERS); // Finally in meters
+    float VEHICLE_LENGTH = (float) (193.9 * INCHES_TO_METERS);
     float[][] inputBuffer = new float[5][1];
-    // It's a 10-sized one-hot encoding
     float[][] labelProb = new float[1][10];
-    Float[] lastGPS;
-    Integer lastGear = null;
-    Location lastLoc, currLoc;
     float lastMeasuredSpeed = 0;
     Float lastSpeed = null;
     long lastSpeedAtTime = 0;
     Float lastYaw = null;
     Object runningPredictionLock = new Object();
+
     Interpreter tflite;
 
     public Algorithm (CLDataProvider cl, Context context) {
@@ -37,22 +36,29 @@ public class Algorithm extends AlgorithmBase {
         enableHistoricalLogging = true;
     }
 
+    private static MappedByteBuffer loadModelFile (String modelFilename) throws IOException {
+        FileInputStream inputStream = new FileInputStream(modelFilename);
+        FileChannel fileChannel = inputStream.getChannel();
+        long declaredLength = fileChannel.size();
+        long startOffset = fileChannel.position();
+        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
+    }
+
     @Override
     public Integer estimateGear (Float CarSpeed, String GearModelFile) {
-        // Download the gear model file name
-        // The speed might change but the gear model download shouldnt change
-        // Download is only a one-time thing.
-        // Once downloaded, run the TensorFlow prediction
-
-        // 1. Check if the model is loaded. If not, return. We should have already loaded it.
+        // 1. Check if the model is loaded. If not, then download the model
         if (tflite == null) {
-            Log.e(TAG, "Tensor Flow Lite model not initialized");
-            return null;
+            Log.v(TAG, "Loading tensorflow model");
+            try {
+                tflite = new Interpreter(loadModelFile(GearModelFile), null);
+            } catch (Exception e) {
+                Log.e(TAG, "Error when loading tensorflow file");
+                e.printStackTrace();
+                return null;
+            }
         }
 
-
         synchronized (runningPredictionLock) {
-            startClock();
             // 2. Get the speed samples at the last [-4, -3, -2, -1, 0] seconds (similar to getLatestData(dev, sen))
             DataSample f1 = getDataAt(Registry.CarSpeed.name, 4000L);
             DataSample f2 = getDataAt(Registry.CarSpeed.name, 3000L);
@@ -93,15 +99,16 @@ public class Algorithm extends AlgorithmBase {
         float gSpeed = GPS.z * MPS_TO_KMPH;
 
         if (lastSpeedAtTime == 0) {
-            lastSpeed = gSpeed;
+            lastMeasuredSpeed = gSpeed;
         } else {
             long dt = System.currentTimeMillis() - lastSpeedAtTime;
-            lastSpeed = alpha * (lastSpeed + VehicleAlignedAccel.x * ((float) dt / 1000.0f)) +
-                        (1 - alpha) * gSpeed;
+            lastMeasuredSpeed =
+                    alpha * (lastMeasuredSpeed + VehicleAlignedAccel.x * ((float) dt / 1000.0f)) +
+                    (1 - alpha) * gSpeed;
         }
 
         lastSpeedAtTime = System.currentTimeMillis();
-        return lastSpeed;
+        return lastMeasuredSpeed;
     }
 
     @Override
