@@ -1,4 +1,4 @@
-PROJECT ?= green-gps
+PROJECT ?= estimations
 
 runreact:
 	( cd sandbox/$(PROJECT)/react && npm start & )

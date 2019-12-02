@@ -5,9 +5,12 @@ from termcolor import cprint
 import os, json
 
 class AlgorithmBase (Algorithm):
+    
+    def __init__ (self, gateway):
+        super().__init__(gateway)
 
-
-    get_gear_model_file_function = AlgorithmFunction(
+        self.latest_values = {}
+        self.get_gear_model_file_function = AlgorithmFunction(
             "get_gear_model_file",
             AlgorithmImpl,
             Registry.GearModelFile, 
@@ -15,8 +18,6 @@ class AlgorithmBase (Algorithm):
             [Registry.CarModel])
 
 
-    def __init__ (self):
-        self.latest_values = {}
 
     
     
@@ -28,10 +29,10 @@ class AlgorithmBase (Algorithm):
         cprint('	Received information: {} = {}'.format(dobj.info, dobj.value), 'magenta')
         cprint('	Latest value has keys: {}'.format(self.latest_values.keys()), 'blue')
         
-
-        if self.get_gear_model_file_function.matches_required(dobj.info) and self.get_gear_model_file_function.have_received_all_required_data(self.latest_values.keys()):        
-            if dobj.info in self.get_gear_model_file_function.inputinfo:
-                retval = self.get_gear_model_file(self.latest_values["car-model"])
+        
+        if self.get_gear_model_file_function.matches_required(dobj.info) and self.get_gear_model_file_function.have_received_all_required_data(self.latest_values.keys()):
+            if dobj.info in self.get_gear_model_file_function.inputinfo or dobj.info in self.get_gear_model_file_function.usesinfo:
+                retval = self.get_gear_model_file(self.latest_values[Registry.CarModel])
                 if retval is not None:
                     return_values.append(DataMarshal(
                         Registry.GearModelFile,
@@ -47,12 +48,13 @@ class AlgorithmBase (Algorithm):
 
 # Split into 2 files if it makes it cleaner 
 class AlgorithmImpl (AlgorithmBase):
-    def __init__ (self):
-        super(AlgorithmImpl, self).__init__()
+    def __init__ (self, gateway):
+        super(AlgorithmImpl, self).__init__(gateway)
 
 
     def get_gear_model_file (self, car_model) -> Registry.GearModelFile.datatype:
         # based on the car model, we will return the pre-trained gear model file
+        car_model = car_model['message']
         model_filenames = {
             'Ford Focus 2016': '1c2b1faf88413eaea1893205d01d65ee',
             'Ford Explorer 2016': '293c5527d05c5a9ddd4696fd608decd7',

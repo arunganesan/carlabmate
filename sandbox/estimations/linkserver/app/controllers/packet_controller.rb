@@ -131,7 +131,11 @@ class PacketController < ApplicationController
             information = Information.create(name: params[:information])
         end
         last_info = Packet.where(user: user, information: information).order('received DESC').first
-        puts "<- [#{Time.now.utc.iso8601}] Return latest #{information.name}: #{last_info.message}: ".colorize(:color => :green)
+        if last_info.nil?
+          puts "<- [#{Time.now.utc.iso8601}] Return latest #{information.name}: None found".colorize(:color => :green)
+        else
+          puts "<- [#{Time.now.utc.iso8601}] Return latest #{information.name}: #{last_info.message}: ".colorize(:color => :green)
+        end
         render :json => last_info
     end
     

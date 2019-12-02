@@ -11,13 +11,14 @@ from typing import List, Dict
 
 import tensorflow_models
 
+_tmp_tensorflow_models = tensorflow_models.algorithm.AlgorithmImpl(None)
 loaded_functions: List[AlgorithmFunction] = [
-	tensorflow_models.algorithm.AlgorithmImpl.get_gear_model_file_function
+	_tmp_tensorflow_models.get_gear_model_file_function
 ]
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--session', default='dd2a4372516dab38535282070785853f')
+    parser.add_argument('--session', default='6068c667d402578ea20a31a809667d98')
     args = parser.parse_args()
     
     LOCALFILE = '{}.db'.format(args.session)
@@ -44,7 +45,7 @@ def main():
         args.session,
         required_info,
         state_refers_info,
-        [], # output info
+        [Registry.GearModelFile], # output info
         LOCALFILE,
         False,
     )
@@ -64,9 +65,6 @@ def main():
             multiplex_routing[info].append(alg)
 
    
-    
-
-
     storage = {}
     if os.path.exists(LOCALFILE):
         storage = pickle.load(open(LOCALFILE, 'rb'))
@@ -92,10 +90,15 @@ def main():
                         new_storage[output.info] = output.value
 
         for info, values in new_storage.items():
-            storage[info] += values
+            storage.setdefault(info, [])
+            if type(info) is list:
+                storage[info] += values
+            else:
+                storage[info].append(values)
         
         for info, value in storage.items():
             gateway.output_new_info(info, value)
+
        
         gateway.upload_data()
         time.sleep(1)

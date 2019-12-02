@@ -36,9 +36,18 @@ public class PackageCLService extends edu.umich.carlab.CLService {
 
     public class PackageStrategy extends Strategy {
         public PackageStrategy () {
-            loadedAlgorithms = Arrays.asList(carlab.vehicle_estimate.Algorithm.class, carlab.aligned_imu.Algorithm.class);
-            loadedFunctions = Arrays.asList(carlab.vehicle_estimate.Algorithm.estimateSpeed, carlab.vehicle_estimate.Algorithm.estimateSteering, carlab.vehicle_estimate.Algorithm.estimateGear, carlab.aligned_imu.Algorithm.produceVehicleAlignedAccel, carlab.aligned_imu.Algorithm.produceGravityAlignedGyro, carlab.aligned_imu.Algorithm.produceVehiclePointingRotation);
-            saveInformation = Arrays.asList(Registry.CarSpeed, Registry.CarSteering, Registry.CarGear, Registry.VehicleAlignedAccel, Registry.GravityAlignedGyro, Registry.VehiclePointingRotation);
+            loadedAlgorithms = Arrays.asList(carlab.vehicle_estimate.Algorithm.class,
+                                             carlab.aligned_imu.Algorithm.class);
+            loadedFunctions = Arrays.asList(carlab.vehicle_estimate.Algorithm.estimateSpeed,
+                                            carlab.vehicle_estimate.Algorithm.estimateSteering,
+                                            carlab.vehicle_estimate.Algorithm.estimateGear,
+                                            carlab.aligned_imu.Algorithm.produceVehicleAlignedAccel,
+                                            carlab.aligned_imu.Algorithm.produceGravityAlignedGyro,
+                                            carlab.aligned_imu.Algorithm.produceVehiclePointingRotation);
+            saveInformation =
+                    Arrays.asList(Registry.CarSpeed, Registry.CarSteering, Registry.CarGear,
+                                  Registry.VehicleAlignedAccel, Registry.GravityAlignedGyro,
+                                  Registry.VehiclePointingRotation);
         }
     }
 }

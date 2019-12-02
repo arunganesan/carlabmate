@@ -42,7 +42,8 @@ class App extends React.Component<{}, AppState> {
       showLoginForm: sessionLocal["session"] == null,
       session: sessionLocal["session"],
       username: sessionLocal["username"],
-      password: ""
+      password: "",
+      carModel: ""
     };
 
     this.libcarlab = new Libcarlab(
@@ -63,13 +64,9 @@ class App extends React.Component<{}, AppState> {
   getLatest() {
     this.libcarlab.checkLatestInfo((data: DataMarshal) => {
       console.log(data);
-      if (data.info.name == 'car-fuel') {
+      if (data.info.name == 'car-model') {
         this.setState({
-          carFuel: data.message.message
-        });
-      } else if (data.info.name == 'phone-number') {
-        this.setState({
-          phoneNumber: data.message.message
+          carModel: data.message.message
         });
       }
       console.log("Got info ", data.info, "with data", data.message);
@@ -197,6 +194,7 @@ class App extends React.Component<{}, AppState> {
             value={this.state.carModel}
             update={(carModel: string) => this.setState({ carModel: carModel })}
             produce={(val: string) => {
+                alert('submitting: ' + val);
                 this.libcarlab.outputNewInfo(
                     new DataMarshal(Registry.CarModel, val),
                     () => {}

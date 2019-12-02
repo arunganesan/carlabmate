@@ -84,11 +84,11 @@ ANDROID_TEMPLATE = """
 package edu.umich.carlab;
 
 import android.hardware.Sensor;
-import android.provider.ContactsContract;
 import android.renderscript.Float2;
 import android.renderscript.Float3;
 import android.util.Pair;
 
+import java.util.List;
 import java.util.Arrays;
 
 import edu.umich.carlab.sensors.ObdSensors;
@@ -220,7 +220,7 @@ java_datatype_mapping = {
     'float[9]': 'Float[]',
     'float[3]': 'Float3',
     'string': 'String',
-    'list[float[3]]': 'List<Float[]>'
+    'list[float[3]]': 'List' # can't do List<Float[]>.class
 }
 
 

@@ -5,8 +5,10 @@ import android.hardware.Sensor;
 import android.provider.ContactsContract;
 import android.renderscript.Float2;
 import android.renderscript.Float3;
+import android.util.Pair;
 
 import java.util.Arrays;
+import java.util.List;
 
 import edu.umich.carlab.sensors.ObdSensors;
 import edu.umich.carlab.sensors.PhoneSensors;
@@ -30,7 +32,7 @@ public class Registry {
     public static Information PhoneNumber = new Information("phone-number", String.class);
     public static Information UserText = new Information("user-text", String.class);
     public static Information Sighting = new Information("sighting", Float3.class);
-    public static Information SightingsMap = new Information("sightings-map", List<Float[]>.class);
+    public static Information SightingsMap = new Information("sightings-map", List.class);
     public static Information GPS = new Information("gps", Float3.class, 1, null, new DevSen(PhoneSensors.DEVICE, PhoneSensors.GPS));
     public static Information Accel = new Information("accel", Float3.class, Sensor.TYPE_ACCELEROMETER, Sensor.STRING_TYPE_ACCELEROMETER, new DevSen(PhoneSensors.DEVICE, PhoneSensors.ACCEL));
     public static Information Magnetometer = new Information("magnetometer", Float3.class, Sensor.TYPE_MAGNETIC_FIELD, Sensor.STRING_TYPE_MAGNETIC_FIELD, new DevSen(PhoneSensors.DEVICE, PhoneSensors.MAGNET));
