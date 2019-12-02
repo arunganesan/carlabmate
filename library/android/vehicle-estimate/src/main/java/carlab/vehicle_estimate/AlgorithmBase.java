@@ -19,7 +19,7 @@ public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm 
             "estimateSpeed",
             Algorithm.class,
             Registry.CarSpeed,
-            Registry.VehicleAlignedAccel, Registry.GPS
+            Registry.VehicleAlignedAccel, Registry.GPS, Registry.CarModel
     );
 
 
@@ -37,7 +37,7 @@ public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm 
             "estimateSteering",
             Algorithm.class,
             Registry.CarSteering,
-            Registry.CarSpeed, Registry.GravityAlignedGyro
+            Registry.CarSpeed, Registry.GravityAlignedGyro, Registry.CarModel
     );
 
 
@@ -64,7 +64,8 @@ public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm 
                     Registry.CarSpeed,
                     estimateSpeed(
                             (Float3) latestValues.get(Registry.VehicleAlignedAccel),
-                            (Float3) latestValues.get(Registry.GPS)));
+                            (Float3) latestValues.get(Registry.GPS),
+                            (String) latestValues.get(Registry.CarModel)));
         }
 
 
@@ -74,7 +75,8 @@ public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm 
             outputData(
                     Registry.CarGear,
                     estimateGear(
-                            (Float) latestValues.get(Registry.CarSpeed)));
+                            (Float) latestValues.get(Registry.CarSpeed),
+                            (String) latestValues.get(Registry.GearModelFile)));
         }
 
 
@@ -85,19 +87,17 @@ public abstract class AlgorithmBase extends edu.umich.carlab.loadable.Algorithm 
                     Registry.CarSteering,
                     estimateSteering(
                             (Float) latestValues.get(Registry.CarSpeed),
-                            (Float) latestValues.get(Registry.GravityAlignedGyro)));
+                            (Float) latestValues.get(Registry.GravityAlignedGyro),
+                            (String) latestValues.get(Registry.CarModel)));
         }
 
     }
 
-    public abstract Float estimateSpeed (Float3 VehicleAlignedAccel, Float3 GPS);
+    public abstract Float estimateSpeed (Float3 VehicleAlignedAccel, Float3 GPS, String CarModel);
 
-    public abstract Integer estimateGear (Float CarSpeed);
+    public abstract Integer estimateGear (Float CarSpeed, String GearModelFile);
 
-    public abstract Float estimateSteering (Float CarSpeed, Float GravityAlignedGyro);
+    public abstract Float estimateSteering (Float CarSpeed, Float GravityAlignedGyro, String CarModel);
 }
-
-
-
 
 

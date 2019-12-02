@@ -113,7 +113,8 @@ def write_code_for_android (algname, algdetails):
 
 
     for fname, fndetails in algdetails['functions'].items():
-        FnUses = [] if 'uses' not in fndetails else fndetails['uses']
+        fndetails.setdefault('uses', [])
+        FnUses = fndetails['uses']
         Output = transform_variable_name(fndetails['output'])
         Inputs = list(map(transform_variable_name, fndetails['input']))
         Uses = list(map(transform_variable_name, FnUses))
@@ -127,7 +128,7 @@ def write_code_for_android (algname, algdetails):
 
 
         function_params = []
-        for i in fndetails['input']:
+        for i in fndetails['input'] + fndetails['uses']:
             datatype = java_datatype_mapping[registry[i]['type']]
             function_params.append('({}) latestValues.get(Registry.{})'.format(
                 datatype,
@@ -144,7 +145,7 @@ def write_code_for_android (algname, algdetails):
 
         # public abstract Float2 getLocation (Float3 gps);
         function_params = []
-        for i in fndetails['input']:
+        for i in fndetails['input'] + fndetails['uses']:
             datatype = java_datatype_mapping[registry[i]['type']]
             function_params.append('{} {}'.format(
                 datatype,

@@ -96,6 +96,87 @@ public abstract class App implements IApp {
         Log.v(name, String.format("Ran in ms: %d", (endTime - startTime)));
     }
 
+    /**
+     * Returns the time bucket index
+     * This function takes the timetamp, which is in milliseconds, and returns the nearest bucket that contains it
+     * The bucket size is determined by the constant SECONDS_PER_BUCKET (default = 5)
+     * I.e., all timestamps within a certain 5 second window are assigned the same bucket
+     * <p>
+     * Note, two very similar timestamps might still be divided across buckets.
+     *
+     * @param timestamp
+     * @return
+     */
+    public Long bucketTime(Long timestamp) {
+        return Math.round((timestamp.doubleValue()
+                           / 1000.0
+                           / SECONDS_PER_BUCKET));
+    }
+
+    /**
+     * Gets the data that is closest to the seconds offset.
+     * The sensor is the split raw sensor value. Consult the middleware or sensor sources for split sensor names
+     * For example, if the data you need is phone/accel, you need to call this function with:
+     * getDataAt(phone, accel_x, 0); getDataAt(phone, accel_y, 0); getDataAt(phone, accel_z, 0)
+     * <p>
+     * Note, this happens much more infrequently than adding to the historical data
+     * We should put the heavy lifting of searching here and try to make insertion faster
+     *
+     * @param devsen
+     * @param millisecondsOffset
+     * @return
+     */
+    public DataSample getDataAt(String devsen, Long millisecondsOffset) {
+        if (!enableHistoricalLogging) return null;
+        /*
+            Take current time
+            Take seconds offset from current time
+            Index into the rough ~5 second window (data indexed by 5 seconds)
+            Search through 5 second window for the nearest timestamp
+            Return that data
+         */
+
+        Long currTime = System.currentTimeMillis();
+        Long searchTime = currTime - millisecondsOffset;
+        Long bucket = bucketTime(searchTime);
+
+
+
+        if (!historicalData.containsKey(devsen)) {
+            Log.e(TAG, String.format("Sensor not found in historical data[%s]", devsen));
+            return null;
+        }
+
+        if (!historicalData.get(devsen).containsKey(bucket)) {
+            Log.e(TAG, String.format("Bucket not found in historical data[%s][%s][%d]", devsen, bucket));
+            StringBuilder sb = new StringBuilder();
+            for (Map.Entry<Long, List<DataSample>> keyValue : historicalData.get(devsen).entrySet()) {
+                sb.append(String.format("%d [%d], ", keyValue.getKey(), keyValue.getValue().size()));
+            }
+            Log.v(TAG, String.format("Historical data only has: " + sb.toString()));
+            return null;
+        }
+
+
+        List<DataSample> bucketSamples = historicalData.get(devsen)
+                                                       .get(bucket);
+        // Find the nearest datapoint
+        // We can easily improve this by using a sorted list or binary searching
+        Long nearestDiff = SECONDS_PER_BUCKET * 1000L; // At max this is the difference
+        DataSample nearestSample = null;
+        for (DataSample sample : bucketSamples) {
+            Long diff = Math.abs(sample.time - searchTime);
+            if (diff < nearestDiff) {
+                nearestDiff = diff;
+                nearestSample = sample;
+            }
+        }
+
+        return nearestSample;
+    }
+
+
+
     @CallSuper
     @Override
     public void newData(DataMarshal.DataObject dObject) {
@@ -103,6 +184,23 @@ public abstract class App implements IApp {
         Registry.Information information = dObject.information;
         latestData.put(information, dObject);
         latestDataTime.put(information, System.currentTimeMillis());
+
+        String devsen = dObject.information.name;
+        Long timestamp = dObject.time;
+
+        // Only support historical logging for floats
+        if (enableHistoricalLogging && dObject.information.dataType == Float.class) {
+            Long bucket = bucketTime(timestamp);
+
+            Float val;
+            historicalData.putIfAbsent(devsen, new HashMap<Long, List<DataSample>>());
+            historicalData.get(devsen).putIfAbsent(bucket, new ArrayList<DataSample>());
+            historicalData.get(devsen)
+                          .get(bucket)
+                          .add(new DataSample(
+                              timestamp,
+                              (Float)dObject.value));
+        }
     }
 
     /**
