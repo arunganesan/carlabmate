@@ -2,6 +2,7 @@ package carlab.vehicle_estimate;
 
 import android.content.Context;
 import android.location.Location;
+import android.renderscript.Float3;
 
 import java.util.Map;
 
@@ -30,27 +31,29 @@ public class Algorithm extends AlgorithmBase {
     Float lastSpeed = null;
     Float lastYaw = null;
     Double previousFuelLevel; // in liters
+
     public Algorithm (CLDataProvider cl, Context context) {
         super(cl, context);
-        name = "watchfone";
     }
 
-
-    public Float produceCarGear (Float car_speed) {
+    @Override
+    public Integer estimateGear (Float CarSpeed) {
         // TODO.
-        return 0F;
+        return 0;
     }
 
-
-    public Float produceCarSpeed (Float[] aligned_accel, Float[] gps) {
-        return gps[2] * MPS_TO_KMPH;
+    @Override
+    public Float estimateSpeed (Float3 VehicleAlignedAccel, Float3 GPS) {
+        return GPS.z * MPS_TO_KMPH;
     }
 
-    public Float produceCarSteering (Float[] aligned_gyro, Float car_speed) {
+    @Override
+    public Float estimateSteering (Float CarSpeed, Float GravityAlignedGyro) {
         Double steering = (double) (lastSpeed / lastYaw);
         steering = Math.asin(VEHICLE_LENGTH / steering);
         steering = STEERING_RATIO * steering;
         steering *= 180 / Math.PI;
         return steering.floatValue();
     }
+
 }

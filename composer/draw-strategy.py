@@ -27,6 +27,7 @@ class Information ():
     def __init__ (self, name):
         self.name = name
         self.implemented_by = []
+        self.input_by = []
         self.used_by = []
 
     def node (self):
@@ -99,7 +100,6 @@ def main():
             * we can label the edges with the algorithm's name
     """
 
-    output_used_by = {}
     expanded_strategy = {}
 
     indexed_information = {}
@@ -132,8 +132,11 @@ def main():
         )
 
         outnode.implemented_by.append(alg)
-        for i in inputnodes + usesnodes:
+        for i in usesnodes:
             i.used_by.append(alg)
+
+        for i in inputnodes:
+            i.input_by.append(alg)
         
         indexed_algorithm[nodename] = alg
 
@@ -152,8 +155,14 @@ def main():
             else:
                 dot.attr('node', pencolor='black',  penwidth='1')
             dot.node(info.name)
+            
 
             for nn in info.used_by:
+                dot.attr('edge', style='dashed')
+                dot.edge(info.name, nn.name)
+
+            for nn in info.input_by:
+                dot.attr('edge', style='solid')
                 dot.edge(info.name, nn.name)
             
             for nn in info.implemented_by:
@@ -180,7 +189,7 @@ def main():
             dot.node(alg.name)
         
         for alg in indexed_algorithm.values():
-            for a2 in alg.outputinfo.used_by:
+            for a2 in alg.outputinfo.used_by + alg.outputinfo.input_by:
                 dot.edge(alg.name, a2.name, label=alg.outputinfo.name)
 
     # else if args.draw == 'both':
