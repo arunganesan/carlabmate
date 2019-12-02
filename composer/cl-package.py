@@ -127,21 +127,22 @@ Registry.Location, Registry.CarFuel
 
 def write_code_for_python (func_per_algorithms):
     import_calls = []
-    create_alg = []
+    # create_alg = []
     list_of_functions = []
 
     for alg, functions in func_per_algorithms.items():
         Alg = alg.replace('-', '_')
-        TmpAlg = '_tmp_{0}'.format(Alg)
+        # TmpAlg = '_tmp_{0}'.format(Alg)
         import_calls.append('import {}'.format(Alg))
-        create_alg.append('{} = {}.algorithm.AlgorithmImpl()'.format(TmpAlg, Alg))
+        # create_alg.append('{} = {}.algorithm.AlgorithmImpl()'.format(TmpAlg, Alg))
         
         for funcname, funcdetails in functions.items():
-            list_of_functions.append('\t{}.{}_function'.format(TmpAlg, funcname))
+            list_of_functions.append('\t{}.algorithm.AlgorithmImpl.{}_function'.format(
+              Alg, 
+              funcname))
 
     return PYTHON_PACKAGE_CODE % (
         '\n'.join(import_calls),
-        '\n'.join(create_alg),
         ',\n'.join(list_of_functions)
     ) 
         
@@ -251,18 +252,29 @@ class App extends React.Component<{}, AppState> {
     );
   }
 
-  // TODO need to call this on a timer
-  // TODO ONCE we get the relevant data, we just have to set the state,
-  // and that'll automatically propagate to the components
-  // And this is already initialized with the required info, so it should happen quite automatically...
   componentDidMount() {
-    this.libcarlab.checkNewInfo((data: DataMarshal) => {
-      // console.log("Got info ", data.info, "with data", data.value);
-    });
+    if (this.state.session != null) 
+      this.getLatest();
   }
 
+  getLatest() {
+    this.libcarlab.checkLatestInfo((data: DataMarshal) => {
+      console.log(data);
+      if (data.info.name == 'car-fuel') {
+        this.setState({
+          carFuel: data.message.message
+        });
+      } else if (data.info.name == 'phone-number') {
+        this.setState({
+          phoneNumber: data.message.message
+        });
+      }
+      console.log("Got info ", data.info, "with data", data.message);
+    });
+
+  }
   tryLoggingIn() {
-    let loginurl = `http://localhost:3000/login?username=${this.state.username}&password=${this.state.password}`;
+    let loginurl = `http://localhost:8080/login?username=${this.state.username}&password=${this.state.password}`;
     fetch(loginurl, {
       method: "post",
       mode: "cors",
@@ -277,6 +289,8 @@ class App extends React.Component<{}, AppState> {
           username: data["username"],
           showLoginForm: false
         });
+
+        this.getLatest();
       })
       .catch(function() {
         console.log("error");
@@ -449,8 +463,6 @@ from typing import List, Dict
 
 %s
 
-%s
-
 loaded_functions: List[AlgorithmFunction] = [
 %s
 ]
@@ -470,8 +482,28 @@ def main():
     multiplex_routing: Dict[Information, List[Algorithm]] = {}
 
     for func in loaded_functions:
+      # Loop through
+      # this is all the required info
+      required_info: List[Information] = []
+      state_refers_info: List[Information] = []
+      for func in loaded_functions:
+          required_info += func.inputinfo
+          required_info += func.usesinfo
+          state_refers_info += func.usesinfo
+    
+    # which ones to output are specified in the spec
+    gateway = LinkGatewayService(
+        args.session,
+        required_info,
+        state_refers_info,
+        [], # output info
+        LOCALFILE,
+        False,
+    )
+
+    for func in loaded_functions:
         # instantiate all classes
-        alg = func.belongsto()
+        alg = func.belongsto(gateway)
         running_algorithms.append(alg)
 
         # set up multiplexing
@@ -483,26 +515,8 @@ def main():
             multiplex_routing.setdefault(info, [])
             multiplex_routing[info].append(alg)
 
-    # Loop through
-    # infonames = [info.name for alg in running_algorithms]
-    # this is all the required info
-    required_info: List[Information] = []
-    state_refers_info: List[Information] = []
-    for func in loaded_functions:
-        required_info += func.inputinfo
-        required_info += func.usesinfo
-        state_refers_info += func.usesinfo
-
-    # XXX the output sensors from here
-    # which ones to output are specified in the spec
-    gateway = LinkGatewayService(
-        args.session,
-        required_info,
-        state_refers_info,
-        [], # output info
-        LOCALFILE,
-        False,
-    )
+   
+    
 
 
     storage = {}
@@ -515,14 +529,12 @@ def main():
         storage[info] = value
 
     while True:
-        cprint('Running', 'green')
-        for info, value in gateway.check_new_info().items():
-            storage[info] = value
-        
         new_storage = {}
         for info, values in storage.items():
             if info in multiplex_routing:
                 for alg in multiplex_routing[info]:
+                    if type(value) is list and len(value) == 0:
+                        continue
                     dm = DataMarshal(info, value)
                     output_values = alg.add_new_data(dm)
                     for output in output_values:
@@ -531,21 +543,19 @@ def main():
                         new_storage.setdefault(output.info, [])
                         new_storage[output.info] = output.value
 
-                # TODO need to throw it away once consumed
-        
- 
         for info, values in new_storage.items():
-            storage.setdefault(info, [])
             storage[info] += values
         
         for info, value in storage.items():
             gateway.output_new_info(info, value)
        
         gateway.upload_data()
-
         time.sleep(1)
-
-
+        storage.clear()
+        
+        for info, value in gateway.check_new_info().items():
+            storage[info] = value
+    
 if __name__ == '__main__':
     main()
 """

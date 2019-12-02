@@ -1,0 +1,6 @@
+include ':app', ':aligned-imu', ':vehicle-estimate', ':libcarlab'
+rootProject.name='Packaged'
+
+project(':libcarlab').projectDir = new File(settingsDir, '../../../library/android/libcarlab')
+project(':aligned-imu').projectDir = new File(settingsDir, '../../../library/android/aligned-imu')
+project(':vehicle-estimate').projectDir = new File(settingsDir, '../../../library/android/vehicle-estimate')
