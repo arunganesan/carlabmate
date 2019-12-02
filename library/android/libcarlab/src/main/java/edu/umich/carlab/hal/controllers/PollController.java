@@ -50,9 +50,9 @@ public class PollController {
                         // Couldnt make the call.
                         // XXX How do we signify the error?
                         String errorMsg = "Sensor Error: " + e.getMessage();
-                        dm.broadcastData(
-                                Registry.DevSenToInformation(new DevSen(DeviceName, SensorName)),
-                                -1f, DataMarshal.MessageType.ERROR);
+                        // dm.broadcastData(
+                        //         Registry.DevSenToInformation(new DevSen(DeviceName, SensorName)),
+                        //         -1f, DataMarshal.MessageType.ERROR);
                         //Log.e(TAG, errorMsg);
 
                         // Even if there's error, we should keep polling?

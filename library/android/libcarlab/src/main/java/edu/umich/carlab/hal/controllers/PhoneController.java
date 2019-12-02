@@ -170,16 +170,16 @@ public class PhoneController {
                             .requestLocationUpdates(mLocationRequest, mLocationCallback, looper);
                 } catch (SecurityException se) {
                     Log.e(TAG, "GPS Security Exception.");
-                    dm.broadcastData(Registry.DevSenToInformation(
-                            new DevSen(PhoneSensors.DEVICE, PhoneSensors.GPS)),
-                                     Constants.NO_GPS_PERMISSION_ERROR,
-                                     DataMarshal.MessageType.ERROR);
+                    // dm.broadcastData(Registry.DevSenToInformation(
+                    //         new DevSen(PhoneSensors.DEVICE, PhoneSensors.GPS)),
+                    //                  Constants.NO_GPS_PERMISSION_ERROR,
+                    //                  DataMarshal.MessageType.ERROR);
                     return;
                 }
 
-                dm.broadcastData(Registry.DevSenToInformation(
-                        new DevSen(PhoneSensors.DEVICE, PhoneSensors.GPS)),
-                                 Constants.GPS_STARTED_STATUS, DataMarshal.MessageType.STATUS);
+                // dm.broadcastData(Registry.DevSenToInformation(
+                //         new DevSen(PhoneSensors.DEVICE, PhoneSensors.GPS)),
+                //                  Constants.GPS_STARTED_STATUS, DataMarshal.MessageType.STATUS);
             }
         }
     }
@@ -259,11 +259,11 @@ public class PhoneController {
             String formatted = "";
             int sensorType = sensorEvent.sensor.getType();
             String sensorGroupName = PhoneSensors.typeToSensorName(sensorType);
-            Float[] values = new Float[sensorEvent.values.length];
-            for (int i = 0; i < sensorEvent.values.length; i++) {
-                values[i] = sensorEvent.values[i];
-            }
-
+            // Float[] values = new Float[sensorEvent.values.length];
+            Float3 values = new Float3(sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]);
+            // for (int i = 0; i < sensorEvent.values.length; i++) {
+            //     values[i] = sensorEvent.values[i];
+            // }
             dm.broadcastData(ms, Registry.DevSenToInformation(
                     new DevSen(PhoneSensors.DEVICE, sensorGroupName)), values,
                              DataMarshal.MessageType.DATA);

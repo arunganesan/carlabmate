@@ -206,10 +206,15 @@ public class LinkServerGateway extends Service {
                     downloadSinceTime.put(info.name, 0L);
 
                 try {
-                    URL url = new URL(String.format(DOWNLOAD_URL, info, session));
+                    String iname = info.name;
+                    long sinceTime = downloadSinceTime.get(info.name);
+                    String urlString = String.format(DOWNLOAD_URL, iname, session, sinceTime);
+                    URL url = new URL(urlString);
                     MultipartUtility mpu = new MultipartUtility(url);
+                    mpu.addFormField("tmp", "empty");
                     String response = mpu.finish();
                     dm.broadcastData(info, response);
+                    downloadSinceTime.put(info.name, System.currentTimeMillis() / 1000);
                 } catch (Exception e) {
                     Log.e(TAG, "Failed to download info.");
                     e.printStackTrace();

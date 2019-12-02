@@ -67,7 +67,7 @@ class PacketController < ApplicationController
         # move file to location
         if params.has_key? :file
             file = FileUtils.copy_entry params[:file].tempfile.path, save_filename
-            puts 'saved file to ', save_filename
+            # puts 'saved file to ', save_filename
             packet.file = save_filename
         end
         
@@ -103,8 +103,8 @@ class PacketController < ApplicationController
 
 
     def latest
-        ActiveRecord::Base.logger = nil
-        Rails.logger.level = 5 # at any time
+        # ActiveRecord::Base.logger = nil
+        # Rails.logger.level = 5 # at any time
 
 
         #⚛️
@@ -152,13 +152,16 @@ class PacketController < ApplicationController
 
         # Must be get
         # Must contain params about info and person and last date
-        if !request.get? or !params.has_key? :information or !params.has_key? :session or !params.has_key? :sincetime
+        if !params.has_key? :information or !params.has_key? :session or !params.has_key? :sincetime
+            # puts "MISSING PARAMS: "
+            # puts params
             head :invalid
             return
         end
 
         user = User.find_by(session: params[:session])
         if user.blank?
+            puts "MISSING USER NOT FOUND"
             head :invalid
             return
         end

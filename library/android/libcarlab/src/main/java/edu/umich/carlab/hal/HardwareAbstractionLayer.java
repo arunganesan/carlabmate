@@ -158,8 +158,8 @@ public class HardwareAbstractionLayer {
         if (!initializeSensor) return true;
 
         // Else, we will start this sensor.
-        dm.broadcastData(Registry.DevSenToInformation(new DevSen(device, sensor)),
-                         Constants.GENERAL_STATUS, DataMarshal.MessageType.STATUS);
+        // dm.broadcastData(Registry.DevSenToInformation(new DevSen(device, sensor)),
+        //                  Constants.GENERAL_STATUS, DataMarshal.MessageType.STATUS);
 
         switch (device) {
             case PhoneSensors.DEVICE:
@@ -171,8 +171,8 @@ public class HardwareAbstractionLayer {
                 } catch (Exception e) {
                     Log.e(TAG, "Error starting listener " + listenerKey + " got error: " +
                                e.getMessage());
-                    dm.broadcastData(Registry.DevSenToInformation(new DevSen(device, sensor)),
-                                     Constants.GENERAL_ERROR, DataMarshal.MessageType.ERROR);
+                    // dm.broadcastData(Registry.DevSenToInformation(new DevSen(device, sensor)),
+                    //                  Constants.GENERAL_ERROR, DataMarshal.MessageType.ERROR);
 
                     // No need to destroy this sensor since we didn't really make it
                     listenerMap.removeSubscriber(listenerKey);
@@ -180,8 +180,8 @@ public class HardwareAbstractionLayer {
                 }
             case OpenXcSensors.DEVICE:
                 if (!OpenXcSensors.validSensor(sensor)) {
-                    dm.broadcastData(Registry.DevSenToInformation(new DevSen(device, sensor)),
-                                     Constants.GENERAL_ERROR, DataMarshal.MessageType.ERROR);
+                    // dm.broadcastData(Registry.DevSenToInformation(new DevSen(device, sensor)),
+                    //                  Constants.GENERAL_ERROR, DataMarshal.MessageType.ERROR);
                     listenerMap.removeSubscriber(listenerKey);
                     return false;
                 }
@@ -199,8 +199,8 @@ public class HardwareAbstractionLayer {
                 Log.v(TAG, "Starting OBD inside thread ID: " + Thread.currentThread().getId());
                 if (!obdController.isInitialized()) obdController.startupSync();
                 if (!obdController.validSensor(sensor)) {
-                    dm.broadcastData(Registry.DevSenToInformation(new DevSen(device, sensor)),
-                                     Constants.GENERAL_ERROR, DataMarshal.MessageType.ERROR);
+                    // dm.broadcastData(Registry.DevSenToInformation(new DevSen(device, sensor)),
+                    //                  Constants.GENERAL_ERROR, DataMarshal.MessageType.ERROR);
                     listenerMap.removeSubscriber(listenerKey);
                     return false;
                 } else {
@@ -212,8 +212,8 @@ public class HardwareAbstractionLayer {
                     return true;
                 }
             default:
-                dm.broadcastData(Registry.DevSenToInformation(new DevSen(device, sensor)),
-                                 Constants.GENERAL_ERROR, DataMarshal.MessageType.ERROR);
+                // dm.broadcastData(Registry.DevSenToInformation(new DevSen(device, sensor)),
+                //                  Constants.GENERAL_ERROR, DataMarshal.MessageType.ERROR);
                 listenerMap.removeSubscriber(listenerKey);
                 return false;
         }

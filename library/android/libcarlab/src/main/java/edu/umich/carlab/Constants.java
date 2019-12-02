@@ -20,10 +20,10 @@ public class Constants {
     public static final String INTENT_APP_STATE_UPDATE = "edu.umich.carlab.APP_STATE_UPDATE";
     public static final String LINKSERVER = "35.3.91.229";
     public static final String DOWNLOAD_URL =
-            "http://" + LINKSERVER + ":8080/list?information=%s%session=%s&sincetime=%l";
+            "http://" + LINKSERVER + ":8080/list?information=%s&session=%s&sincetime=%d";
     public static final String LIVE_MODE = "live mode - no saving";
     public static final String LOGINURL =
-            "http://" + Constants.LINKSERVER + ":3000/login?username=%s&password=%s";
+            "http://" + Constants.LINKSERVER + ":8080/login?username=%s&password=%s";
     public static final String Last_Activity_Update = "Last_Activity_Update";
     public static final String Last_Time_In_Vehicle = "Last_Time_In_Vehicle";
     public static final String Load_From_Trace_Duration_End = "load from this trace file ending at";

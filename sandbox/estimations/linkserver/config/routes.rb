@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   get 'packet/latest'
 
   post 'add', to: 'packet#upload'
+  post 'list', to: 'packet#list'
   get 'list', to: 'packet#list'
   get 'latest', to: 'packet#latest'
 
