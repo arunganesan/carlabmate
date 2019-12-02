@@ -1,12 +1,16 @@
 package carlab.aligned_imu;
 
 import android.content.Context;
+import android.location.Location;
+import android.renderscript.Float2;
 import android.renderscript.Float3;
 
 import edu.umich.carlab.CLDataProvider;
 
 public class Algorithm extends AlgorithmBase {
     private Float[] lastMagnet, lastGravity, lastGyro, lastAccel, lastRotation;
+
+    private Float3 lastGps = null;
 
     public Algorithm (CLDataProvider cl, Context context) {
         super(cl, context);
@@ -15,6 +19,46 @@ public class Algorithm extends AlgorithmBase {
     @Override
     public Float[] produceWorldPointingRotation (Float3 m, Float3 g) {
         // Cross product of magnet and gravity
+        return rotmat(m, g);
+    }
+
+
+    @Override
+    public Float3 produceWorldAlignedGyro (Float3 gyro, Float[] rm) {
+        return mmul(gyro, rm);
+    }
+
+    @Override
+    public Float3 produceWorldAlignedAccel (Float3 accel, Float[] rm) {
+        return mmul(accel, rm);
+    }
+
+    @Override
+    public Float[] produceVehiclePointingRotation (Float3 magnet, Float3 gps, Float3 gravity) {
+        if (lastGps == null) {
+            lastGps = gps;
+            return null;
+        }
+
+        Float2 delta = norm(new Float2(gps.x - lastGps.x, gps.y - lastGps.y));
+        Float3 bearingInWorldFrame = new Float3(delta.x, delta.y, 0);
+        Float[] transformationMatrix = rotmat(magnet, gravity);
+        Float3 bearingInPhoneFrame = mmul(transformationMatrix, bearingInWorldFrame);
+        return rotmat(gravity, bearingInPhoneFrame);
+    }
+
+    @Override
+    public Float3 produceVehicleAlignedAccel(Float3 accel, Float[] rm) {
+        return mmul(accel, rm);
+    }
+
+    @Override
+    public Float produceGravityAlignedGyro(Float3 gravity, Float3 gyro) {
+        return gravity.x*gyro.x + gravity.y*gyro.y + gravity.z*gyro.z;
+    }
+
+
+    Float[] rotmat (Float3 m, Float3 g) {
         Float[] rm = new Float[9];
 
 
@@ -24,14 +68,8 @@ public class Algorithm extends AlgorithmBase {
                 m.x * g.y - m.y * g.x);
 
         // Divide by norm
-        float norm = (float) Math.sqrt(c.x * c.x + c.y * c.y + c.z * c.z);
-        c.x /= norm;
-        c.y /= norm;
-        c.z /= norm;
-        norm = (float) Math.sqrt(g.x * g.x + g.y * g.y + g.z * g.z);
-        g.x /= norm;
-        g.y /= norm;
-        g.z /= norm;
+        c = norm(c);
+        g = norm(g);
 
         // Reconstruct the magnet using another cross product
         Float3 nm = new Float3(
@@ -40,12 +78,17 @@ public class Algorithm extends AlgorithmBase {
                 g.x * c.y - g.y * c.x);
 
         // Assign values
+        // First row
         rm[0] = c.x;
         rm[1] = c.y;
         rm[2] = c.z;
+
+        // Second row
         rm[3] = nm.x;
         rm[3 + 1] = nm.y;
         rm[3 + 2] = nm.z;
+
+        // Third row
         rm[2 * 3] = g.x;
         rm[2 * 3 + 1] = g.y;
         rm[2 * 3 + 2] = g.z;
@@ -54,38 +97,34 @@ public class Algorithm extends AlgorithmBase {
     }
 
 
-    @Override
-    public Float3 produceWorldAlignedGyro (Float3 gyro, Float[] rm) {
-        return MatrixMul(gyro, rm);
+    Float2 norm (Float2 vec) {
+        Float2 c = new Float2(vec.x, vec.y);
+        float norm = (float) Math.sqrt(c.x * c.x + c.y * c.y);
+        c.x /= norm;
+        c.y /= norm;
+        return c;
     }
 
-    @Override
-    public Float3 produceWorldAlignedAccel (Float3 accel, Float[] rm) {
-        return MatrixMul(accel, rm);
-    }
-
-    @Override
-    public Float[] produceVehiclePointingRotation (Float3 magnet, Float3 gps, Float3 gravity) {
-        // Take consecutive GPS points, get the bearing
-        // Get basis vector based on that and magnetic north
-        // Translate back
-        // TODO indeed.
-        return new Float[]{};
-    }
-
-    @Override
-    public Float3 produceVehicleAlignedAccel(Float3 accel, Float[] rm) {
-        return MatrixMul(accel, rm);
-    }
-
-    @Override
-    public Float produceGravityAlignedGyro(Float3 gravity, Float3 gyro) {
-        // AKA the dot product
-        return gravity.x*gyro.x + gravity.y*gyro.y + gravity.z*gyro.z;
+    Float3 norm (Float3 vec) {
+        Float3 c = new Float3(vec.x, vec.y, vec.z);
+        float norm = (float) Math.sqrt(c.x * c.x + c.y * c.y + c.z * c.z);
+        c.x /= norm;
+        c.y /= norm;
+        c.z /= norm;
+        return c;
     }
 
 
-    public Float3 MatrixMul (Float3 T3, Float[] RotMat) {
+
+    public Float3 mmul (Float[] mat, Float3 v) {
+        return new Float3(
+        mat[0] * v.x + mat[1] * v.y + mat[2] * v.z,
+        mat[3] * v.x + mat[4] * v.y + mat[5] * v.z,
+        mat[6] * v.x + mat[7] * v.y + mat[8] * v.z
+        );
+    }
+
+    public Float3 mmul (Float3 T3, Float[] RotMat) {
         Float[] T = new Float[] { T3.x, T3.y, T3.z };
         Float[] temp = T.clone();
         for (int i = 0; i < T.length; i++)
