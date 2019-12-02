@@ -38,12 +38,12 @@ class TextingController < ApplicationController
     
         @client = Twilio::REST::Client.new(account_sid, auth_token)
         
-        if !params.has_key? :number or !params.has_key? :message
+        if !params.has_key? :session or !params.has_key? :message
             head :invalid
             return
         end
         
-        tablerow = Phone.find_by(phoneno: params[:number])
+        tablerow = Phone.find_by(session: params[:session])
         if tablerow.blank?
             head :invalid
             return
@@ -53,7 +53,7 @@ class TextingController < ApplicationController
         message = @client.messages.create(
             body: params[:message],
             from: '+17344363993',
-            to: params[:number]
+            to: tablerow.phoneno
         )
 
         head :ok

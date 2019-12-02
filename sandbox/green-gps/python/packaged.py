@@ -13,12 +13,9 @@ from typing import List, Dict
 import map_match
 import text_input
 
-_tmp_map_match = map_match.algorithm.AlgorithmImpl()
-_tmp_text_input = text_input.algorithm.AlgorithmImpl()
-
 loaded_functions: List[AlgorithmFunction] = [
-	_tmp_map_match.mapmatch_function,
-	_tmp_text_input.accept_fuel_level_function
+	map_match.algorithm.AlgorithmImpl.mapmatch_function,
+	text_input.algorithm.AlgorithmImpl.accept_fuel_level_function
 ]
 
 def main():
@@ -36,8 +33,28 @@ def main():
     multiplex_routing: Dict[Information, List[Algorithm]] = {}
 
     for func in loaded_functions:
+        # Loop through
+        # this is all the required info
+        required_info: List[Information] = []
+        state_refers_info: List[Information] = []
+        for func in loaded_functions:
+            required_info += func.inputinfo
+            required_info += func.usesinfo
+            state_refers_info += func.usesinfo
+
+    # which ones to output are specified in the spec
+    gateway = LinkGatewayService(
+        args.session,
+        required_info,
+        state_refers_info,
+        [Registry.CarFuel], # output info
+        LOCALFILE,
+        False,
+    )
+
+    for func in loaded_functions:
         # instantiate all classes
-        alg = func.belongsto()
+        alg = func.belongsto(gateway)
         running_algorithms.append(alg)
 
         # set up multiplexing
@@ -49,26 +66,6 @@ def main():
             multiplex_routing.setdefault(info, [])
             multiplex_routing[info].append(alg)
 
-    # Loop through
-    # infonames = [info.name for alg in running_algorithms]
-    # this is all the required info
-    required_info: List[Information] = []
-    state_refers_info: List[Information] = []
-    for func in loaded_functions:
-        required_info += func.inputinfo
-        required_info += func.usesinfo
-        state_refers_info += func.usesinfo
-
-    # XXX the output sensors from here
-    # which ones to output are specified in the spec
-    gateway = LinkGatewayService(
-        args.session,
-        required_info,
-        state_refers_info,
-        [Registry.CarFuel], # output info
-        LOCALFILE,
-        False,
-    )
 
 
     storage = {}

@@ -5,15 +5,17 @@ from termcolor import cprint
 import os, json
 
 class AlgorithmBase (Algorithm):
-    def __init__ (self):
-        self.latest_values = {}
+    accept_fuel_level_function = AlgorithmFunction(
+                "accept_fuel_level",
+                AlgorithmImpl,
+                Registry.CarFuel, 
+                [Registry.UserText],
+                [Registry.PhoneNumber])
 
-        self.accept_fuel_level_function = AlgorithmFunction(
-                    "accept_fuel_level",
-                    AlgorithmImpl,
-                    Registry.CarFuel, 
-                    [Registry.UserText],
-                    [Registry.PhoneNumber])
+                
+    def __init__ (self, gateway):
+        super().__init__(gateway)
+        self.latest_values = {}
     
     def add_new_data(self, dobj: DataMarshal) -> List[Union[DataMarshal, None]]:
         return_values = []
@@ -48,6 +50,7 @@ class AlgorithmImpl (AlgorithmBase):
             return val
         except:
             print('Not a number')
+            self.gateway.send_text("Not a valid fuel value. Please enter a valid number")
             return None
 
 

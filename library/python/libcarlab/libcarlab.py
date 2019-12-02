@@ -15,8 +15,9 @@ class DataMarshal:
 
 
 class Algorithm:
-    def __init__(self):
+    def __init__(self, gateway):
         self.functions = []
+        self.gateway = gateway
 
     def add_new_data(self, data_marshal) -> List[Union[DataMarshal, None]]:
         # check the information of the data
@@ -68,6 +69,7 @@ class LinkGatewayService:
         self.required_info = required_info
         self.refers_info = refers_info
         self.output_info = output_info
+        self.session = session
 
         # XXX weird to harcode this here
         baseurl = 'http://localhost:8080/'
@@ -134,3 +136,12 @@ class LinkGatewayService:
                     ofile = open(self.save_filename, 'wb')
                     pickle.dump(existingData, ofile)
                     ofile.close()
+    
+    def send_text(self, message="Msg"):
+        import requests, urllib.parse
+        texting_server = "http://localhost:3030/texting/schedule_text"
+        result = requests.post(texting_server, 
+            { 
+                'message': urllib.parse.quote(message),
+                'session': self.session,
+            })
