@@ -54,9 +54,11 @@ class App extends React.Component {
 
     
     this.state = {
-      includeInformation: [],
-      excludeInformation: [],
-      platforms: []
+      required: [],
+      exclude: [],
+      platforms: Platforms,
+      choices: {},
+      imageHash: Date.now()
     }
   }
 
@@ -72,7 +74,7 @@ class App extends React.Component {
       }
     }
     this.setState({
-      includeInformation: value
+      required: value
     })
   }
 
@@ -84,10 +86,23 @@ class App extends React.Component {
       }
     }
     this.setState({
-      excludeInformation: value
+      exclude: value
     })
   }
 
+
+
+  updatePlatforms(options) {
+    let value = [];
+    for (let i = 0, l = options.length; i < l; i++) {
+      if (options[i].selected) {
+        value.push(options[i].value);
+      }
+    }
+    this.setState({
+      platforms: value
+    })
+  }
 
   generateRequiredInfo() {
     let elts = [];
@@ -96,7 +111,7 @@ class App extends React.Component {
       elts.push(<option 
         value={info} 
         onChange={val => console.log('CHANGED', val)}
-        disabled={this.state.excludeInformation.includes(info)}
+        disabled={this.state.exclude.includes(info)}
         key={'required-' + info}>{info}</option>)
     }
 
@@ -112,7 +127,11 @@ class App extends React.Component {
   generateStrategy() {
     // Call server
     // Server will take this, generate JSON file, call Python script.
-      
+
+    fetch("http://localhost:1234/plan/design", {
+        method: 'post',
+        body: JSON.stringify(this.state)
+    }).then(res => this.setState({ imageHash: Date.now() }));
   }
 
   generateExcludedInfo() {
@@ -121,7 +140,7 @@ class App extends React.Component {
     for (let info in Registry) {
       elts.push(<option 
         value={info} 
-        disabled={this.state.includeInformation.includes(info)}
+        disabled={this.state.required.includes(info)}
         key={'excluded-' + info}>{info}</option>)
     }
 
@@ -135,13 +154,14 @@ class App extends React.Component {
   }
 
   render() {
+    console.log("Re-rendering with hash: " + this.state.imageHash);
     return (
       <Container>
         <Row>
           <Col>
             <Form>
               <Form.Label>Platforms</Form.Label>
-              <Form.Control as="select" multiple>
+              <Form.Control as="select" onChange={(evt) => this.updatePlatforms(evt.target.options)} multiple>
               {Platforms.map(elt => <option value={elt} key={elt}>{elt}</option>)}
               </Form.Control>
 
@@ -157,11 +177,13 @@ class App extends React.Component {
                 </Col>
               </Row>
               
-              <Button onClick={() => this.generateStrategy()} block>Generate Strategy</Button>
+              <Button onClick={() => this.generateStrategy()} block>
+                Update Strategy
+              </Button>
             </Form>            
           </Col>
-          <Col>
-            RENDERED IMAGE
+          <Col >
+            <img width='100%' src={`http://localhost:1234/images/strategy-both.gv.png?${this.state.imageHash}`} />
           </Col>
         </Row>
       </Container>

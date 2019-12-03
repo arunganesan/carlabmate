@@ -1,14 +1,19 @@
 {
-  "name": "appdesigner",
+  "name": "packaged-react",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "bootstrap": "^4.4.1",
-    "lodash": "^4.17.15",
-    "react": "^16.12.0",
-    "react-bootstrap": "^1.0.0-beta.16",
-    "react-dom": "^16.12.0",
-    "react-scripts": "3.2.0"
+    "@types/node": "12.12.7",
+    "@types/react": "16.9.11",
+    "@types/react-dom": "16.9.4",
+    "bootstrap": "^4.3.1",
+    "react": "^16.11.0",
+    "react-bootstrap": "^1.0.0-beta.15",
+    "react-dom": "^16.11.0",
+    "react-scripts": "3.2.0",
+    "typescript": "3.7.2",
+    "libcarlab": "file:../../../library/react/libcarlab",
+    "obstacle-warning-react": "file:../../../library/react/obstacle-warning-react"
   },
   "scripts": {
     "start": "react-scripts start",

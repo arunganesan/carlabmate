@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   get 'plan/design'
+  post 'plan/design'
   post 'plan/launch'
 
   get 'texting/register_phone'

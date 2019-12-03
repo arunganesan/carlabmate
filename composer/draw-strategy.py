@@ -197,7 +197,8 @@ def main():
 
     basename = os.path.basename(args.strategy)
     basename, _ = os.path.splitext(basename)
-    dot.render('{}/{}-{}.gv'.format(ODIR, basename, args.draw), view=True) 
+    dot.format = 'png'
+    dot.render('{}/{}-{}.gv'.format(ODIR, basename, args.draw), view=False) 
 
 
 if __name__ == '__main__':

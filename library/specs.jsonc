@@ -116,7 +116,7 @@
         "platform": "react",
         "functions": {
             "acceptSightingReport": {
-                "input": ["map-matched-location", "sightings-map"],
+                "input": ["location", "sightings-map"],
                 "output": "sighting"
             }
         }

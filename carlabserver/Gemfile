@@ -54,3 +54,4 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 
 gem "twilio-ruby", "~> 5.29"
 gem 'colorize', '~> 0.8.1'
+gem 'rack-cors', :require => 'rack/cors'
