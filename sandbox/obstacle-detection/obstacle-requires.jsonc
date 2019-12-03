@@ -1,0 +1,6 @@
+{
+    "required": [ "map-matched-location", "sighting", "sightings-map"],
+    "platforms": [ "android", "python", "react" ],
+    "exclude": [],
+    "choices": {}
+}
