@@ -1,19 +1,19 @@
 digraph {
 	node [shape=box style=filled]
-	node [fillcolor="#9CD3FF"]
-	"user-input/acceptPhoneNumber"
-	node [fillcolor="#9CD3FF"]
-	"obstacle-warning-react/acceptSightingReport"
 	node [fillcolor="#FFB8B5"]
 	"obstacle-warning-python/update_sightings"
+	node [fillcolor="#9CD3FF"]
+	"obstacle-warning-react/acceptSightingReport"
 	node [fillcolor="#C8CC68"]
 	"android-passthroughs/getLocation"
 	node [fillcolor=lightgrey shape=box style=filled]
 	node [pencolor=red penwidth=5]
-	"phone-number"
+	"sightings-map"
 	edge [style=solid]
-	"user-input/acceptPhoneNumber" -> "phone-number"
-	node [pencolor=red penwidth=5]
+	"sightings-map" -> "obstacle-warning-react/acceptSightingReport"
+	edge [style=solid]
+	"obstacle-warning-python/update_sightings" -> "sightings-map"
+	node [pencolor=black penwidth=1]
 	sighting
 	edge [style=solid]
 	sighting -> "obstacle-warning-python/update_sightings"
@@ -25,12 +25,6 @@ digraph {
 	location -> "obstacle-warning-react/acceptSightingReport"
 	edge [style=solid]
 	"android-passthroughs/getLocation" -> location
-	node [pencolor=red penwidth=5]
-	"sightings-map"
-	edge [style=solid]
-	"sightings-map" -> "obstacle-warning-react/acceptSightingReport"
-	edge [style=solid]
-	"obstacle-warning-python/update_sightings" -> "sightings-map"
 	node [pencolor=black penwidth=1]
 	gps
 	edge [style=solid]

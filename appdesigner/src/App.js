@@ -181,7 +181,10 @@ class App extends React.Component {
             <Form>
               <Form.Label>Platforms</Form.Label>
               <Form.Control as="select" onChange={(evt) => this.updatePlatforms(evt.target.options)} multiple>
-              {Platforms.map(elt => <option value={elt} key={elt}>{elt}</option>)}
+                {Platforms.map(elt => <option 
+                  value={elt} 
+                  selected="selected"
+                  key={elt}>{elt}</option>)}
               </Form.Control>
 
               <Row>

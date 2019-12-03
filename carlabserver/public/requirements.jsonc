@@ -1,1 +1,1 @@
-{"required":["phone-number","sighting","sightings-map"],"exclude":[],"platforms":["android","python","react"],"choices":{},"loading":false,"imageHash":1575343132720}
+{"required":["sightings-map"],"exclude":[],"platforms":["android","python","react"],"choices":{},"loading":false,"imageHash":1575343289187}
