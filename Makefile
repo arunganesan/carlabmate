@@ -1,4 +1,4 @@
-PROJECT ?= estimations
+PROJECT ?= obstacle-detection
 
 runreact:
 	( cd sandbox/$(PROJECT)/react && npm start & )
