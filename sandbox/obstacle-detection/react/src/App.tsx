@@ -16,7 +16,8 @@ type AppState = {
   username: string;
   password: string;
 
-  sightingsMap: [],
+  sightingsMap: any,
+  location: any
 };
 
 class App extends React.Component<{}, AppState> {
@@ -36,15 +37,20 @@ class App extends React.Component<{}, AppState> {
         session: null,
         username: ""
       };
+    
     this.state = {
       message: "",
-      required_info: [Registry.SightingsMap],
+      required_info: [Registry.SightingsMap, Registry.Location],
       showLoginForm: sessionLocal["session"] == null,
       session: sessionLocal["session"],
       username: sessionLocal["username"],
-      password: "",
-      
-      sightingsMap: []
+      password: "",  
+      sightingsMap: [
+        { hazard: 'pothole', lat: 42.3065, lng: -83.707684},
+        { hazard: 'pedestrian', lat: 42.307, lng: -83.707684},
+        { hazard: 'biker', lat: 42.308, lng: -83.707684}
+      ],
+      location: { lat: 42.305958,lng: -83.707684},
     };
 
     this.libcarlab = new Libcarlab(
@@ -53,13 +59,27 @@ class App extends React.Component<{}, AppState> {
     );
   }
 
-  // TODO need to call this on a timer
-  // TODO ONCE we get the relevant data, we just have to set the state,
-  // and that'll automatically propagate to the components
-  // And this is already initialized with the required info, so it should happen quite automatically...
   componentDidMount() {
     if (this.state.session != null) 
       this.getLatest();
+
+    setTimeout(() => this.downloadNewInfo(), 1000);
+  }
+
+
+  downloadNewInfo() {
+    if (this.state.session != null)
+      this.libcarlab.checkNewInfo((data: DataMarshal) => {
+        if (data.info.name == 'sightings-map' && data.message != null) {
+          this.setState({
+            sightingsMap: data.message.message
+          });
+        } else if (data.info.name == 'location' && data.message != null && data.message.message != null) {
+          this.setState({
+            location: data.message.message
+          });
+        }
+      });
   }
 
   getLatest() {
@@ -69,10 +89,12 @@ class App extends React.Component<{}, AppState> {
         this.setState({
           sightingsMap: data.message.message
         });
+      } else if (data.info.name == 'location' && data.message != null) {
+        this.setState({
+          location: data.message.message
+        });
       }
-      console.log("Got info ", data.info, "with data", data.message);
     });
-
   }
 
   tryLoggingIn() {
@@ -193,6 +215,8 @@ class App extends React.Component<{}, AppState> {
         {this.state.session != null && [
           <AcceptSightingsReport
             value={this.state.sightingsMap}
+            location={this.state.location}
+            sightingsMap={this.state.sightingsMap}
             update={(val: string) => {}}
             produce={(val: string) => {
                 alert('submitting: ' + val);

@@ -1,7 +1,12 @@
 import * as React from "react";
-// import { Button, Container, Form } from "react-bootstrap";
+import { ButtonToolbar, Button, Row, Container, Col } from "react-bootstrap";
 
 import GoogleMapReact from 'google-map-react';
+
+import { MdDirectionsBike, MdDirectionsRun, MdLocationOn,  } from "react-icons/md";
+
+import { GiHole } from "react-icons/gi";
+
 
 
 import "bootstrap/dist/css/bootstrap.css";
@@ -16,7 +21,10 @@ import "bootstrap/dist/css/bootstrap.css";
 type Props = { 
   produce: Function,
   update: Function,
-  value: any
+  value: any,
+
+  location: any,
+  sightingsMap: any,
 };
 
 
@@ -26,24 +34,61 @@ type Props = {
 
 
 export class acceptSightingsReport extends React.Component<Props, {}> {
-  render() {
-    // const { update, produce, value } = this.props;
 
-    return <div style={{ height: '100vh', width: '100%' }}>
+  flagHazard(hazardType: any) {
+    const { location, produce } = this.props;
+    let hazard = {
+      lat: location.lat,
+      lng: location.lng,
+      hazard: hazardType
+    }
+    produce(hazard)
+  }
+
+  render() {
+    //  update, produce, value,
+    const { sightingsMap, location } = this.props;
+
+    return <Container>
+      <Row><Col><div style={{ height: '70vh', width: '100%' }}>
     <GoogleMapReact
       bootstrapURLKeys={{ key: 'AIzaSyCvsdzVGSonWxVoZ5-OUzaH0_iV-mosEnk' }}
-      defaultCenter={{lat: 11.0168, lng: 76.9558 }}
-      defaultZoom={11}
+      center={location}
+      defaultZoom={17}
     >
-      <AnyReactComponent
-        lat={11.0168}
-        lng={76.9558}
-        text="My Marker"
+      <MyMarker
+        lat={location['lat']}
+        lng={location['lng']}
+        type='current'
       />
+
+      { sightingsMap.map((sighting: any) => {
+        return <MyMarker
+          lat={sighting.lat}
+          lng={sighting.lng}
+          type={sighting.hazard} />
+      }) }
     </GoogleMapReact>
-  </div>
+  </div></Col></Row>
+
+  <Row><Col>
+    <ButtonToolbar>
+      <Button size="lg" variant="primary" onClick={() => this.flagHazard('pothole')}><GiHole /></Button>
+      <Button size="lg" variant="secondary"><MdDirectionsRun /></Button>
+      <Button size="lg" variant="success"><MdDirectionsBike /></Button>
+    </ButtonToolbar>
+  </Col></Row>
+      </Container>
   }
 }
 
-const AnyReactComponent = ({text}: any) => <div
-style={{width: '20px', height: '20px', border: 'solid thin black', boxShadow: '12px 12px 2px 1px rgba(0, 0, 255, .2);', backgroundColor: 'white'}}>{text}</div>;
+const MyMarker = ({type}: any) => {
+  if (type == 'current') 
+    return <MdLocationOn size={30} />
+  else if (type == 'pothole')
+    return <GiHole size={30} />
+  else if (type == 'pedestrian')
+    return <MdDirectionsRun size={30} />
+  // else if (type == 'biker') 
+  return <MdDirectionsBike size={30} />
+}
