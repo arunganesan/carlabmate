@@ -3,11 +3,17 @@ import logo from './logo.svg';
 import { Form, Button } from "react-bootstrap";
 import { Container, Row, Col } from 'react-bootstrap';
 
+import _ from 'lodash'
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.css';
 
+
 const Platforms = [
   'android', 'python', 'react'
+]
+
+const LowlevelSensors = [
+  "gps", "accel", "magnetometer", "gyro", "gravity", "obd-fuel", "user-text"
 ]
 
 const Registry = {
@@ -19,7 +25,6 @@ const Registry = {
   "car-gear": {"type": "int"}, // Actually gear is enum
   "car-fuel": {"type": "float"},
   "car-steering": {"type": "float"},
-
   // IMU transformations
   "vehicle-pointing-rotation": {"type": "float[9]" },
   "world-pointing-rotation": {"type": "float[9]" },
@@ -27,14 +32,9 @@ const Registry = {
   "world-aligned-accel": {"type": "float[3]" },
   "world-aligned-gyro": {"type": "float[3]" },
   "gravity-aligned-gyro": {"type": "float" },
-  
   "gear-model-file": {"type": "string" },
   "car-model": {"type": "string" }, // Car model might also be an enum
-
   "phone-number": {"type": "string"},
-  "user-text": {"type": "string"},
-
-  // Ubi related
   "sighting": {"type": "float[3]", "description": "time, lat, lng"}, 
   "sightings-map": {"type": "list[float[3]]" }, // list of sightings. Indeterminate length of array
   
@@ -44,7 +44,9 @@ const Registry = {
   "magnetometer": {"type": "float[3]", "sensor": true},
   "gyro": {"type": "float[3]", "sensor": true},
   "gravity": {"type": "float[3]", "sensor": true},
-  "obd-fuel": {"type": "float", "sensor": true}
+  "obd-fuel": {"type": "float", "sensor": true},
+  "user-text": {"type": "string"},
+
 }
 
 
@@ -58,6 +60,7 @@ class App extends React.Component {
       exclude: [],
       platforms: Platforms,
       choices: {},
+      loading: false,
       imageHash: Date.now()
     }
   }
@@ -107,10 +110,13 @@ class App extends React.Component {
   generateRequiredInfo() {
     let elts = [];
 
-    for (let info in Registry) {
+    let allInfo = _.sortBy(_.keys(Registry));
+    for (let info of allInfo) {
+      if (LowlevelSensors.includes(info))
+        continue
+
       elts.push(<option 
         value={info} 
-        onChange={val => console.log('CHANGED', val)}
         disabled={this.state.exclude.includes(info)}
         key={'required-' + info}>{info}</option>)
     }
@@ -128,16 +134,29 @@ class App extends React.Component {
     // Call server
     // Server will take this, generate JSON file, call Python script.
 
+    this.setState({loading: true});
     fetch("http://localhost:1234/plan/design", {
         method: 'post',
         body: JSON.stringify(this.state)
-    }).then(res => this.setState({ imageHash: Date.now() }));
+    }).then(res => {
+      if (res.status != 200) {
+        alert('Strategy not possible');
+      }
+
+      this.setState({ 
+        loading: false, 
+        imageHash: Date.now() 
+      })})
+    .catch((error) => alert("Could not satisfy requirements"));
   }
 
   generateExcludedInfo() {
     let elts = [];
+    
+    let allInfo = _.sortBy(_.keys(Registry));
 
-    for (let info in Registry) {
+
+    for (let info of allInfo) {
       elts.push(<option 
         value={info} 
         disabled={this.state.required.includes(info)}
@@ -177,13 +196,14 @@ class App extends React.Component {
                 </Col>
               </Row>
               
-              <Button onClick={() => this.generateStrategy()} block>
+              <Button onClick={() => this.generateStrategy()} block style={{marginTop: 25}}>
                 Update Strategy
               </Button>
             </Form>            
           </Col>
-          <Col >
-            <img width='100%' src={`http://localhost:1234/images/strategy-both.gv.png?${this.state.imageHash}`} />
+          <Col>
+
+            { this.state.loading ? "Loading..." :             <img width='100%' src={`http://localhost:1234/images/strategy-both.gv.png?${this.state.imageHash}`} />}
           </Col>
         </Row>
       </Container>

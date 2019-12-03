@@ -1,1 +1,1 @@
-[{"algorithm": "obstacle-warning-python", "function": "update_sightings"}, {"algorithm": "obstacle-warning-react", "function": "acceptSightingReport"}, {"algorithm": "map-match", "function": "mapmatch"}, {"algorithm": "android-passthroughs", "function": "getLocation"}]
+[{"algorithm": "user-input", "function": "acceptPhoneNumber"}, {"algorithm": "obstacle-warning-react", "function": "acceptSightingReport"}, {"algorithm": "obstacle-warning-python", "function": "update_sightings"}, {"algorithm": "android-passthroughs", "function": "getLocation"}]

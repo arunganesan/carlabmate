@@ -47,7 +47,16 @@ class PlanController < ApplicationController
         strategy_file = 'strategy.jsonc'
 
         Dir.chdir(PUBLIC){
-            `python3.7 cl-strategy.py requirements.jsonc > strategy.jsonc`
+            returnvalue = `python3.7 cl-strategy.py requirements.jsonc`
+            if $?.exitstatus != 0
+                head :conflict
+                return
+            end
+
+            file = File.open("#{PUBLIC.to_s}/strategy.jsonc", 'w')
+            file.puts(returnvalue)
+            file.close
+            
             `python3.7 draw-strategy.py --requirements requirements.jsonc --strategy strategy.jsonc --draw both`
         }
         

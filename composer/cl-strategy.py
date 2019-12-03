@@ -243,6 +243,7 @@ def solve_graph (
     for i in required_info:
         if i not in all_output_info:
             cprint('Unable to satisfy -> {}'.format(i), 'red')
+            exit(1)
     
     # if passed:
         # cprint('Satisfied requirements', 'green')
