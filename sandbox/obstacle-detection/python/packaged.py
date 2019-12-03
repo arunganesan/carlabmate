@@ -9,11 +9,11 @@ import pickle
 import time
 from typing import List, Dict
 
-import tensorflow_models
+import obstacle_warning_python
 
-_tmp_tensorflow_models = tensorflow_models.algorithm.AlgorithmImpl(None)
+_tmp_obstacle_warning = obstacle_warning_python.algorithm.AlgorithmImpl(None)
 loaded_functions: List[AlgorithmFunction] = [
-	_tmp_tensorflow_models.get_gear_model_file_function
+	_tmp_obstacle_warning.update_sightings_function
 ]
 
 def main():
@@ -45,7 +45,7 @@ def main():
         args.session,
         required_info,
         state_refers_info,
-        [Registry.GearModelFile], # output info
+        [Registry.SightingsMap], # output info
         LOCALFILE,
         False,
     )
