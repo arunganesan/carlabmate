@@ -7,7 +7,7 @@ class PacketController < ApplicationController
     skip_before_action :verify_authenticity_token
 
     PUBLIC = Rails.root.join('public')
-    MAX_DB_MESSAGE_SIZE = 50
+    MAX_DB_MESSAGE_SIZE = 5000
 
     def upload
         ActiveRecord::Base.logger = nil

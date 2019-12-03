@@ -66,10 +66,10 @@ class App extends React.Component<{}, AppState> {
     setTimeout(() => this.downloadNewInfo(), 1000);
   }
 
-
   downloadNewInfo() {
     if (this.state.session != null)
       this.libcarlab.checkNewInfo((data: DataMarshal) => {
+        console.log("RECEIVED FROM SERVER", data);
         if (data.info.name == 'sightings-map' && data.message != null) {
           this.setState({
             sightingsMap: data.message.message
@@ -80,6 +80,8 @@ class App extends React.Component<{}, AppState> {
           });
         }
       });
+
+    setTimeout(() => this.downloadNewInfo(), 1000);
   }
 
   getLatest() {
@@ -219,9 +221,9 @@ class App extends React.Component<{}, AppState> {
             sightingsMap={this.state.sightingsMap}
             update={(val: string) => {}}
             produce={(val: string) => {
-                alert('submitting: ' + val);
+                alert('submitting: ' + JSON.stringify(val));
                 this.libcarlab.outputNewInfo(
-                    new DataMarshal(Registry.Sighting, val),
+                    new DataMarshal(Registry.Sighting, JSON.stringify(val)),
                     () => {}
                 );
             }}

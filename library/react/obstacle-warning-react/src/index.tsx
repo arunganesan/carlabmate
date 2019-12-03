@@ -62,7 +62,7 @@ export class acceptSightingsReport extends React.Component<Props, {}> {
         type='current'
       />
 
-      { sightingsMap.map((sighting: any) => {
+      { sightingsMap && sightingsMap.map((sighting: any) => {
         return <MyMarker
           lat={sighting.lat}
           lng={sighting.lng}

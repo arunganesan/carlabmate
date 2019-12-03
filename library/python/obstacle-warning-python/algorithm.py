@@ -30,9 +30,9 @@ class AlgorithmBase (Algorithm):
         cprint('	Latest value has keys: {}'.format(self.latest_values.keys()), 'blue')
         
         
-        if self.get_gear_model_file_function.matches_required(dobj.info) and self.get_gear_model_file_function.have_received_all_required_data(self.latest_values.keys()):
-            if dobj.info in self.get_gear_model_file_function.inputinfo or dobj.info in self.get_gear_model_file_function.usesinfo:
-                retval = self.get_gear_model_file(self.latest_values[Registry.CarModel])
+        if self.update_sightings_function.matches_required(dobj.info) and self.update_sightings_function.have_received_all_required_data(self.latest_values.keys()):
+            if dobj.info in self.update_sightings_function.inputinfo or dobj.info in self.update_sightings_function.usesinfo:
+                retval = self.update_sightings(self.latest_values[Registry.Sighting])
                 if retval is not None:
                     return_values.append(DataMarshal(
                         Registry.SightingsMap,
@@ -58,6 +58,8 @@ class AlgorithmImpl (AlgorithmBase):
             # then return that entire file. Simple simple simple
             # Irrespective of other people
         
+        if sighting == None:
+            return None
         SIGHTINGS_FILE = 'sightings.obj'
         if os.path.exists(SIGHTINGS_FILE):
             sightings_so_far = pickle.load(open(SIGHTINGS_FILE, 'rb'))
@@ -66,7 +68,7 @@ class AlgorithmImpl (AlgorithmBase):
 
         sightings_so_far.append(sighting)
         ofile = open(SIGHTINGS_FILE, 'wb')
-        pickle.dump(ofile, sightings_so_far)
+        pickle.dump(sightings_so_far, ofile)
         ofile.close()
 
         return sightings_so_far

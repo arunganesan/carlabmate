@@ -56,8 +56,14 @@ export class Libcarlab {
     // check with local storage first to only get relevant data
     for (let info of this.requiredInfo)
       fetch(this.latestUrl(info.name))
-        .then(res => res.json())
-        .then(data => callback(new DataMarshal(info, data)));
+        .then(res => {
+          console.log(res);
+          res.json()
+        })
+        .then(data => {
+          if (data != undefined)
+            callback(new DataMarshal(info, data))
+        });
 
     this.lastCheckTime = Math.round(new Date().getTime() / 1000);
   }
@@ -69,7 +75,10 @@ export class Libcarlab {
     for (let info of this.requiredInfo)
       fetch(this.fetchUrl(info.name))
         .then(res => res.json())
-        .then(data => callback(new DataMarshal(info, data)));
+        .then(data => {
+          if (data != undefined)
+            callback(new DataMarshal(info, data))
+        });
 
     this.lastCheckTime = Math.round(new Date().getTime() / 1000);
   }
