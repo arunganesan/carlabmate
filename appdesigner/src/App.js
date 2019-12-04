@@ -1,7 +1,7 @@
 import React from 'react';
 import logo from './logo.svg';
 import { Form, Button } from "react-bootstrap";
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Spinner } from 'react-bootstrap';
 
 import _ from 'lodash'
 import './App.css';
@@ -60,6 +60,7 @@ class App extends React.Component {
       exclude: [],
       platforms: Platforms,
       choices: {},
+      initialized: false,
       loading: false,
       imageHash: Date.now()
     }
@@ -145,6 +146,7 @@ class App extends React.Component {
 
       this.setState({ 
         loading: false, 
+        initialized: true,
         imageHash: Date.now() 
       })})
     .catch((error) => alert("Could not satisfy requirements"));
@@ -206,12 +208,22 @@ class App extends React.Component {
           </Col>
           <Col>
 
-            { this.state.loading ? "Loading..." :             <img width='100%' src={`http://localhost:1234/images/strategy-both.gv.png?${this.state.imageHash}`} />}
+            { this.state.loading 
+              ? <div style={bigmessage}>Loading... <Spinner animation="border" role="status"><span className="sr-only">Loading</span></Spinner></div> 
+              : this.state.initialized 
+                ? <img width='100%' src={`http://localhost:1234/images/strategy-both.gv.png?${this.state.imageHash}`} /> 
+                : <div style={bigmessage}>Submit your requirements</div>
+            }
           </Col>
         </Row>
       </Container>
     );
   }
+}
+const bigmessage = {
+  fontSize: 25,
+  width: '300px',
+  margin: '200px auto'
 }
 
 export default App;

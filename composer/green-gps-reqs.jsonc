@@ -1,7 +1,9 @@
 {
+   "platforms": [ "android", "python", "react" ],
     "required": [ 
-      "map-matched-location", "car-fuel" ],
-    "platforms": [ "android", "python", "react" ],
+      "map-matched-location", 
+      "car-fuel" 
+    ],
     "exclude": [],
     "choices": {
       "car-fuel": "obd-devices/readFuelLevel"

@@ -72,7 +72,7 @@ class App extends React.Component<{}, AppState> {
         console.log("RECEIVED FROM SERVER", data);
         if (data.info.name == 'sightings-map' && data.message != null) {
           this.setState({
-            sightingsMap: data.message.message
+            //sightingsMap: data.message.message
           });
         } else if (data.info.name == 'location' && data.message != null && data.message.message != null) {
           this.setState({
