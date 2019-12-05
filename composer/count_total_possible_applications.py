@@ -27,7 +27,9 @@ def main():
     for alg, details in specs.items():
         for function in details['functions'].keys():
             list_of_functions.append('{}/{}'.format(alg, function))
-
+    
+    print(len(list_of_functions))
+    exit(1)
 
     per_algorithm_deps = {}
     for algfn in tqdm(list_of_functions, "function"):
@@ -53,9 +55,9 @@ def main():
         required_apps = []
         for f in funcset:
             required_apps += per_algorithm_deps[f]
-        appstr = '&'.join(required_apps)
-        if not appstr in unique_apps:
-            unique_apps.append(appstr)
+        required_apps = set(required_apps)
+        if not required_apps in unique_apps:
+            unique_apps.append(required_apps)
     
     print(len(allcombos))
     print(len(unique_apps))
