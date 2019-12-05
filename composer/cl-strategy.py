@@ -183,6 +183,7 @@ def _draw_helper (dg, positioning, label_positioning, subset, alpha):
 
 def solve_graph (
     required:List[Information]=[], 
+    required_algorithms:List[Algorithm]=[],
     platforms:List[str]=[], 
     blacklist_info:List[Information]=[], 
     choices: Dict[Information, Algorithm]={}, 
@@ -190,9 +191,11 @@ def solve_graph (
     
     required_info = []
     required_impl = []
-
+    
     new_required_info = [i for i in required if i not in blacklist_info]
-    new_required_impl = []
+    # for alg in required_algorithms:
+    #     new_required_info.append()
+    new_required_impl = required_algorithms
 
     round = 1
 
@@ -339,6 +342,11 @@ def main():
     required_information = []
     for infoname in requirements['required']:
         required_information.append(indexed_information[infoname])
+
+    required_algorithms = []
+    requirements.setdefault('algorithms', [])
+    for algfn in requirements['algorithms']:
+        required_algorithms.append(indexed_functions[algfn])
     
     platforms = requirements['platforms']
 
@@ -350,7 +358,12 @@ def main():
     for infoname, algfn in requirements['choices'].items():
         choices[indexed_information[infoname]] = indexed_functions[algfn]
 
-    selected_nodes = solve_graph(required_information, platforms, blacklisted_information, choices)
+    selected_nodes = solve_graph(
+        required_information, 
+        required_algorithms, 
+        platforms, 
+        blacklisted_information, 
+        choices)
     strategy = []
     for node in selected_nodes:
         if node[0] == 'impl':

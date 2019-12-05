@@ -1,0 +1,1 @@
+[{"algorithm": "obstacle-warning-react", "function": "acceptSightingReport"}, {"algorithm": "android-passthroughs", "function": "getLocation"}, {"algorithm": "obstacle-warning-python", "function": "update_sightings"}]

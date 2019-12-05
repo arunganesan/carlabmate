@@ -1,0 +1,7 @@
+{
+    "required": [],
+    "platforms": [ "android", "python", "react" ],
+    "exclude": [],
+    "algorithms": ["obstacle-warning-react/acceptSightingReport"],
+    "choices": {}
+}

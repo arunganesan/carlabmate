@@ -105,6 +105,8 @@ def main():
     indexed_information = {}
     indexed_algorithm = {}
     required_sensor_names = reqs['required']
+    reqs.setdefault('algorithms', [])
+    required_function_names = reqs['algorithms']
     
     def make_or_get_info (name):
         indexed_information.setdefault(name, Information(name))
@@ -145,13 +147,13 @@ def main():
     if args.draw == 'both':
         dot.attr('node', shape='box', style='filled')
         for alg in indexed_algorithm.values():
-            dot.attr('node', fillcolor=COLOR_BY_PLATFORM[alg.platform])
+            dot.attr('node', fillcolor=COLOR_BY_PLATFORM[alg.platform], penwidth='5' if alg.name in required_function_names else '1')
             dot.node(alg.name)
         
         dot.attr('node', shape='box', style='filled', fillcolor='lightgrey')
         for info in indexed_information.values():
             if info.name in required_sensor_names:
-                dot.attr('node', pencolor='red', penwidth='5')
+                dot.attr('node', pencolor='black', penwidth='5')
             else:
                 dot.attr('node', pencolor='black',  penwidth='1')
             dot.node(info.name)
