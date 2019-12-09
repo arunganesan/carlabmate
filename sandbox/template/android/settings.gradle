@@ -1,0 +1,5 @@
+include ':app', ':android-passthroughs', ':libcarlab'
+rootProject.name='Packaged'
+
+project(':libcarlab').projectDir = new File(settingsDir, '../../../library/android/libcarlab')
+project(':android-passthroughs').projectDir = new File(settingsDir, '../../../library/android/android-passthroughs')

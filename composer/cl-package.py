@@ -10,9 +10,6 @@ import os
 
 REGISTRY = 'registry.jsonc'
 SPECS = 'specs.jsonc'
-ODIR = 'generated'
-if not os.path.exists(ODIR):
-    os.makedirs(ODIR)
 
 
 
@@ -34,11 +31,13 @@ def main():
     registry = json.loads(jsmin(open(REGISTRY, 'r').read()))
     strategy = json.loads(jsmin(open(args.strategy, 'r').read()))
 
+    strategy.setdefault('name', 'generated')
+    ODIR = strategy['name']
+    if not os.path.exists(ODIR):
+        os.makedirs(ODIR)
 
-    # collect each algorithm/function into the platfortm it belongs to
-    # then ... like package them together.
     per_platform = {}
-    for algfunc in strategy:
+    for algfunc in strategy['functions']:
         algname = algfunc['algorithm']
         platform = specs[algname]['platform']
 
@@ -66,12 +65,7 @@ def main():
 
         perform_per_platform_linking(platform, func_per_algorithms)
 
-    # registry_entries = []
-    # for infoname, details in registry.items():
-    #     registry_entries.append(write_for_language(
-    #         args.platform, infoname, details))
-
-    # print(TEMPLATES[args.platform] % '\n    '.join(registry_entries))
+  
 
 def perform_per_platform_linking (platform, func_per_algorithms):
     """
@@ -566,33 +560,6 @@ if __name__ == '__main__':
 
 
 
-
-
-
-
-
-"""
-JAVA, really its just this (and some Gradle stuff but that's OK)
-
-package edu.umich.carlab.packaged;
-
-import java.util.Arrays;
-
-import carlab.android_passthroughs.Algorithm;
-import edu.umich.carlab.Registry;
-import edu.umich.carlab.Strategy;
-
-public class PackageStrategy extends Strategy {
-    public PackageStrategy () {
-        loadedAlgorithms = Arrays.asList(carlab.android_passthroughs.Algorithm.class,
-                                         carlab.obd_devices.Algorithm.class);
-        loadedFunctions =
-                Arrays.asList(Algorithm.getLocation, carlab.obd_devices.Algorithm.readFuelLevel);
-        saveInformation = Arrays.asList(Registry.Location, Registry.CarFuel);
-    }
-}
-
-"""
 
 
 

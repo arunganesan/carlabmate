@@ -1,4 +1,5 @@
 {
+   "name": "green-gps",
    "platforms": [ "android", "python", "react" ],
     "required": [ 
       "map-matched-location", 
