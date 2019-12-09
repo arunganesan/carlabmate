@@ -3,5 +3,5 @@
     "platforms": [ "android", "python", "react" ],
     "exclude": [],
     "choices": {},
-    "algorithms": ["aligned-imu/produceGravityAlignedGyro"]
+    "algorithms": []
 }

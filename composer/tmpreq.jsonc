@@ -1,1 +1,1 @@
-{"required": [], "platforms": ["android", "python", "react"], "exclude": [], "algorithms": ["android-passthroughs/getLocation"], "choices": {}}
+{"required": [], "platforms": ["android", "python", "react"], "exclude": [], "algorithms": ["obstacle-warning-react/acceptSightingReport"], "choices": {}}

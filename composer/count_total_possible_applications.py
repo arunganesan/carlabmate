@@ -29,6 +29,7 @@ def main():
             list_of_functions.append('{}/{}'.format(alg, function))
     
     print(len(list_of_functions))
+    print(list_of_functions)
     exit(1)
 
     per_algorithm_deps = {}
