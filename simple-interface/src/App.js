@@ -1,8 +1,8 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { Form, Button, ToggleButton, ButtonGroup, DropdownButton, Dropdown, ToggleButtonGroup } from "react-bootstrap";
-import { Container, Row, Col, Spinner, Card } from 'react-bootstrap';
+import { Form, Button, ToggleButton, ToggleButtonGroup } from "react-bootstrap";
+import { Container, Row, Col, Card } from 'react-bootstrap';
 
 import _ from 'lodash'
 import 'bootstrap/dist/css/bootstrap.css';
@@ -13,22 +13,53 @@ class App extends React.Component {
     super(props);
 
     this.state = {
+      name: '',
       required: [],
       excluded: [],
       applications: [],
       platforms: Platforms,
-      choices: {},
     }
+
+
+    this.submitForm = this.submitForm.bind(this);
   }
 
   componentDidMount() {
 
   }
 
+
+  submitForm() {
+    fetch("http://localhost:1234/create/launch", {
+        method: 'post',
+        body: JSON.stringify(this.state)
+    }).then(res => {
+      if (res.status !== 200) {
+        alert('Strategy not possible');
+      } else {
+        // Now we keep checking for status updates
+        // If it is ready we'll show a huge modal with the url
+      }
+    })
+    .catch((error) => alert("Could not satisfy requirements"));
+  }
+
   render() {
     return <Container>
-    
-
+      <Row style={{marginTop: 25}}>
+        <Col><Form.Label>Name</Form.Label></Col>
+      
+      </Row>
+      <Row style={{marginBottom: 25, marginTop: 0}}>
+        <Col>        
+          <Form.Control 
+            onChange={(evt) =>  this.setState({ name: evt.target.value }) }
+            size="lg" 
+            type="text" 
+            placeholder="name" />
+        </Col>
+      </Row>
+      
       <Row style={{marginTop: 25}}>
         <Col><Form.Label>Platform</Form.Label></Col>
       
@@ -37,24 +68,36 @@ class App extends React.Component {
         <Col>
 
         
+        <ToggleButtonGroup value={[0,1,2]} type="checkbox">
+          {Platforms.map((elt, i) => {
+            return (<ToggleButton 
+              value={i} 
+              key={elt}
+              defaultChecked
+              variant="outline-primary">
+                {elt}
+              </ToggleButton>)
+          })}
 
-        <ToggleButtonGroup  type="checkbox">
-          <ToggleButton  value={1} variant="outline-primary">Android</ToggleButton>
-          <ToggleButton  value={2} variant="outline-primary">React</ToggleButton>
-          <ToggleButton  value={3} variant="outline-primary">Python</ToggleButton>
         </ToggleButtonGroup>
         </Col>
       </Row>
       
       <Row>
-
-      <Col>
-        <Card>
+        <Col>
+          <Card>
           <Card.Header>Required Information</Card.Header>
           <Card.Body>
 
           { this.state.required.map ((info) => (
-            <div className="ready_bhajan">{info}</div>
+            <div 
+              key={'requiredbutton-'+info}
+              className="ready_bhajan" onClick={() => {
+              let new_list = this.state.required.filter((v) => v != info);
+              this.setState({
+                required: new_list
+              });
+            }}>{info}</div>
           ))}
            
 
@@ -67,7 +110,9 @@ class App extends React.Component {
               }}
             >
               {
-                _.sortBy(_.keys(Registry)).map(item => (
+                _.sortBy(_.filter(_.keys(Registry), (inf) => {
+                  return !this.state.excluded.includes(inf) && !this.state.required.includes(inf)
+                })).map(item => (
                   <option
                     key={'required-' + item}
                     value={item}
@@ -77,7 +122,7 @@ class App extends React.Component {
                 ))
               }
            </Form.Control>
-            </Card.Body>
+          </Card.Body>
           </Card>
         </Col>
 
@@ -89,7 +134,15 @@ class App extends React.Component {
           <Card.Body>
 
           { this.state.excluded.map ((info) => (
-            <div className="exclude_bhajan">{info}</div>
+            <div 
+              className="exclude_bhajan" 
+              key={'excludedbutton-'+info}
+              onClick={() => {
+              let new_list = this.state.excluded.filter((v) => v != info);
+              this.setState({
+                excluded: new_list
+              });
+            }}>{info}</div>
           ))}
            
 
@@ -102,7 +155,9 @@ class App extends React.Component {
               }}
             >
               {
-                _.sortBy(_.keys(Registry)).map(item => (
+                _.sortBy(_.filter(_.keys(Registry), (inf) => {
+                  return !this.state.excluded.includes(inf) && !this.state.required.includes(inf)
+                })).map(item => (
                   <option
                     key={'excluded-' + item}
                     value={item}
@@ -134,7 +189,14 @@ class App extends React.Component {
           <Card.Body>
 
           { this.state.applications.map ((info) => (
-            <div className="ready_bhajan">{info}</div>
+            <div 
+              key={'appliabutton-'+info}
+              className="ready_bhajan" onClick={() => {
+              let new_list = this.state.applications.filter((v) => v != info);
+              this.setState({
+                applications: new_list
+              });
+            }}>{info}</div>
           ))}
            
 
@@ -165,7 +227,7 @@ class App extends React.Component {
 
       <Row style={{marginTop:25}}>
         <Col>
-            <Button block>Create Application</Button>
+            <Button onClick={this.submitForm} block>Create Application</Button>
         </Col>
       </Row>
 
@@ -194,151 +256,151 @@ const Platforms = [
 
 
 
-const Specs = {
-  "aligned-imu" : {
-      "platform": "android",
-      "functions": { 
-          "produceWorldPointingRotation": {
-              "output": "world-pointing-rotation", 
-              "input": ["gravity", "magnetometer"] 
-          },
+// const Specs = {
+//   "aligned-imu" : {
+//       "platform": "android",
+//       "functions": { 
+//           "produceWorldPointingRotation": {
+//               "output": "world-pointing-rotation", 
+//               "input": ["gravity", "magnetometer"] 
+//           },
 
-          "produceWorldAlignedGyro": {
-              "output": "world-aligned-gyro", 
-              "input": ["gyro", "world-pointing-rotation"] 
-          },
+//           "produceWorldAlignedGyro": {
+//               "output": "world-aligned-gyro", 
+//               "input": ["gyro", "world-pointing-rotation"] 
+//           },
 
-          "produceWorldAlignedAccel": {
-              "output": "world-aligned-accel", 
-              "input": ["accel", "world-pointing-rotation"] 
-          },
+//           "produceWorldAlignedAccel": {
+//               "output": "world-aligned-accel", 
+//               "input": ["accel", "world-pointing-rotation"] 
+//           },
 
-          "produceVehicleAlignedAccel": {
-              "output": "vehicle-aligned-accel",
-              "input": ["accel", "vehicle-pointing-rotation"]
-          },
+//           "produceVehicleAlignedAccel": {
+//               "output": "vehicle-aligned-accel",
+//               "input": ["accel", "vehicle-pointing-rotation"]
+//           },
 
-          "produceVehiclePointingRotation": {
-              "output": "vehicle-pointing-rotation",
-              "input": ["magnetometer", "gps", "gravity"]
-          },
+//           "produceVehiclePointingRotation": {
+//               "output": "vehicle-pointing-rotation",
+//               "input": ["magnetometer", "gps", "gravity"]
+//           },
 
-          "produceGravityAlignedGyro": {
-              "output": "gravity-aligned-gyro",
-              "input": ["gravity", "gyro"]
-          }
-      }
-  },
-
-
-
-  "map-match": {
-      "platform": "python",
-      "functions": {
-          "mapmatch": {
-              "input": ["location"],
-              "output": "map-matched-location"
-          }
-      }
-  },
-
-  "user-input": {
-      "platform": "react",
-      "functions": {
-          "acceptFuelLevel": { "output": "car-fuel" },
-          "acceptPhoneNumber": {"output": "phone-number"},
-
-          // For now literally just use the car models for which we already have models
-          "acceptCarModel": { "output": "car-model" }
-      }
-  },
+//           "produceGravityAlignedGyro": {
+//               "output": "gravity-aligned-gyro",
+//               "input": ["gravity", "gyro"]
+//           }
+//       }
+//   },
 
 
-  "obd-devices": {
-      "platform": "android",
-      "functions": { 
-          "readFuelLevel": { "output": "car-fuel", "input": ["obd-fuel"] }
-      }
-  },
+
+//   "map-match": {
+//       "platform": "python",
+//       "functions": {
+//           "mapmatch": {
+//               "input": ["location"],
+//               "output": "map-matched-location"
+//           }
+//       }
+//   },
+
+//   "user-input": {
+//       "platform": "react",
+//       "functions": {
+//           "acceptFuelLevel": { "output": "car-fuel" },
+//           "acceptPhoneNumber": {"output": "phone-number"},
+
+//           // For now literally just use the car models for which we already have models
+//           "acceptCarModel": { "output": "car-model" }
+//       }
+//   },
 
 
-  "text-input": {
-      "platform": "python",
-      "functions": {
-          "accept_fuel_level": { "output": "car-fuel", "input": ["user-text"], "uses": ["phone-number"] }
-      }
-  },
+//   "obd-devices": {
+//       "platform": "android",
+//       "functions": { 
+//           "readFuelLevel": { "output": "car-fuel", "input": ["obd-fuel"] }
+//       }
+//   },
 
 
-  "vehicle-estimate": {
-      "platform": "android",
-      "functions": {
-          "estimateSpeed": {
-              "uses": ["car-model"],
-              "input": ["vehicle-aligned-accel", "gps"],
-              "output": "car-speed"
-          },
+//   "text-input": {
+//       "platform": "python",
+//       "functions": {
+//           "accept_fuel_level": { "output": "car-fuel", "input": ["user-text"], "uses": ["phone-number"] }
+//       }
+//   },
 
-          "estimateGear": {
-              "uses": ["gear-model-file"],
-              "input": ["car-speed"],
-              "output": "car-gear"
-          },
+
+//   "vehicle-estimate": {
+//       "platform": "android",
+//       "functions": {
+//           "estimateSpeed": {
+//               "uses": ["car-model"],
+//               "input": ["vehicle-aligned-accel", "gps"],
+//               "output": "car-speed"
+//           },
+
+//           "estimateGear": {
+//               "uses": ["gear-model-file"],
+//               "input": ["car-speed"],
+//               "output": "car-gear"
+//           },
           
-          "estimateSteering": {
-              "uses": ["car-model"],
-              "input": ["car-speed", "gravity-aligned-gyro"],
-              "output": "car-steering"
-          }
-      }
-  },
+//           "estimateSteering": {
+//               "uses": ["car-model"],
+//               "input": ["car-speed", "gravity-aligned-gyro"],
+//               "output": "car-steering"
+//           }
+//       }
+//   },
 
 
-  // If this only USES the car model, then when is it called?
-  // When we load it up, we'll call it and try to initialize with the car model
-  // If that fails, we will call it when the car model is set
-  // I.e., "uses" relationships also invoke the function. Just not as input. 
-  "tensorflow-models": {
-      "platform": "python",
-      "functions": {
-          "get_gear_model_file": {
-              "uses": ["car-model"],
-              "output": "gear-model-file"
-          }
-      }
-  },
+//   // If this only USES the car model, then when is it called?
+//   // When we load it up, we'll call it and try to initialize with the car model
+//   // If that fails, we will call it when the car model is set
+//   // I.e., "uses" relationships also invoke the function. Just not as input. 
+//   "tensorflow-models": {
+//       "platform": "python",
+//       "functions": {
+//           "get_gear_model_file": {
+//               "uses": ["car-model"],
+//               "output": "gear-model-file"
+//           }
+//       }
+//   },
 
-  "obstacle-warning-react": {
-      "platform": "react",
-      "functions": {
-          "acceptSightingReport": {
-              "input": ["location", "sightings-map"],
-              "output": "sighting"
-          }
-      }
-  },
+//   "obstacle-warning-react": {
+//       "platform": "react",
+//       "functions": {
+//           "acceptSightingReport": {
+//               "input": ["location", "sightings-map"],
+//               "output": "sighting"
+//           }
+//       }
+//   },
 
-  "obstacle-warning-python": {
-      "platform": "python",
-      "functions": {
-          "update_sightings": {
-              "input": ["sighting"],
-              "output": "sightings-map"
-          }
-      }
-  },
+//   "obstacle-warning-python": {
+//       "platform": "python",
+//       "functions": {
+//           "update_sightings": {
+//               "input": ["sighting"],
+//               "output": "sightings-map"
+//           }
+//       }
+//   },
 
-  // Low level passthrough algorithms so other modalities can read Android sensors
-  "android-passthroughs": {
-      "platform": "android",
-      "functions": {
-          "getLocation": {
-              "input": ["gps"],
-              "output": "location"
-          }
-      }
-  }
-}
+//   // Low level passthrough algorithms so other modalities can read Android sensors
+//   "android-passthroughs": {
+//       "platform": "android",
+//       "functions": {
+//           "getLocation": {
+//               "input": ["gps"],
+//               "output": "location"
+//           }
+//       }
+//   }
+// }
 
 
 

@@ -10,7 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_11_20_114809) do
+ActiveRecord::Schema.define(version: 2019_12_10_120000) do
+
+  create_table "jobs", force: :cascade do |t|
+    t.text "name"
+    t.integer "status"
+    t.text "url"
+  end
 
   create_table "phones", force: :cascade do |t|
     t.string "session"

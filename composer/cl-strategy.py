@@ -303,6 +303,7 @@ def main():
     specs = json.loads(jsmin(open(SPECS, 'r').read()))
     requirements = json.loads(jsmin(open(args.requirements, 'r').read()))
 
+    requirements.setdefault('name', 'generated')
     # 1. Create dependency graph out of registry (aka informations) and specs (aka algorithms)
     indexed_information: Dict[str, Information] = {
         infoname: Information(infoname)
@@ -351,10 +352,11 @@ def main():
     platforms = requirements['platforms']
 
     blacklisted_information = []
-    for infoname in requirements['exclude']:
+    for infoname in requirements['excluded']:
         blacklisted_information.append(indexed_information[infoname])
     
     choices = {}
+    requirements.setdefault('choices', {})
     for infoname, algfn in requirements['choices'].items():
         choices[indexed_information[infoname]] = indexed_functions[algfn]
 
@@ -364,12 +366,18 @@ def main():
         platforms, 
         blacklisted_information, 
         choices)
-    strategy = []
+    functions = []
     for node in selected_nodes:
         if node[0] == 'impl':
             alg, func = node[1].split('/')
-            strategy.append({ 'algorithm': alg, 'function': func})
+            functions.append({ 'algorithm': alg, 'function': func})
     
+
+    strategy = {
+        'name': requirements['name'],
+        'functions': functions
+    }
+
     # pprint(strategy)
     print(json.dumps(strategy))
         

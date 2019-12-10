@@ -1,1 +1,1 @@
-{"required":["map-matched-location","sighting"],"exclude":[],"platforms":["android","python","react"],"choices":{},"initialized":false,"loading":false,"imageHash":1575476810467}
+{"name":"obstacleman","required":[],"excluded":[],"applications":["obstacle-warning-python/update_sightings"],"platforms":["android","python","react"]}

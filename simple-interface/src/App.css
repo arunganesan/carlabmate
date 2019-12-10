@@ -56,6 +56,7 @@
   border-radius: 5px;
   border: solid thin black;
   padding: 5px;
+  cursor: pointer;
   /* margin-left: 15px; */
   margin: 5px 0px;;
   /* width: 250px; */
@@ -69,6 +70,7 @@
   border-radius: 5px;
   border: solid thin black;
   padding: 5px;
+  cursor: pointer;
   /* margin-left: 15px; */
   margin: 5px 0px;
   /* width: 250px; */
