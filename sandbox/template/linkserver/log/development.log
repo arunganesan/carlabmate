@@ -20117,3 +20117,22 @@ Processing by PacketController#list as */*
 Processing by PacketController#list as */*
   Parameters: {"information"=>"sightings-map", "session"=>"6068c667d402578ea20a31a809667d98", "sincetime"=>"1575347483"}
 Processing by PacketController#latest as */*
+  [1m[35m (4.8ms)[0m  [1m[34mSELECT sqlite_version(*)[0m
+  [1m[35m (4.4ms)[0m  [1m[35mCREATE TABLE "schema_migrations" ("version" varchar NOT NULL PRIMARY KEY)[0m
+  [1m[35m (2.1ms)[0m  [1m[35mCREATE TABLE "ar_internal_metadata" ("key" varchar NOT NULL PRIMARY KEY, "value" varchar, "created_at" datetime(6) NOT NULL, "updated_at" datetime(6) NOT NULL)[0m
+  [1m[35m (0.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m
+Migrating to CreateInfoTable (20190906114809)
+  [1m[35m (0.4ms)[0m  [1m[36mbegin transaction[0m
+  [1m[35m (1.5ms)[0m  [1m[35mCREATE TABLE "information" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "name" varchar)[0m
+  [1m[35m (1.7ms)[0m  [1m[35mCREATE TABLE "users" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "username" varchar, "password" varchar, "session" varchar)[0m
+  [1m[35m (0.3ms)[0m  [1m[35mCREATE TABLE "packets" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "file" varchar, "message" varchar, "received" datetime, "user_id" integer, "information_id" integer)[0m
+  [1m[35m (0.2ms)[0m  [1m[35mCREATE  INDEX "index_packets_on_user_id" ON "packets" ("user_id")[0m
+  [1m[35m (0.1ms)[0m  [1m[35mCREATE  INDEX "index_packets_on_information_id" ON "packets" ("information_id")[0m
+  [1m[36mprimary::SchemaMigration Create (0.2ms)[0m  [1m[32mINSERT INTO "schema_migrations" ("version") VALUES (?)[0m  [["version", "20190906114809"]]
+  [1m[35m (1.9ms)[0m  [1m[36mcommit transaction[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.2ms)[0m  [1m[34mSELECT "ar_internal_metadata".* FROM "ar_internal_metadata" WHERE "ar_internal_metadata"."key" = ? LIMIT ?[0m  [["key", "environment"], ["LIMIT", 1]]
+  [1m[35m (0.1ms)[0m  [1m[36mbegin transaction[0m
+  [1m[36mActiveRecord::InternalMetadata Create (0.6ms)[0m  [1m[32mINSERT INTO "ar_internal_metadata" ("key", "value", "created_at", "updated_at") VALUES (?, ?, ?, ?)[0m  [["key", "environment"], ["value", "development"], ["created_at", "2019-12-10 00:22:59.500584"], ["updated_at", "2019-12-10 00:22:59.500584"]]
+  [1m[35m (6.6ms)[0m  [1m[36mcommit transaction[0m
+  [1m[35m (0.2ms)[0m  [1m[34mSELECT sqlite_version(*)[0m
+  [1m[35m (1.0ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC[0m

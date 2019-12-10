@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="9a9348fb-022c-414b-b70b-bb0eed45195e" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/../template/android/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../template/android/app/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../composer/create-sandbox.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../composer/create-sandbox.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../library/android/android-passthroughs/src/androidTest/java/carlab/android_passthroughs/ExampleInstrumentedTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../library/android/android-passthroughs/src/test/java/carlab/android_passthroughs/ExampleUnitTest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../template/android/app/app.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../template/android/app/app.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../template/android/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/../template/android/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../template/linkserver/db/development.sqlite3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../template/linkserver/log/development.log" beforeDir="false" afterPath="$PROJECT_DIR$/../template/linkserver/log/development.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../template/react/package-lock.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../template/react/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../template/react/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../template/react/yarn.lock" beforeDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="y" value="23" />
+    <option name="width" value="1920" />
+    <option name="height" value="1177" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="ProjectPane" />
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="android.sdk.path" value="/Volumes/Transcend/Library/Android/sdk" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="AndroidSdkUpdater" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9a9348fb-022c-414b-b70b-bb0eed45195e" name="Default Changelist" comment="" />
+      <created>1575940194262</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1575940194262</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="0" y="23" width="1440" height="877" extended-state="6" />
+    <layout>
+      <window_info content_ui="combo" id="Project" weight="0.32980973" />
+      <window_info id="Structure" side_tool="true" />
+      <window_info id="Image Layers" />
+      <window_info id="Designer" />
+      <window_info id="Resources Explorer" />
+      <window_info id="Capture Tool" />
+      <window_info id="Favorites" side_tool="true" />
+      <window_info id="Captures" order="0" weight="0.25" />
+      <window_info anchor="bottom" id="Version Control" />
+      <window_info anchor="bottom" id="TODO" />
+      <window_info anchor="bottom" id="Terminal" />
+      <window_info anchor="bottom" id="Event Log" side_tool="true" />
+      <window_info anchor="right" id="Capture Analysis" />
+      <window_info anchor="right" id="Theme Preview" />
+      <window_info anchor="right" id="Palette&#9;" />
+    </layout>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+</project>

@@ -432,6 +432,13 @@ public class PackageCLService extends edu.umich.carlab.CLService {
         strategy = new PackageStrategy();
     }
 
+    // Need to change the Arrays.asList() for loaded algorithms
+    /*
+    Should switch to:
+
+    loadedAlgorithms = new ArrayList<>();
+    loadedAlgorithms.add(carlab.android_passthroughs.Algorithm.class);
+    */
     public class PackageStrategy extends Strategy {
         public PackageStrategy () {
             loadedAlgorithms = Arrays.asList(%s);

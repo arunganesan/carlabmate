@@ -7,13 +7,13 @@
     "@types/react": "16.9.11",
     "@types/react-dom": "16.9.4",
     "bootstrap": "^4.3.1",
+    "libcarlab": "file:../../../library/react/libcarlab",
+    "obstacle-warning-react": "file:../../../library/react/obstacle-warning-react",
     "react": "^16.11.0",
     "react-bootstrap": "^1.0.0-beta.15",
     "react-dom": "^16.11.0",
     "react-scripts": "3.2.0",
-    "typescript": "3.7.2",
-    "libcarlab": "file:../../../library/react/libcarlab",
-    "obstacle-warning-react": "file:../../../library/react/obstacle-warning-react"
+    "typescript": "3.7.2"
   },
   "scripts": {
     "start": "react-scripts start",

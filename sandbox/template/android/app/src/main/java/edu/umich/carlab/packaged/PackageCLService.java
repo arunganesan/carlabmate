@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import edu.umich.carlab.Constants;
@@ -36,7 +37,8 @@ public class PackageCLService extends edu.umich.carlab.CLService {
 
     public class PackageStrategy extends Strategy {
         public PackageStrategy () {
-            loadedAlgorithms = Arrays.asList(carlab.android_passthroughs.Algorithm.class);
+            loadedAlgorithms = new ArrayList<>();
+            Arrays.asList(carlab.android_passthroughs.Algorithm.class);
             loadedFunctions = Arrays.asList(carlab.android_passthroughs.Algorithm.getLocation);
             saveInformation = Arrays.asList(Registry.Location);
         }
