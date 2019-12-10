@@ -64,7 +64,7 @@ def generate_strategy(strategy):
         p = subprocess.Popen(['npm', 'install', '--save', moduledir], cwd=reactdir); p.wait()
     p = subprocess.Popen(['npm', 'install'], cwd=reactdir); p.wait()
     package_file = '{}/src/App.tsx'.format(reactdir)
-    shutil.copyfile('generated/react.tsx', package_file)
+    shutil.copyfile('{}/react.tsx'.format(platformname), package_file)
 
 
 
@@ -76,7 +76,7 @@ def generate_strategy(strategy):
         moduledir = '../../../../library/react/{}'.format(algname)
         p = subprocess.Popen(['ln', '-sn', moduledir], cwd=pythondir); p.wait()
     package_file = '{}/packaged.py'.format(pythondir)
-    shutil.copyfile('generated/python.py', package_file)
+    shutil.copyfile('{}/python.py'.format(platformname), package_file)
 
     # Android
     android = '{}/android'.format(sandbox)
@@ -109,7 +109,7 @@ def generate_strategy(strategy):
     ofile.write(ff)
     ofile.close()
     package_file = '{}/app/src/main/java/edu/umich/carlab/packaged/PackageCLService.java'.format(android)
-    shutil.copyfile('generated/android.java', package_file)
+    shutil.copyfile('{}/android.java'.format(platformname), package_file)
 
     p = subprocess.Popen(['./gradlew', 'assembleDebug'], cwd=android); p.wait()
     apkfile = '{}/app/build/outputs/apk/debug/app-debug.apk'.format(android)
@@ -125,33 +125,9 @@ if __name__ == '__main__':
     parser.add_argument('strategy')
     args = parser.parse_args()
 
-    subprocess.call(['python', 'cl-package.py', args.strategy])
+    subprocess.call(['./cl-package.py', args.strategy])
     strategy = json.loads(jsmin(open(args.strategy, 'r').read()))
     generate_strategy(strategy)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# android
-
-"""
-cd SANDBOX/android
-./gradlew build
-APK is saved under: SANDBOX/android/app/build/outputs/apk/debug/
-adb install -t APKFILE
-"""
 
 
 
