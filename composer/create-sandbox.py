@@ -19,7 +19,6 @@ SANDBOX_DIR = '../sandbox'
 TEMPLATE_DIR = '{}/template'.format(SANDBOX_DIR)
 ODIR = 'localgen'
 
-
 def generate_strategy(strategy):
     strategy.setdefault('name', 'generated')
     platformname = strategy['name']
@@ -64,7 +63,11 @@ def generate_strategy(strategy):
         moduledir = '../../../../library/react/{}'.format(algname)
         p = subprocess.Popen(['npm', 'install', '--save', moduledir], cwd=reactdir); p.wait()
     p = subprocess.Popen(['npm', 'install'], cwd=reactdir); p.wait()
-    
+    package_file = '{}/src/App.tsx'.format(reactdir)
+    shutil.copyfile('generated/react.tsx', package_file)
+
+
+
     # Python
     pythondir = '{}/python'.format(sandbox)
     cprint('Setting up Python server', 'green')
@@ -72,7 +75,8 @@ def generate_strategy(strategy):
     for algname in per_platform['python'].keys():
         moduledir = '../../../../library/react/{}'.format(algname)
         p = subprocess.Popen(['ln', '-sn', moduledir], cwd=pythondir); p.wait()
-
+    package_file = '{}/packaged.py'.format(pythondir)
+    shutil.copyfile('generated/python.py', package_file)
 
     # Android
     android = '{}/android'.format(sandbox)
@@ -104,12 +108,14 @@ def generate_strategy(strategy):
     ofile = open(gradlefile, 'w')
     ofile.write(ff)
     ofile.close()
+    package_file = '{}/app/src/main/java/edu/umich/carlab/packaged/PackageCLService.java'.format(android)
+    shutil.copyfile('generated/android.java', package_file)
 
     p = subprocess.Popen(['./gradlew', 'assembleDebug'], cwd=android); p.wait()
     apkfile = '{}/app/build/outputs/apk/debug/app-debug.apk'.format(android)
     p = subprocess.Popen(['adb', 'install', '-t', apkfile], cwd=android); p.wait()
 
-    
+  
 
 
 
@@ -118,6 +124,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('strategy')
     args = parser.parse_args()
+
+    subprocess.call(['python', 'cl-package.py', args.strategy])
     strategy = json.loads(jsmin(open(args.strategy, 'r').read()))
     generate_strategy(strategy)
 
