@@ -8,6 +8,7 @@ import argparse
 import shutil
 import json
 import os
+import subprocess
 
 REGISTRY = 'registry.jsonc'
 SPECS = 'specs.jsonc'
@@ -44,8 +45,72 @@ def generate_strategy(strategy):
     
     # copy template
     cprint('Copying template sandbox', 'green')
-    shutil.copytree(TEMPLATE_DIR, '{}/{}'.format(ODIR, platformname), symlinks=True)
+    sandbox = '{}/{}'.format(ODIR, platformname)
+    shutil.copytree(TEMPLATE_DIR, sandbox, symlinks=True)
     
+    
+    # link server
+    cprint('Setting up linking server', 'green')
+    linkdir = '{}/linkserver'.format(sandbox)
+    p = subprocess.Popen(['yarn', 'install'], cwd=linkdir); p.wait()
+    p = subprocess.Popen(['./bin/rake', 'db:migrate'], cwd=linkdir); p.wait()
+
+
+    # react
+    reactdir = '{}/react'.format(sandbox)
+    cprint('Setting up React server', 'green')
+    p = subprocess.Popen(['npm', 'install', '--save', '../../../../library/react/libcarlab'], cwd=reactdir); p.wait()
+    for algname in per_platform['react'].keys():
+        moduledir = '../../../../library/react/{}'.format(algname)
+        p = subprocess.Popen(['npm', 'install', '--save', moduledir], cwd=reactdir); p.wait()
+    p = subprocess.Popen(['npm', 'install'], cwd=reactdir); p.wait()
+    
+    # Python
+    pythondir = '{}/python'.format(sandbox)
+    cprint('Setting up Python server', 'green')
+    p = subprocess.Popen(['ln', '-sn', '../../../../library/python/libcarlab'], cwd=pythondir); p.wait()
+    for algname in per_platform['python'].keys():
+        moduledir = '../../../../library/react/{}'.format(algname)
+        p = subprocess.Popen(['ln', '-sn', moduledir], cwd=pythondir); p.wait()
+
+
+    # Android
+    android = '{}/android'.format(sandbox)
+    cprint('Setting up Android server', 'green')
+    lines = []
+    gradlefile = '{}/settings.gradle'.format(android)
+    gradle_modules = [':app', ':libcarlab']
+    for algname in per_platform['android'].keys():
+        gradle_modules.append(':' + algname)
+    lines.append('include ' + ', '.join(["':{}'".format(mod) for mod in gradle_modules]))
+    lines.append("rootProject.name='Packaged'")
+    lines.append("project(':libcarlab').projectDir = new File(settingsDir, '../../../../library/android/libcarlab')")
+    for algname in per_platform['android'].keys():
+        lines.append("project(':{algname}').projectDir = new File(settingsDir, '../../../../library/android/{algname}')".format(
+            algname=algname
+        ))
+    ofile = open(gradlefile, 'w')
+    ofile.write('\n'.join(lines))
+    ofile.close()
+
+
+    gradlefile = '{}/app/build.gradle'.format(android)
+    ff = open(gradlefile, 'r').read()
+    deps = []
+    for algname in per_platform['android'].keys():
+        deps.append("implementation project(':{}')".format(algname))
+    ff = ff.replace('/*DEPENDENCIES*/', '\n'.join(deps))
+    ff = ff.replace('template.application.id', 'carlab.{}'.format(platformname.replace('-', '')))
+    ofile = open(gradlefile, 'w')
+    ofile.write(ff)
+    ofile.close()
+
+    p = subprocess.Popen(['./gradlew', 'assembleDebug'], cwd=android); p.wait()
+    apkfile = '{}/app/build/outputs/apk/debug/app-debug.apk'.format(android)
+    p = subprocess.Popen(['adb', 'install', '-t', apkfile], cwd=android); p.wait()
+
+    
+
 
 
 if __name__ == '__main__':
@@ -71,56 +136,15 @@ if __name__ == '__main__':
 
 
 
-
-
-# link server
-"""
-cd SANDBOX/linkserver
-yarn install
-./bin/rake db:migrate
-"""
-
-# react
-"""
-cd SANDBOX/react
-npm install
-npm install --save ../../../library/react/libcarlab
-npm install --save ../../../library/react/user-input
-"""
-
 # android
+
 """
 cd SANDBOX/android
-echo "include ':app', ':libcarlab', ':android-passthroughs'" > settings.gradle
-echo "rootProject.name='Packaged'" >> settings.gradle
-echo "project(':libcarlab').projectDir = new File(settingsDir, '../../../library/android/libcarlab')" >> settings.gradle
-echo "project(':android-passthroughs').projectDir = new File(settingsDir, '../../../library/android/android-passthroughs')" >> settings.gradle
-"""
-
-
-"""
-cd SANDBOX/android/app
-ff = open('build.gradle', 'r').read()
-ff = ff.replace('/*DEPENDENCIES*/', "implementation project(':android-passthroughs')")
-ofile = open('build.gradle', 'w')
-ofile.write(ff)
-ofile.close()
-
-`build.gradle`.replace('template.application.id',  'carlab.green-gps')
-
-cd SANDBOX/android
-# (this might be necessary because we're linking to the same folder)
 ./gradlew build
 APK is saved under: SANDBOX/android/app/build/outputs/apk/debug/
 adb install -t APKFILE
 """
 
-
-# Python
-"""
-ln -sn ../../../library/python/libcarlab
-ln -sn ../../../library/python/obstacle-warning-python obstacle_warning_python
-"""
 
 
 # start everything 
