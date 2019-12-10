@@ -5,6 +5,7 @@ from typing import *
 from termcolor import cprint
 
 import argparse
+import shutil
 import json
 import os
 
@@ -15,13 +16,13 @@ registry = json.loads(jsmin(open(REGISTRY, 'r').read()))
 
 SANDBOX_DIR = '../sandbox'
 TEMPLATE_DIR = '{}/template'.format(SANDBOX_DIR)
+ODIR = 'localgen'
+
 
 def generate_strategy(strategy):
     strategy.setdefault('name', 'generated')
-    ODIR = strategy['name']
-    if not os.path.exists(ODIR):
-        os.makedirs(ODIR)
-
+    platformname = strategy['name']
+    
     per_platform = {}
     for algfunc in strategy['functions']:
         algname = algfunc['algorithm']
@@ -42,13 +43,15 @@ def generate_strategy(strategy):
     
     
     # copy template
-
-
+    cprint('Copying template sandbox', 'green')
+    shutil.copytree(TEMPLATE_DIR, '{}/{}'.format(ODIR, platformname), symlinks=True)
+    
 
 
 if __name__ == '__main__':
     import argparse
-    parser = argparse.ArgumentParser('strategy')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('strategy')
     args = parser.parse_args()
     strategy = json.loads(jsmin(open(args.strategy, 'r').read()))
     generate_strategy(strategy)
