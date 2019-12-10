@@ -132,7 +132,5 @@
     <orderEntry type="module" module-name="android-passthroughs" />
     <orderEntry type="module" module-name="libcarlab" />
     <orderEntry type="module" module-name="android-passthroughs" />
-    <orderEntry type="module" module-name="libcarlab" />
-    <orderEntry type="module" module-name="android-passthroughs" />
   </component>
 </module>

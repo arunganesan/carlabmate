@@ -47,5 +47,4 @@
 
         <receiver android:name=".PackageTriggerSession" />
     </application>
-
 </manifest>
