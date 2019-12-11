@@ -218,7 +218,7 @@ class App extends React.Component {
         </Modal.Header>
         <Modal.Body>
           Distribute this URL to experiment participants <br /><br />
-          <h3><a target='blank' href='http://localhost:8080'>http://localhost:8080</a></h3>
+          <h3><a target='blank' href='http://35.3.62.141:8080'>http://35.3.62.141:8080</a></h3>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="primary" onClick={handleClose}>
