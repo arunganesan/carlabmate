@@ -42,11 +42,11 @@ def generate_strategy(strategy, step):
         per_platform[platform].setdefault(algname, {})
         per_platform[platform][algname][algfunc['function']] = expanded_func
     
+    sandbox = '{}/{}'.format(ODIR, platformname)
     
     # copy template
     if step == 2:
         cprint('Copying template sandbox', 'green')
-        sandbox = '{}/{}'.format(ODIR, platformname)
         shutil.copytree(TEMPLATE_DIR, sandbox, symlinks=True)
         
     
@@ -95,7 +95,7 @@ def generate_strategy(strategy, step):
             gradle_modules = [':app', ':libcarlab']
             for algname in per_platform['android'].keys():
                 gradle_modules.append(':' + algname)
-            lines.append('include ' + ', '.join(["':{}'".format(mod) for mod in gradle_modules]))
+            lines.append('include ' + ', '.join(["'{}'".format(mod) for mod in gradle_modules]))
             lines.append("rootProject.name='Packaged'")
             lines.append("project(':libcarlab').projectDir = new File(settingsDir, '{}/android/libcarlab')".format(LIBDIR))
             for algname in per_platform['android'].keys():
@@ -135,14 +135,14 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
 
-    platformname = args.strategy['name']
+    strategy = json.loads(jsmin(open(args.strategy, 'r').read()))
+    platformname = strategy['name']
     sandbox = '{}/{}'.format(ODIR, platformname)
 
 
     if args.step == 1:
         subprocess.call(['./cl-package.py', args.strategy])
     else:
-        strategy = json.loads(jsmin(open(args.strategy, 'r').read()))
         generate_strategy(strategy, args.step)
         linkdir = '{}/linkserver'.format(sandbox)
         p = subprocess.Popen(['yarn', 'install'], cwd=linkdir); p.wait()

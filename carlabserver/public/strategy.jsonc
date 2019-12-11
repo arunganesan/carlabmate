@@ -1,1 +1,1 @@
-{"name": "obstacleman", "functions": []}
+{"name": "gakla", "functions": [{"algorithm": "vehicle-estimate", "function": "estimateSpeed"}, {"algorithm": "aligned-imu", "function": "produceVehicleAlignedAccel"}, {"algorithm": "user-input", "function": "acceptCarModel"}, {"algorithm": "aligned-imu", "function": "produceVehiclePointingRotation"}]}

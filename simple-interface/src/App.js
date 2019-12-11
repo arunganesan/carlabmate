@@ -1,11 +1,56 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { Form, Button, ToggleButton, ToggleButtonGroup } from "react-bootstrap";
-import { Container, Row, Col, Card } from 'react-bootstrap';
+import { Form, Button, ToggleButton, ToggleButtonGroup, ProgressBar } from "react-bootstrap";
+import { Container, Row, Col, Card, Modal } from 'react-bootstrap';
 
 import _ from 'lodash'
 import 'bootstrap/dist/css/bootstrap.css';
+
+
+function SelectInformation (props) {
+  return (<Col>
+      <Card>
+      <Card.Header>{props.title}</Card.Header>
+      <Card.Body>
+
+      { props.state[props.arrkey].map ((info) => (
+        <div 
+          key={props.title + '-'+info}
+          className="ready_bhajan" onClick={() => {
+          let new_list = props.state[props.arrkey].filter((v) => v != info);
+          props.setState({
+            [props.arrkey]: new_list
+          });
+        }}>{info}</div>
+      ))}
+       
+
+      <Form.Control
+          as="select"
+          onChange={(event) => {
+            props.setState({
+              [props.arrkey]: _.concat(props.state[props.arrkey], event.target.value)
+            })
+          }}
+        >
+          {
+            _.sortBy(_.filter(_.keys(props.masterlist), (inf) => {
+              return !props.state.excluded.includes(inf) && !props.state.required.includes(inf) && !props.state.applications.includes(inf)
+            })).map(item => (
+              <option
+                key={props.arrkey + '-' + item}
+                value={item}
+                readOnly>
+                  {item}
+                </option>
+            ))
+          }
+       </Form.Control>
+      </Card.Body>
+      </Card>
+    </Col>)
+}
 
 
 class App extends React.Component {
@@ -18,33 +63,57 @@ class App extends React.Component {
       excluded: [],
       applications: [],
       platforms: Platforms,
+      
+      showUrl: false,
+      launching: false,
+      progress: 0,
     }
 
 
     this.submitForm = this.submitForm.bind(this);
+    this.checkStatus = this.checkStatus.bind(this);
   }
 
   componentDidMount() {
 
   }
 
+  checkStatus () {
+    fetch(`http://localhost:1234/create/status?appname=${this.state.name}`)
+    .then(res => res.text())
+    .then(text => {   
+      this.setState({
+        progress: text,
+        launching: text != -1 && text < 8,
+        showUrl: text == 8,
+      })
+      console.log("RECEIVED: ", text)
+      if (text != -1 && text < 8) {
+        setTimeout(this.checkStatus, 1000);
+      }
+    });
+  }
 
   submitForm() {
     fetch("http://localhost:1234/create/launch", {
         method: 'post',
         body: JSON.stringify(this.state)
     }).then(res => {
-      if (res.status !== 200) {
-        alert('Strategy not possible');
-      } else {
-        // Now we keep checking for status updates
-        // If it is ready we'll show a huge modal with the url
-      }
+      this.setState({
+        launching: true,
+        progress: 0
+      });
+
+      setTimeout(this.checkStatus, 1000);
     })
     .catch((error) => alert("Could not satisfy requirements"));
   }
 
+  
+
   render() {
+    let handleClose = () => this.setState({showUrl: false})
+
     return <Container>
       <Row style={{marginTop: 25}}>
         <Col><Form.Label>Name</Form.Label></Col>
@@ -84,152 +153,59 @@ class App extends React.Component {
       </Row>
       
       <Row>
-        <Col>
-          <Card>
-          <Card.Header>Required Information</Card.Header>
-          <Card.Body>
+        
+        <SelectInformation
+          title="Required Information" 
+          state={this.state}
+          setState={(s) => this.setState(s)}
+          arrkey="required"
+          masterlist={Registry}
+          />
 
-          { this.state.required.map ((info) => (
-            <div 
-              key={'requiredbutton-'+info}
-              className="ready_bhajan" onClick={() => {
-              let new_list = this.state.required.filter((v) => v != info);
-              this.setState({
-                required: new_list
-              });
-            }}>{info}</div>
-          ))}
-           
+        <SelectInformation
+            title="Exclude Information" 
+            state={this.state}
+            setState={(s) => this.setState(s)}
+            arrkey="excluded"
+            masterlist={Registry}
+            />
 
-           <Form.Control
-              as="select"
-              onChange={(event) => {
-                this.setState({
-                  required: _.concat(this.state.required, event.target.value)
-                })
-              }}
-            >
-              {
-                _.sortBy(_.filter(_.keys(Registry), (inf) => {
-                  return !this.state.excluded.includes(inf) && !this.state.required.includes(inf)
-                })).map(item => (
-                  <option
-                    key={'required-' + item}
-                    value={item}
-                    readOnly>
-                      {item}
-                    </option>
-                ))
-              }
-           </Form.Control>
-          </Card.Body>
-          </Card>
-        </Col>
+        <SelectInformation
+            title="Include Application" 
+            state={this.state}
+            setState={(s) => this.setState(s)}
+            arrkey="applications"
+            masterlist={Applications}
+            />
 
-
-
-        <Col>
-        <Card>
-          <Card.Header>Exclude Information</Card.Header>
-          <Card.Body>
-
-          { this.state.excluded.map ((info) => (
-            <div 
-              className="exclude_bhajan" 
-              key={'excludedbutton-'+info}
-              onClick={() => {
-              let new_list = this.state.excluded.filter((v) => v != info);
-              this.setState({
-                excluded: new_list
-              });
-            }}>{info}</div>
-          ))}
-           
-
-           <Form.Control
-              as="select"
-              onChange={(event) => {
-                this.setState({
-                  excluded: _.concat(this.state.excluded, event.target.value)
-                })
-              }}
-            >
-              {
-                _.sortBy(_.filter(_.keys(Registry), (inf) => {
-                  return !this.state.excluded.includes(inf) && !this.state.required.includes(inf)
-                })).map(item => (
-                  <option
-                    key={'excluded-' + item}
-                    value={item}
-                    readOnly>
-                      {item}
-                    </option>
-                ))
-              }
-           </Form.Control>
-            </Card.Body>
-          </Card>
-        </Col>
-
-
-
-
-
-
-
-
-
-
-
-
-
-        <Col>
-        <Card>
-          <Card.Header>Include Application</Card.Header>
-          <Card.Body>
-
-          { this.state.applications.map ((info) => (
-            <div 
-              key={'appliabutton-'+info}
-              className="ready_bhajan" onClick={() => {
-              let new_list = this.state.applications.filter((v) => v != info);
-              this.setState({
-                applications: new_list
-              });
-            }}>{info}</div>
-          ))}
-           
-
-           <Form.Control
-              as="select"
-              onChange={(event) => {
-                this.setState({
-                  applications: _.concat(this.state.applications, event.target.value)
-                })
-              }}
-            >
-              {
-                _.sortBy(Applications).map(item => (
-                  <option
-                    key={'apps-' + item}
-                    value={item}
-                    readOnly>
-                      {item}
-                    </option>
-                ))
-              }
-           </Form.Control>
-            </Card.Body>
-          </Card>
-        </Col>
       </Row>
 
 
       <Row style={{marginTop:25}}>
         <Col>
-            <Button onClick={this.submitForm} block>Create Application</Button>
+            
+            { this.state.launching
+              ?  <ProgressBar now={this.state.progress} max={8} />
+              :  <Button onClick={this.submitForm} block>Create Application</Button>
+            }
         </Col>
       </Row>
+
+
+      <Modal show={this.state.showUrl} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Launched!</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Distribute this URL to experiment participants</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleClose}>
+            Save Changes
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
     </Container>
   }
@@ -246,7 +222,7 @@ export default App;
 
 
 
-const Applications = ['aligned-imu/produceWorldPointingRotation', 'aligned-imu/produceWorldAlignedGyro', 'aligned-imu/produceWorldAlignedAccel', 'aligned-imu/produceVehicleAlignedAccel', 'aligned-imu/produceVehiclePointingRotation', 'aligned-imu/produceGravityAlignedGyro', 'map-match/mapmatch', 'user-input/acceptFuelLevel', 'user-input/acceptPhoneNumber', 'user-input/acceptCarModel', 'obd-devices/readFuelLevel', 'text-input/accept_fuel_level', 'vehicle-estimate/estimateSpeed', 'vehicle-estimate/estimateGear', 'vehicle-estimate/estimateSteering', 'tensorflow-models/get_gear_model_file', 'obstacle-warning-react/acceptSightingReport', 'obstacle-warning-python/update_sightings', 'android-passthroughs/getLocation'];
+const Applications = {'aligned-imu/produceWorldPointingRotation': 0,'aligned-imu/produceWorldAlignedGyro': 0,'aligned-imu/produceWorldAlignedAccel': 0,'aligned-imu/produceVehicleAlignedAccel': 0,'aligned-imu/produceVehiclePointingRotation': 0,'aligned-imu/produceGravityAlignedGyro': 0,'map-match/mapmatch': 0,'user-input/acceptFuelLevel': 0,'user-input/acceptPhoneNumber': 0,'user-input/acceptCarModel': 0,'obd-devices/readFuelLevel': 0,'text-input/accept_fuel_level': 0,'vehicle-estimate/estimateSpeed': 0,'vehicle-estimate/estimateGear': 0,'vehicle-estimate/estimateSteering': 0,'tensorflow-models/get_gear_model_file': 0,'obstacle-warning-react/acceptSightingReport': 0,'obstacle-warning-python/update_sightings': 0,'android-passthroughs/getLocation': 0};
 
 
 
@@ -255,152 +231,6 @@ const Platforms = [
 ]
 
 
-
-// const Specs = {
-//   "aligned-imu" : {
-//       "platform": "android",
-//       "functions": { 
-//           "produceWorldPointingRotation": {
-//               "output": "world-pointing-rotation", 
-//               "input": ["gravity", "magnetometer"] 
-//           },
-
-//           "produceWorldAlignedGyro": {
-//               "output": "world-aligned-gyro", 
-//               "input": ["gyro", "world-pointing-rotation"] 
-//           },
-
-//           "produceWorldAlignedAccel": {
-//               "output": "world-aligned-accel", 
-//               "input": ["accel", "world-pointing-rotation"] 
-//           },
-
-//           "produceVehicleAlignedAccel": {
-//               "output": "vehicle-aligned-accel",
-//               "input": ["accel", "vehicle-pointing-rotation"]
-//           },
-
-//           "produceVehiclePointingRotation": {
-//               "output": "vehicle-pointing-rotation",
-//               "input": ["magnetometer", "gps", "gravity"]
-//           },
-
-//           "produceGravityAlignedGyro": {
-//               "output": "gravity-aligned-gyro",
-//               "input": ["gravity", "gyro"]
-//           }
-//       }
-//   },
-
-
-
-//   "map-match": {
-//       "platform": "python",
-//       "functions": {
-//           "mapmatch": {
-//               "input": ["location"],
-//               "output": "map-matched-location"
-//           }
-//       }
-//   },
-
-//   "user-input": {
-//       "platform": "react",
-//       "functions": {
-//           "acceptFuelLevel": { "output": "car-fuel" },
-//           "acceptPhoneNumber": {"output": "phone-number"},
-
-//           // For now literally just use the car models for which we already have models
-//           "acceptCarModel": { "output": "car-model" }
-//       }
-//   },
-
-
-//   "obd-devices": {
-//       "platform": "android",
-//       "functions": { 
-//           "readFuelLevel": { "output": "car-fuel", "input": ["obd-fuel"] }
-//       }
-//   },
-
-
-//   "text-input": {
-//       "platform": "python",
-//       "functions": {
-//           "accept_fuel_level": { "output": "car-fuel", "input": ["user-text"], "uses": ["phone-number"] }
-//       }
-//   },
-
-
-//   "vehicle-estimate": {
-//       "platform": "android",
-//       "functions": {
-//           "estimateSpeed": {
-//               "uses": ["car-model"],
-//               "input": ["vehicle-aligned-accel", "gps"],
-//               "output": "car-speed"
-//           },
-
-//           "estimateGear": {
-//               "uses": ["gear-model-file"],
-//               "input": ["car-speed"],
-//               "output": "car-gear"
-//           },
-          
-//           "estimateSteering": {
-//               "uses": ["car-model"],
-//               "input": ["car-speed", "gravity-aligned-gyro"],
-//               "output": "car-steering"
-//           }
-//       }
-//   },
-
-
-//   // If this only USES the car model, then when is it called?
-//   // When we load it up, we'll call it and try to initialize with the car model
-//   // If that fails, we will call it when the car model is set
-//   // I.e., "uses" relationships also invoke the function. Just not as input. 
-//   "tensorflow-models": {
-//       "platform": "python",
-//       "functions": {
-//           "get_gear_model_file": {
-//               "uses": ["car-model"],
-//               "output": "gear-model-file"
-//           }
-//       }
-//   },
-
-//   "obstacle-warning-react": {
-//       "platform": "react",
-//       "functions": {
-//           "acceptSightingReport": {
-//               "input": ["location", "sightings-map"],
-//               "output": "sighting"
-//           }
-//       }
-//   },
-
-//   "obstacle-warning-python": {
-//       "platform": "python",
-//       "functions": {
-//           "update_sightings": {
-//               "input": ["sighting"],
-//               "output": "sightings-map"
-//           }
-//       }
-//   },
-
-//   // Low level passthrough algorithms so other modalities can read Android sensors
-//   "android-passthroughs": {
-//       "platform": "android",
-//       "functions": {
-//           "getLocation": {
-//               "input": ["gps"],
-//               "output": "location"
-//           }
-//       }
-//   }
-// }
 
 
 

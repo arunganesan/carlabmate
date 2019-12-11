@@ -1,1 +1,1 @@
-{"name":"obstacleman","required":[],"excluded":[],"applications":["obstacle-warning-python/update_sightings"],"platforms":["android","python","react"]}
+{"name":"gakla","required":["car-speed"],"excluded":[],"applications":[],"platforms":["android","python","react"],"showUrl":false,"launching":false,"progress":0}

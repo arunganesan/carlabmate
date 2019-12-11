@@ -18,19 +18,10 @@ class CreateController < ApplicationController
         appname = requirements_json['name']
         puts(appname)
         
-        # head :ok
-        # return
-
-        # job_name = appname
-        # job = Job.find_by name: job_name
-        # job.status = 0
-        # job.save!
-
         CreatePlatformJob.perform_later requirements_json
 
         head :ok
         return
-        # render :json => {}
     end
 
 
@@ -41,6 +32,6 @@ class CreateController < ApplicationController
         end
 
         job = Job.find_by name: params[:appname]
-        render :json => job
+        render :json => job.status
     end
 end
