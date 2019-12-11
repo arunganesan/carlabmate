@@ -1,1 +1,1 @@
-{"name":"gakla","required":["car-speed"],"excluded":[],"applications":[],"platforms":["android","python","react"],"showUrl":false,"launching":false,"progress":0}
+{"name":"goose","required":["car-fuel","car-gear","car-model"],"excluded":[],"applications":[],"platforms":["android","python","react"],"showUrl":false,"launching":false,"progress":0}

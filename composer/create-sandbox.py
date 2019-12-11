@@ -121,7 +121,7 @@ def generate_strategy(strategy, step):
 
             p = subprocess.Popen(['./gradlew', 'assembleDebug'], cwd=android); p.wait()
             apkfile = '{}/app/build/outputs/apk/debug/app-debug.apk'.format(android)
-            p = subprocess.Popen(['adb', 'install', '-t', apkfile], cwd=android); p.wait()
+            # p = subprocess.Popen(['adb', 'install', '-t', apkfile], cwd=android); p.wait()
 
     
 

@@ -89,7 +89,7 @@ class App extends React.Component {
       })
       console.log("RECEIVED: ", text)
       if (text != -1 && text < 8) {
-        setTimeout(this.checkStatus, 1000);
+        setTimeout(this.checkStatus, 5000);
       }
     });
   }
@@ -104,12 +104,32 @@ class App extends React.Component {
         progress: 0
       });
 
-      setTimeout(this.checkStatus, 1000);
+      setTimeout(this.checkStatus, 5000);
     })
     .catch((error) => alert("Could not satisfy requirements"));
   }
 
-  
+  getLaunchStage() {
+    switch (this.state.progress) {
+      case '1':
+        return 'Generating strategy'
+      case '2':
+        return 'Initializing template'
+      case '3':
+        return 'Setting up linking server'
+      case '4':
+        return 'Creating React components'
+      case '5':
+        return 'Creating Python components'
+      case '6':
+        return 'Creating Android components'
+      case '7': 
+        return 'Launching'
+    }
+
+    return '';
+    
+  }
 
   render() {
     let handleClose = () => this.setState({showUrl: false})
@@ -185,7 +205,7 @@ class App extends React.Component {
         <Col>
             
             { this.state.launching
-              ?  <ProgressBar now={this.state.progress} max={8} />
+              ?  <ProgressBar style={{height: 75}} label={this.getLaunchStage()} now={this.state.progress} max={8} />
               :  <Button onClick={this.submitForm} block>Create Application</Button>
             }
         </Col>
