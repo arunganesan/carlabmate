@@ -73,7 +73,7 @@ export class acceptSightingsReport extends React.Component<Props, {}> {
 
   <Row><Col>
     <ButtonToolbar>
-      <Button size="lg" variant="primary" onClick={() => this.flagHazard('pothole')}><GiHole /></Button>
+      <Button size="lg" style={{marginRight: 25}} variant="primary" onClick={() => this.flagHazard('pothole')}><GiHole /></Button>
       <Button size="lg" variant="secondary"><MdDirectionsRun /></Button>
       <Button size="lg" variant="success"><MdDirectionsBike /></Button>
     </ButtonToolbar>
