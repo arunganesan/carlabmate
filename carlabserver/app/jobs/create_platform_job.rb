@@ -79,6 +79,9 @@ class CreatePlatformJob < ApplicationJob
       existing_job.status = 7
       existing_job.save!
       `python3.7 create-sandbox.py --step 7 strategy.jsonc`
+
+      existing_job.status = 8
+      existing_job.save!
   }
 
   end
@@ -90,10 +93,10 @@ class CreatePlatformJob < ApplicationJob
     job_name = requirements_json['name']
     existing_job = Job.find_by name: job_name
     if existing_job == nil
-      Job.create :name => job_name, :status => 2
+      Job.create :name => job_name, :status => 8
     else
       existing_job.status = 8
-      existing_job.save
+      existing_job.save!
     end
   end
 end

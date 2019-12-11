@@ -84,11 +84,11 @@ class App extends React.Component {
     .then(text => {   
       this.setState({
         progress: text,
-        launching: text != -1 && text < 8,
-        showUrl: text == 8,
+        launching: text != -1 && text < 7,
+        showUrl: text == 7,
       })
       console.log("RECEIVED: ", text)
-      if (text != -1 && text < 8) {
+      if (text != -1 && text < 7) {
         setTimeout(this.checkStatus, 5000);
       }
     });
@@ -114,15 +114,15 @@ class App extends React.Component {
       case '1':
         return 'Generating strategy'
       case '2':
-        return 'Initializing template'
+        return 'Initializing platform'
       case '3':
-        return 'Setting up linking server'
+        return 'Installing linking server'
       case '4':
-        return 'Creating React components'
+        return 'Building React components'
       case '5':
-        return 'Creating Python components'
+        return 'Building Python components'
       case '6':
-        return 'Creating Android components'
+        return 'Building Android components'
       case '7': 
         return 'Launching'
     }
@@ -149,7 +149,7 @@ class App extends React.Component {
         </Col>
       </Row>
       
-      <Row style={{marginTop: 25}}>
+      {/* <Row style={{marginTop: 25}}>
         <Col><Form.Label>Platform</Form.Label></Col>
       
       </Row>
@@ -170,7 +170,7 @@ class App extends React.Component {
 
         </ToggleButtonGroup>
         </Col>
-      </Row>
+      </Row> */}
       
       <Row>
         
@@ -205,7 +205,7 @@ class App extends React.Component {
         <Col>
             
             { this.state.launching
-              ?  <ProgressBar style={{height: 75}} label={this.getLaunchStage()} now={this.state.progress} max={8} />
+              ?  <ProgressBar style={{height: 50}} label={this.getLaunchStage()} now={this.state.progress} max={8} />
               :  <Button onClick={this.submitForm} block>Create Application</Button>
             }
         </Col>
@@ -216,13 +216,13 @@ class App extends React.Component {
         <Modal.Header closeButton>
           <Modal.Title>Launched!</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Distribute this URL to experiment participants</Modal.Body>
+        <Modal.Body>
+          Distribute this URL to experiment participants <br /><br />
+          <h3><a target='blank' href='http://localhost:8080'>http://localhost:8080</a></h3>
+        </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
           <Button variant="primary" onClick={handleClose}>
-            Save Changes
+            Close
           </Button>
         </Modal.Footer>
       </Modal>

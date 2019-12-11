@@ -59,4 +59,8 @@ class UsersController < ApplicationController
             # make the log in page.
         end
     end
+
+    def download
+        send_file "#{PUBLIC}/app-debug.apk", content_type: "application/vnd.android.package-archive"
+    end
 end

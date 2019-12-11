@@ -10,7 +10,7 @@ import os
 
 REGISTRY = 'registry.jsonc'
 SPECS = 'specs.jsonc'
-
+IPADDRESS = '35.3.62.141'
 
 
 def transform_variable_name(name):
@@ -163,16 +163,22 @@ def write_code_for_react (func_per_algorithms):
             
 
             components.append("""                 <%s
+                    value={this.state.%s}
+                    update={(val: string) => {}}
                     produce={(val: string) => {
-                        this.libcarlab.outputNewInfo(
-                            new DataMarshal(Registry.%s, val),
-                            () => {}
-                        );
+                      this.libcarlab.outputNewInfo(
+                          new DataMarshal(Registry.%s, val),
+                          () => {}
+                      );
                     }}
                 />""" 
-                % (Funcname, Output))
+                % (Funcname, Output[:1].lower() + Output[1:], Output))
 
-    code = REACT_PACKAGE_CODE % ('\n'.join(import_calls), ', '.join(inputs), ', \n'.join(components))
+    code = REACT_PACKAGE_CODE % (
+      '\n'.join(import_calls), 
+      ', '.join(inputs), 
+      IPADDRESS, IPADDRESS, IPADDRESS,
+      ', \n'.join(components))
     return code
 
 
@@ -212,6 +218,10 @@ type AppState = {
   required_info: Information[];
   username: string;
   password: string;
+
+  // TODO NEED TO INCLUDE THE INPUT STATE
+  carFuel: string;
+  phoneNumber: string;
 };
 
 class App extends React.Component<{}, AppState> {
@@ -237,7 +247,11 @@ class App extends React.Component<{}, AppState> {
       showLoginForm: sessionLocal["session"] == null,
       session: sessionLocal["session"],
       username: sessionLocal["username"],
-      password: ""
+      password: "",
+
+       // TODO NEED TO INCLUDE THE INPUT STATE
+      carFuel: '',
+      phoneNumber: '',
     };
 
     this.libcarlab = new Libcarlab(
@@ -268,7 +282,7 @@ class App extends React.Component<{}, AppState> {
 
   }
   tryLoggingIn() {
-    let loginurl = `http://localhost:8080/login?username=${this.state.username}&password=${this.state.password}`;
+    let loginurl = `http://%s:8080/login?username=${this.state.username}&password=${this.state.password}`;
     fetch(loginurl, {
       method: "post",
       mode: "cors",
@@ -337,6 +351,7 @@ class App extends React.Component<{}, AppState> {
           </Form.Group>
 
           <Button onClick={() => this.tryLoggingIn()}>Login</Button>
+          <Button style={{marginLeft: 15}} onClick={() => window.open("http://%s:8080/createuser", "_blank")}>Signup</Button>
         </Modal.Body>
       </Modal>
     );
@@ -368,6 +383,14 @@ class App extends React.Component<{}, AppState> {
             }
           >
             Log out
+          </Button>
+
+
+          <Button
+            style={{marginLeft: 10}}
+            onClick={() => window.open("http://%s:8080/download", "_blank")}
+          >
+            Download APK
           </Button>
         </>
       );

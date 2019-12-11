@@ -56,15 +56,10 @@ class App extends React.Component<{}, AppState> {
     );
   }
 
-  // TODO need to call this on a timer
-  // TODO ONCE we get the relevant data, we just have to set the state
   componentDidMount() {
     
     if (this.state.session != null) 
       this.getLatest();
-    // this.libcarlab.checkNewInfo((data: DataMarshal) => {
-    //   console.log("Got info ", data.info, "with data", data.value);
-    // });
   }
 
   getLatest() {

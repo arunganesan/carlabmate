@@ -20,6 +20,7 @@ TEMPLATE_DIR = '{}/template'.format(SANDBOX_DIR)
 ODIR = 'localgen'
 LIBDIR = '../../../../../library'
 
+
 def generate_strategy(strategy, step):
     strategy.setdefault('name', 'generated')
     platformname = strategy['name']
@@ -47,13 +48,16 @@ def generate_strategy(strategy, step):
     # copy template
     if step == 2:
         cprint('Copying template sandbox', 'green')
-        shutil.copytree(TEMPLATE_DIR, sandbox, symlinks=True)
+        if not os.path.exists(sandbox):
+            shutil.copytree(TEMPLATE_DIR, sandbox, symlinks=True)
+        else:
+            print("OVERWRITING")
         
     
     # link server
+    linkdir = '{}/linkserver'.format(sandbox)
     if step == 3:
         cprint('Setting up linking server', 'green')
-        linkdir = '{}/linkserver'.format(sandbox)
         p = subprocess.Popen(['yarn', 'install'], cwd=linkdir); p.wait()
         p = subprocess.Popen(['./bin/rake', 'db:migrate'], cwd=linkdir); p.wait()
 
@@ -121,10 +125,9 @@ def generate_strategy(strategy, step):
 
             p = subprocess.Popen(['./gradlew', 'assembleDebug'], cwd=android); p.wait()
             apkfile = '{}/app/build/outputs/apk/debug/app-debug.apk'.format(android)
-            # p = subprocess.Popen(['adb', 'install', '-t', apkfile], cwd=android); p.wait()
-
-    
-
+            dstdir = '{}/public/app-debug.apk'.format(linkdir)
+            print('COPYING FORM {} TO {}'.format(apkfile, dstdir))
+            #shutil.copyfile(apkfile, dstdir)
 
 
 if __name__ == '__main__':
@@ -144,9 +147,6 @@ if __name__ == '__main__':
         subprocess.call(['./cl-package.py', args.strategy])
     else:
         generate_strategy(strategy, args.step)
-        linkdir = '{}/linkserver'.format(sandbox)
-        p = subprocess.Popen(['yarn', 'install'], cwd=linkdir); p.wait()
-        p = subprocess.Popen(['./bin/rake', 'db:migrate'], cwd=linkdir); p.wait()
 
         if args.step == 7:
             linkdir = '{}/linkserver'.format(sandbox)

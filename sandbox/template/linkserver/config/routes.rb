@@ -16,4 +16,6 @@ Rails.application.routes.draw do
   post 'login', to: 'users#login'
   get 'createuser', to: 'users#createuser'
   post 'createuser', to: 'users#createuser'
+
+  get 'download', to: 'users#download'
 end

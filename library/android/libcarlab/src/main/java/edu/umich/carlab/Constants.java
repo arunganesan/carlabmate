@@ -18,7 +18,7 @@ public class Constants {
     public final static int GPS_INTERVAL = 500;
     public final static float GPS_STARTED_STATUS = 2;
     public static final String INTENT_APP_STATE_UPDATE = "edu.umich.carlab.APP_STATE_UPDATE";
-    public static final String LINKSERVER = "35.3.91.229";
+    public static final String LINKSERVER = "35.3.62.141";
     public static final String DOWNLOAD_URL =
             "http://" + LINKSERVER + ":8080/list?information=%s&session=%s&sincetime=%d";
     public static final String LIVE_MODE = "live mode - no saving";
