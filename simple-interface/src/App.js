@@ -133,6 +133,7 @@ class App extends React.Component {
 
   render() {
     let handleClose = () => this.setState({showUrl: false})
+    let ipaddr = '35.3.62.141'
 
     return <Container>
       <Row style={{marginTop: 25}}>
@@ -220,8 +221,8 @@ class App extends React.Component {
           Distribute this URL to experiment participants <br /><br />
           <Container>
             <Row>
-              <Col><h3><a target='blank' href='http://35.3.62.141:8080'>https://carlab.app:8080</a></h3></Col>
-              <Col><QRCode value="https://carlab.app:8080" /></Col>
+              <Col><h3><a target='blank' href={`http://#{ipaddr}:8080`}>https://{ipaddr}:8080</a></h3></Col>
+              <Col><QRCode value={`https://#{ipaddr}:8080`} /></Col>
             </Row>
           </Container>
       
