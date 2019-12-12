@@ -1,1 +1,1 @@
-{"name":"fuel-consumption","required":["car-fuel","map-matched-location"],"excluded":[],"applications":[],"platforms":["android","python","react"],"showUrl":false,"launching":false,"progress":"8"}
+{"name":"fuel-consumption","required":["car-fuel","map-matched-location"],"excluded":[],"applications":[],"platforms":["android","python","react"],"showUrl":false,"launching":false,"progress":0}

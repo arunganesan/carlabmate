@@ -7,13 +7,10 @@ from termcolor import cprint
 import argparse
 import json
 import os
+import shutil
 
 REGISTRY = 'registry.jsonc'
 SPECS = 'specs.jsonc'
-ODIR = 'generated'
-if not os.path.exists(ODIR):
-    os.makedirs(ODIR)
-
 
 
 def transform_variable_name(name):
@@ -26,20 +23,57 @@ def transform_variable_name(name):
 specs = json.loads(jsmin(open(SPECS, 'r').read()))
 registry = json.loads(jsmin(open(REGISTRY, 'r').read()))
 
+SAVELOCATION_PER_PLATFORM = {
+        'react': 'library/react/{}/src/index.tsx',
+        'python': 'library/python/{}/algorithm.py',
+        'android': [
+            'library/android/{}/src/main/java/carlab/{}/Algorithm.java',
+            'library/android/{}/src/main/java/carlab/{}/AlgorithmBase.java' ]}
+
+
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--algorithm', default='user-input')
+    parser.add_argument('algorithm', default='user-input')
     args = parser.parse_args()
     
     algdetails = specs[args.algorithm]
-
+    
     platform = algdetails['platform']
     code = CODEGEN_PER_PLATFORM[platform](args.algorithm, algdetails)
-    ofile = open('{}/{}-stub.{}'.format(ODIR, platform, EXT[platform]), 'w')
-    ofile.write(code)
-    ofile.close()
+    
+    if platform == 'react':
+        odir = 'library/react/' + args.algorithm
+        assert not os.path.exists(odir)
+        shutil.copytree('library/react/template', odir)
+        ofile = open('{}/src/index.tsx'.format(odir), 'w')
+        ofile.write(code)
+        ofile.close()
+    elif platform == 'python':
+        odir = 'library/python/' + args.algorithm
+        assert not os.path.exists(odir)
+        shutil.copytree('library/python/template', odir)
+        ofile = open('{}/algorithm.py'.format(odir), 'w')
+        ofile.write(code)
+        ofile.close()
+    elif platform == 'android':
+        impl_code, base_code = code
+        odir = 'library/android/' + args.algorithm
+        assert not os.path.exists(odir)
+        shutil.copytree('library/android/template', odir)
+        _odir = '{}/src/main/java/carlab'.format(odir)
+        _algname = args.algorithm.replace('-', '_')
+        _todir = '{}/{}'.format(_odir, _algname)
+        os.rename('{}/template'.format(_odir), _todir)
 
+        ofile = open('{}/AlgorithmBase.java'.format(_todir), 'w')
+        ofile.write(base_code)
+        ofile.close()
+
+        ofile = open('{}/Algorithm.java'.format(_todir), 'w')
+        ofile.write(impl_code)
+        ofile.close()
+    
 
 def write_code_for_react (algname, algdetails):
     stubs = []
@@ -176,7 +210,7 @@ def write_code_for_android (algname, algdetails):
         '\n\n'.join(function_stubs)
     )
 
-    return base_code + '\n'*10 + impl_code
+    return [impl_code, base_code]
 
 JAVA_FUNC_STUB = """
     @Override
@@ -405,8 +439,6 @@ CODEGEN_PER_PLATFORM = {
   'python': write_code_for_python,
   'android': write_code_for_android,
 }
-
-
 
 if __name__ == '__main__':
   main()

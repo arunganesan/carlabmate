@@ -3,6 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 import { Form, Button, ToggleButton, ToggleButtonGroup, ProgressBar } from "react-bootstrap";
 import { Container, Row, Col, Card, Modal } from 'react-bootstrap';
+import QRCode  from 'qrcode.react'
 
 import _ from 'lodash'
 import 'bootstrap/dist/css/bootstrap.css';
@@ -126,7 +127,6 @@ class App extends React.Component {
       case '7': 
         return 'Launching'
     }
-
     return '';
     
   }
@@ -212,13 +212,20 @@ class App extends React.Component {
       </Row>
 
 
-      <Modal show={this.state.showUrl} onHide={handleClose}>
+      <Modal show={this.state.showUrl } onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Launched!</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           Distribute this URL to experiment participants <br /><br />
-          <h3><a target='blank' href='http://35.3.62.141:8080'>http://35.3.62.141:8080</a></h3>
+          <Container>
+            <Row>
+              <Col><h3><a target='blank' href='http://35.3.62.141:8080'>https://carlab.app:8080</a></h3></Col>
+              <Col><QRCode value="https://carlab.app:8080" /></Col>
+            </Row>
+          </Container>
+      
+          
         </Modal.Body>
         <Modal.Footer>
           <Button variant="primary" onClick={handleClose}>

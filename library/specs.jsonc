@@ -1,5 +1,5 @@
 {
-    "aligned-imu" : {
+    "alignment" : {
         "platform": "android",
         "functions": { 
             "produceWorldPointingRotation": {
@@ -141,5 +141,43 @@
                 "output": "location"
             }
         }
+    },
+    
+    "aligned-imu" : {
+        "platform": "android",
+        "functions": { 
+            "produceWorldPointingRotation": {
+                "output": "world-pointing-rotation", 
+                "input": ["gravity", "magnetometer"] 
+            },
+
+            "produceWorldAlignedGyro": {
+                "output": "world-aligned-gyro", 
+                "input": ["gyro", "world-pointing-rotation"] 
+            },
+
+            "produceWorldAlignedAccel": {
+                "output": "world-aligned-accel", 
+                "input": ["accel", "world-pointing-rotation"] 
+            },
+
+            "produceVehicleAlignedAccel": {
+                "output": "vehicle-aligned-accel",
+                "input": ["accel", "vehicle-pointing-rotation"]
+            },
+
+            "produceVehiclePointingRotation": {
+                "output": "vehicle-pointing-rotation",
+                "input": ["magnetometer", "gps", "gravity"]
+            },
+
+            "produceGravityAlignedGyro": {
+                "output": "gravity-aligned-gyro",
+                "input": ["gravity", "gyro"]
+            }
+        }
     }
+
+
+
 }
